@@ -188,6 +188,9 @@
 * **********************************************************************
 **#3 - gen crop price (using uganda 2019_agsec5b as reference)
 * **********************************************************************
+
+gen cropprice = hvst_value/wgt_hvsted
+egen dst_price = mean(cropprice), by(district crop_code)
 * what variables do we need?
 	* harvest qty sold
 	* location vars (need: district, county, subcount, parish) (have: district, region) do we have the rest?

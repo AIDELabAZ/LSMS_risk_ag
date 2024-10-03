@@ -108,7 +108,7 @@
 * 5 - run .do file to append each wave
 * **********************************************************************
 
-	do			"`dofile'/tza_append_built.do"				// append waves
+	*do			"`dofile'/tza_append_built.do"				// append waves
 	
 /* END */
 
