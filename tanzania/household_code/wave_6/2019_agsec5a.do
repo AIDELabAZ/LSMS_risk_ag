@@ -35,7 +35,13 @@
 
 * load data
 	use 		"$root/AG_SEC_5A"
-
+	
 * dropping duplicates
 	duplicates 		drop
 	*** 0 obs dropped
+	
+* ***********************************************************************
+**#1 - merge AG_SEC_4A
+* ***********************************************************************
+
+	merge			m:1 sdd_hhid using "$export/AG_SEC4A"

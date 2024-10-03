@@ -16,8 +16,7 @@
 	* cleaned hh_seca.dta
 
 * TO DO:
-	* complete
-	
+	* gen crop prices
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -43,6 +42,13 @@
 	duplicates 		drop
 	*** 0 obs dropped
 
+* merge in qty sold for crop prices later
+	merge m:1 		y5_hhid cropid using "$root/AG_SEC_5A"
+	* 234 not matched from master
+	
+	drop 			if _merge == 2
+	drop			_merge
+				
 * rename variables of interest
 	rename 			cropid crop_code
 
@@ -101,8 +107,7 @@
 	egen			uq_dist = group(region district)
 	distinct		uq_dist
 	*** 187 distinct districts
-
-	
+			
 * ***********************************************************************
 **#2 - generate harvest variables
 * ***********************************************************************	
@@ -178,11 +183,43 @@
 	replace			mz_hrv = mz_hrv_1_  if crop_code == 11
 	lab var			mz_hrv "Quantity of maize harvested (kg)"
 	drop			mz_hrv_1_
-	*** imputed 47 values out of 2256 total observations	
-	
+	*** imputed 47 values out of 2256 total observations
 	
 * **********************************************************************
-**#3 - end matter, clean up to save
+**#3 - gen crop price (using uganda 2019_agsec5b as reference)
+* **********************************************************************
+* what variables do we need?
+	* harvest qty sold
+	* location vars (need: district, county, subcount, parish) (have: district, region) do we have the rest?
+	* crop id (crop_code)
+	* crop value-- looks like we have harvest value but not crop value. but there's total value of sales. can something be done with this?
+
+* rename needed variables
+	rename 			ag5a_02	harvkgsold
+	* go back and check out ag5a_02 vs ag5a_34, should these be combined?
+	* both are quantity sold, where some values are missing the other variable has values, one is long one is int 
+	
+* encode district for the imputation
+	*encode 			district, gen (districtdstrng)
+	*encode 			region, gen (regiondstrng)
+	* not sure aobut region, but only other location var we have
+	
+* condensed crop codes
+	inspect			crop_code
+	* 39 unique values
+	
+* gen price per kg
+	sort 			crop_code
+	by 				crop_code: gen cropprice = hvst_value / harvkgsold 
+	sum 			cropprice, detail
+	* mean = .713 max = 42.87 min = 0
+	* not sure if good, revisit
+	
+* make datasets with crop price information
+	*** only have district, cant follow what is being done in the uganda file. 
+	
+* **********************************************************************
+**#4 - end matter, clean up to save
 * **********************************************************************
 	
 * keep what we want, get rid of what we don't
