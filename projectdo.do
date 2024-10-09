@@ -35,7 +35,7 @@
 * Define root folder globals
 
 if `"`c(username)'"' == "jdmichler" {
-        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_and_agriculture"
+        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/LSMS_risk_ag"
 		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
     }
 if `"`c(username)'"' == "annal" {
