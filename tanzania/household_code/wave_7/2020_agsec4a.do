@@ -1,14 +1,15 @@
 * Project: WB Weather
 * Created on: March 2024
 * Created by: reece
-* Edited on: 21 May 2024
-* Edited by: jdm
+* Edited on: oct 8 2024
+* Edited by: reece
 * Stata v.18
 
 * does
 	* cleans Tanzania household variables, wave 7 (NPSY5) Ag sec4a
 	* kind of a crop roster, with harvest weights, long rainy season
 	* generates weight harvested, harvest month, percentage of plot planted with given crop, value of seed purchases
+	* generates crop prices, access to extension, and market (daily and weekly)
 	
 * assumes
 	* access to all raw data
@@ -16,7 +17,7 @@
 	* cleaned hh_seca.dta
 
 * TO DO:
-	* gen crop prices
+	* 
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -42,13 +43,6 @@
 	duplicates 		drop
 	*** 0 obs dropped
 
-* merge in qty sold for crop prices later
-	merge m:1 		y5_hhid cropid using "$root/AG_SEC_5A"
-	* 234 not matched from master
-	
-	drop 			if _merge == 2
-	drop			_merge
-				
 * rename variables of interest
 	rename 			cropid crop_code
 
@@ -184,52 +178,44 @@
 	lab var			mz_hrv "Quantity of maize harvested (kg)"
 	drop			mz_hrv_1_
 	*** imputed 47 values out of 2256 total observations
+* **********************************************************************
+**#3 - gen improved seeds var
+* **********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if ag4a_08 == 1
+	replace 	improved_sds = 1 if ag4a_08 == 3
+	* 1,075 real changes made
+	* 303 real changes made
+
 	
 * **********************************************************************
-**#3 - gen crop price (using uganda 2019_agsec5b as reference)
+**#3 - gen crop price 
 * **********************************************************************
 
 gen cropprice = hvst_value/wgt_hvsted
 egen dst_price = mean(cropprice), by(district crop_code)
-* what variables do we need?
-	* harvest qty sold
-	* location vars (need: district, county, subcount, parish) (have: district, region) do we have the rest?
-	* crop id (crop_code)
-	* crop value-- looks like we have harvest value but not crop value. but there's total value of sales. can something be done with this?
 
-* rename needed variables
-	rename 			ag5a_02	harvkgsold
-	* go back and check out ag5a_02 vs ag5a_34, should these be combined?
-	* both are quantity sold, where some values are missing the other variable has values, one is long one is int 
-	
-* encode district for the imputation
-	*encode 			district, gen (districtdstrng)
-	*encode 			region, gen (regiondstrng)
-	* not sure aobut region, but only other location var we have
-	
-* condensed crop codes
-	inspect			crop_code
-	* 39 unique values
-	
-* gen price per kg
-	sort 			crop_code
-	by 				crop_code: gen cropprice = hvst_value / harvkgsold 
-	sum 			cropprice, detail
-	* mean = .713 max = 42.87 min = 0
-	* not sure if good, revisit
-	
-* make datasets with crop price information
-	*** only have district, cant follow what is being done in the uganda file. 
-	
 * **********************************************************************
-**#4 - end matter, clean up to save
+**#4 - gen access to extension
+* **********************************************************************
+
+* import extension data
+	*merge 			m:1 y5_hhid  using "$root/ag_sec_12a", generate(_12A)
+	* having trouble merging
+	
+* trying market data
+	 *merge 			m:1 interview__key using "$root/cm_sec_b", generate(_B)
+		*variables available do not uniquely identify obs for ^^
+
+* **********************************************************************
+**#5 - end matter, clean up to save
 * **********************************************************************
 	
 * keep what we want, get rid of what we don't
 	keep 				y5_hhid plot_id crop_code clusterid ///
 							strataid hhweight region district  ///
 							any_* pure_stand percent_field mz_hrv hvst_value ///
-							mz_damaged y5_rural
+							mz_damaged y5_rural cropprice improved_sds
 
 	order				y5_hhid plot_id crop_code clusterid ///
 							strataid hhweight region district 
@@ -251,6 +237,7 @@ egen dst_price = mean(cropprice), by(district crop_code)
 	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
 	lab var			percent_field "Percent of Field Crop Was Planted On"
+	lab var			improved_sds "Were improved seeds used?"
 						
 * check for duplicates
 	duplicates		report y5_hhid plot_id crop_code

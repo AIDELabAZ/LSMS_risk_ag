@@ -175,7 +175,24 @@
 						longstub format(%9.3g) 
 	replace			mz_hrv = mz_hrv_1_  if crop_code == 11
 	drop			mz_hrv_1_
-	*** imputed 41 values out of 2,868 total observations			
+	*** imputed 41 values out of 2,868 total observations		
+	
+* **********************************************************************
+**#3 - gen improved seeds var
+* **********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if ag4a_08 == 1
+	replace 	improved_sds = 1 if ag4a_08 == 3
+	* 953 real changes made
+	* 823 real changes made
+
+	
+* **********************************************************************
+**#3 - gen crop price 
+* **********************************************************************
+
+gen cropprice = hvst_value/wgt_hvsted
+egen dst_price = mean(cropprice), by(district crop_code)
 
 	
 * **********************************************************************
@@ -186,7 +203,7 @@
 	keep 				y3_hhid plotnum plot_id crop_code crop_id clusterid ///
 							strataid hhweight region district ward ea ///
 							any_* pure_stand percent_field mz_hrv hvst_value ///
-							mz_damaged y3_rural
+							mz_damaged y3_rural cropprice improved_sds
 
 	order				y3_hhid plotnum plot_id crop_code crop_id clusterid ///
 							strataid hhweight region district ward ea
@@ -212,6 +229,7 @@
 	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
 	lab var			percent_field "Percent of Field Crop Was Planted On"
+	lab var			improved_sds "Were improved seeds used?"
 							
 * check for duplicates
 	duplicates		report y3_hhid plotnum crop_code

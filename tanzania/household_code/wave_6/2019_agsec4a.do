@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: March 2024
 * Created by: reece
-* Edited on: 21 May 2024
-* Edited by: jdm
+* Edited on: oct 8 2024
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -194,16 +194,33 @@
 	drop			mz_hrv_1_
 	*** imputed 10 values out of 1298 total observations
 
+* **********************************************************************
+**#3 - gen improved seeds var
+* **********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if ag4a_08 == 1
+	replace 	improved_sds = 1 if ag4a_08 == 3
+	* 170 real changes made
+	* 99 real changes made
+	
 	
 * **********************************************************************
-* 3 - end matter, clean up to save
+**#3 - gen crop price 
+* **********************************************************************
+
+gen cropprice = hvst_value/wgt_hvsted
+egen dst_price = mean(cropprice), by(district crop_code)
+
+	
+* **********************************************************************
+* 4 - end matter, clean up to save
 * **********************************************************************
 	
 * keep what we want, get rid of what we don't
 	keep 				sdd_hhid plotnum plot_id crop_code crop_id clusterid ///
 							strataid hhweight region district ward ea ///
 							any_* pure_stand percent_field mz_hrv hvst_value ///
-							mz_damaged sdd_rural
+							mz_damaged sdd_rural cropprice improved_sds
 
 	order				sdd_hhid plotnum plot_id crop_code crop_id clusterid ///
 							strataid hhweight region district ward ea
@@ -229,6 +246,7 @@
 	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
 	lab var			percent_field "Percent of Field Crop Was Planted On"
+	lab var			improved_sds "Were improved seeds used?"
 						
 * check for duplicates
 	duplicates		report sdd_hhid plotnum crop_code

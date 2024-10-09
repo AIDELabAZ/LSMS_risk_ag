@@ -112,7 +112,7 @@
 						longstub format(%9.3g) 
 	replace			kilo_fert = kilo_fert_1_
 	drop			kilo_fert_1_
-	*** imputed 63 values out of 7,447 total observations	
+	*** imputed 63 values out of 7,447 total observations		
 	
 	
 * ***********************************************************************
