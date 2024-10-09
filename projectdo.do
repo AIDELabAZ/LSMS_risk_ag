@@ -55,7 +55,7 @@ if `"`c(username)'"' == "yetfl" {
 		global 		data	"C:/Users/yetfl/OneDrive - University of Arizona/weather_and_agriculture"
     }
 if `"`c(username)'"' == "rbrnhm" {
-        global 		code  	"C:/Users/rbrnhm/GitHub/weather_and_agriculture"
+        global 		code  	"C:/Users/rbrnhm/GitHub/LSMS_risk_ag"
 		global 		data	"C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture"
     }	
 	 if `"`c(username)'"' == "Chandrakant Agme" {
