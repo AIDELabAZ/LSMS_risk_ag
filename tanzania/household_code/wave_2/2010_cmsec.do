@@ -1,7 +1,7 @@
 * Project: WB Weather
-* Created on: March 2024
+* Created on: oct 14
 * Created by: reece
-* Edited on: oct 8 2024
+* Edited on: oct 14 2024
 * Edited by: reece
 * Stata v.18
 
@@ -20,28 +20,32 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_7/raw"
-	global export 	"$data/household_data/tanzania/wave_7/refined"
+	global root 	"$data/household_data/tanzania/wave_2/raw"
+	global export 	"$data/household_data/tanzania/wave_2/refined"
 	global logout 	"$data/household_data/tanzania/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wv7_CMSECB", append
+	log using "$logout/wv2_CMSECB", append
 
 	
 * ***********************************************************************
-**#1 - prepare TZA 2020 (Wave 7) - Community Section B
+**#1 - prepare TZA 2010 (Wave 2) - Community Section B
 * ***********************************************************************
 
 * load data
-	use 		"$root/cm_sec_b", clear
+	use 		"$root/COMSEC_CB", clear
 	
 	
-	drop cm_b01 cm_b02 cm_b04 interview__id
+	drop cm_b01 cm_b02 
 	
-	keep if service_id == 12 | service_id == 13
+	keep if cboa == "L" | cboa == "M"
+	encode cboa, gen(cboa_num)
+
+	replace cboa_num = 12 if cboa == "L"
+	replace cboa_num = 13 if cboa == "M"
 	
-	reshape wide cm_b03, i(interview__key) j(service_id)
+	reshape wide cm_b03, i(id_01 id_02 id_03 id_04) j(cboa_num)
 	
 	gen dist_mkt = cm_b0312
 	replace dist_mkt = cm_b0313 if dist_mkt == .
@@ -71,11 +75,10 @@
 	compress
 	describe
 	summarize 
-	save 			"$export/2020_CMSEC.dta", replace
+	save 			"$export/2010_CMSEC.dta", replace
 
 * close the log
 	log	close
 
 /* END */
-	
 	
