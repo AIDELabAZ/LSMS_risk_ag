@@ -697,6 +697,7 @@ foreach var of varlist v15_merra - v27_merra {
 
 * drop variables
 	drop			region district ward ea strataid clusterid aez
+	* add community files here 
 	
 	rename			tza_lp_id lp_id
 	rename			tza_sp_id sp_id

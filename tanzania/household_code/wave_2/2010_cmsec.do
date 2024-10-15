@@ -37,7 +37,7 @@
 	use 		"$root/COMSEC_CB", clear
 	
 	
-	drop cm_b01 cm_b02 
+	drop cm_b02 
 	
 	keep if cboa == "L" | cboa == "M"
 	encode cboa, gen(cboa_num)
@@ -45,37 +45,40 @@
 	replace cboa_num = 12 if cboa == "L"
 	replace cboa_num = 13 if cboa == "M"
 	
-	reshape wide cm_b03, i(id_01 id_02 id_03 id_04) j(cboa_num)
+	gen dist_daily = cm_b03 if cboa_num == 12 
+	replace dist_daily = 0 if cm_b01 == 1 
 	
-	gen dist_mkt = cm_b0312
-	replace dist_mkt = cm_b0313 if dist_mkt == .
-	
-	drop cm_b0312 cm_b0313
-	
-	merge 1:1 interview__key using "$root/cm_sec_a"
+	gen dist_daily = cm_b03 if cboa_num == 13 
+	replace dist_daily = 0 if cm_b01 == 1 
+	* do this for the weekly market 
 
 	
+* merge in agrodealer and repeat ^ 
+
 
 	
-	duplicates tag id_01 id_02 id_03 id_04 id_05, generate(dup)
+	* add for ce file 
+	* drop everything that isn't the distance to the input dealer 
+	* save it 
 	
-	drop if cm_a05 == "" & dup > 0
-	drop if id_05 == . & dup > 0
+	* merge together the cb and ce 
 	
-	drop if cm_start == "" & dup >0 
-	
-	replace id_02 = 129 if id_01 == 12 & id_03 == 121
-	drop if id_02 == .
-	
-	drop if id_03 == .
-	drop if id_05 == .
-	
+	* rename everything
+	rename id_01 	region
+	rename id_02 	district
+	rename id_03 	ward
+	rename id_04	ea
+	rename cm_b03	dist_mkt
+	rename cboa_num market
+	* generate year 
+
 * prepare for export
-	isid			id_01 id_02 id_03 id_04 id_05
-	compress
+	isid			id_01 id_02 id_03 id_04
 	describe
 	summarize 
 	save 			"$export/2010_CMSEC.dta", replace
+	
+
 
 * close the log
 	log	close
