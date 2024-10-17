@@ -62,6 +62,24 @@ COOPERATIVE/FARMER'S ASSOCIATION |      2,810       20.00       60.00
 	 
 	 replace access = 1 if access > 0
 	 
+	 *should we drop ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25?
+	 
+* must merge in regional identifiers from 2020_HHSECA
+	merge		m:1 y5_hhid using "$export/HH_SECA"
+	tab			_merge
+	 
+* prepare for export
+	isid			y5_hhid 
+	compress
+	describe
+	summarize 
+	save 			"$export/2020_AGSEC12A.dta", replace
+
+* close the log
+	log	close
+
+/* END */
+
 	 
 	 
 	 

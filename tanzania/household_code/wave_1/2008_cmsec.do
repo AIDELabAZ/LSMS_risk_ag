@@ -20,13 +20,13 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_2/raw"
-	global export 	"$data/household_data/tanzania/wave_2/refined"
+	global root 	"$data/household_data/tanzania/wave_1/raw"
+	global export 	"$data/household_data/tanzania/wave_1/refined"
 	global logout 	"$data/household_data/tanzania/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wv2_CMSECB", append
+	log using "$logout/wv1_CMSECB", append
 
 	
 * ***********************************************************************
@@ -34,22 +34,22 @@
 * ***********************************************************************
 
 * load data
-	use 		"$root/COMSEC_CB", clear
+	use 		"$root/SEC_B", clear
 	
 	
-	drop cm_b02 
+	drop cb2 
 	
 	*keep if cboa == "L" | cboa == "M"
-	encode cboa, gen(cboa_num)
+	*encode cboa, gen(cboa_num)
 
-	replace cboa_num = 12 if cboa == "L"
-	replace cboa_num = 13 if cboa == "M"
+	*replace cboa_num = 12 if cboa == "L"
+	*replace cboa_num = 13 if cboa == "M"
 	
-	gen dist_daily = cm_b03 if cboa_num == 12 
-	replace dist_daily = 0 if cm_b01 == 1 
+	gen dist_daily = cb3 if cb0 == 12 
+	replace dist_daily = 0 if cb1 == 1 
 	
-	gen dist_weekly = cm_b03 if cboa_num == 13 
-	replace dist_weekly = 0 if cm_b01 == 1 
+	gen dist_weekly = cb3 if cb0 == 13 
+	replace dist_weekly = 0 if cb1 == 1 
 	* do this for the weekly market 
 	
 * merge in agrodealer and repeat ^ 
@@ -69,10 +69,6 @@
 	* merge together the cb and ce 
 	
 	* rename everything
-	rename id_01 	region
-	rename id_02 	district
-	rename id_03 	ward
-	rename id_04	ea
 	rename cm_e07_d dist_supply
 	* generate year 
 

@@ -70,7 +70,15 @@
 	*** no observations dropped
 
 	drop			_2A _3A
+
+* merging in access to extension
+	merge			m:1 y5_hhid using "$root/2020_AGSEC12A", gen(_12A)
+	* 5296 matched, 654 not matched from using, 7 not matched from master
 	
+*merging in comm sec
+	merge			m:1 y5_hhid region district ward ea using "$root/2020_CMSEC", gen(_CMSEC)
+
+
 * **********************************************************************
 **#1b - creates total farm and maize variables
 * **********************************************************************

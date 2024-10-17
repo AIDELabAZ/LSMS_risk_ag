@@ -271,7 +271,8 @@
 	keep			y5_hhid plotnum plot_id irrigated fert_any kilo_fert ///
 						pesticide_any herbicide_any labor_days plotnum ///
 						region district y5_rural clusterid strataid ///
-						hhweight
+						hhweight region district
+						* no ward or ea
 	order			y5_hhid plot_id plotnum
 	
 * renaming and relabelling variables

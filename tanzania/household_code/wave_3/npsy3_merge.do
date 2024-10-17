@@ -71,6 +71,9 @@
 	*** no observations dropped
 
 	drop			_2A _3A
+	
+* merge in access to extension
+	merge 			m:1 y3_hhid region district ward ea using "$root/AGSEC12A", generate(_12A)
 
 	
 * **********************************************************************

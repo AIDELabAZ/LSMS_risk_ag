@@ -43,10 +43,11 @@
 	
 	reshape wide cm_b03, i(interview__key) j(service_id)
 	
-	gen dist_mkt = cm_b0312
-	replace dist_mkt = cm_b0313 if dist_mkt == .
+	*gen dist_mkt = cm_b0312
+	*replace dist_mkt = cm_b0313 if dist_mkt == .
 	
-	drop cm_b0312 cm_b0313
+	rename		cm_b0312 dist_daily
+	rename 		cm_b0313 dist_weekly
 	
 	merge 1:1 interview__key using "$root/cm_sec_a"
 
@@ -66,8 +67,16 @@
 	drop if id_03 == .
 	drop if id_05 == .
 	
+	rename id_01 	region
+	rename id_02 	district
+	rename id_03 	ward
+	rename id_05	ea
+	gen 	year = 2020
+	
+	keep region district ward ea dist_daily dist_weekly year interview__key id_04
+	
 * prepare for export
-	isid			id_01 id_02 id_03 id_04 id_05
+	isid			region district ward ea id_04
 	compress
 	describe
 	summarize 

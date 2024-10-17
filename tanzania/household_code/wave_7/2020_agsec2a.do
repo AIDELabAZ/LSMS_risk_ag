@@ -228,7 +228,7 @@
 * **********************************************************************
 	
 * keep what we want, get rid of the rest
-	keep		y5_hhid y4_hhid plot_id plotnum plotsize clusterid strataid ///
+	keep		y5_hhid y4_hhid plot_id plotnum plotsize clusterid strataid region district ward ea ///
 					hhweight region district y5_rural mover2020
 	order		y5_hhid y4_hhid plot_id plotnum clusterid strataid hhweight ///
 					region district y5_rural mover2020 plotsize

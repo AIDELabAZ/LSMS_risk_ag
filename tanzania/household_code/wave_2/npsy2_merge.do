@@ -74,6 +74,12 @@
 
 	drop			_2A _3A
 	
+* merging in access to extension
+	merge 			m:1 y2_hhid region district ward ea using "$root/2010_AGSEC12A"
+	
+* merging in distance to market and input supplier
+	merge			m:1 region district ward ea "$root/CMSEC"
+	
 * **********************************************************************
 * 1b - create total farm and maize variables 
 * **********************************************************************
@@ -490,6 +496,7 @@
 	
 * verify values are accurate
 	sum				tf_* cp_*
+
 	
 * **********************************************************************
 * 5 - end matter, clean up to save

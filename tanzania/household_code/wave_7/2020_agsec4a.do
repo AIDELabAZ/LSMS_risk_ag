@@ -214,7 +214,7 @@ egen dst_price = mean(cropprice), by(district crop_code)
 * keep what we want, get rid of what we don't
 	keep 				y5_hhid plot_id crop_code clusterid ///
 							strataid hhweight region district  ///
-							any_* pure_stand percent_field mz_hrv hvst_value ///
+							any_* pure_stand percent_field mz_hrv hvst_value region district ///
 							mz_damaged y5_rural cropprice improved_sds
 
 	order				y5_hhid plot_id crop_code clusterid ///
