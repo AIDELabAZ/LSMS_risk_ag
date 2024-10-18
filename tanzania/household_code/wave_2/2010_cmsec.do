@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_2/raw"
-	global export 	"$data/household_data/tanzania/wave_2/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_2/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_2"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -37,24 +37,26 @@
 	use 		"$root/COMSEC_CB", clear
 	
 	
-	drop cm_b02 
+	drop cm_b02 cb0
 	
-	*keep if cboa == "L" | cboa == "M"
-	encode cboa, gen(cboa_num)
-
-	replace cboa_num = 12 if cboa == "L"
-	replace cboa_num = 13 if cboa == "M"
+	keep if cboa == "L" | cboa == "M"
 	
-	gen dist_daily = cm_b03 if cboa_num == 12 
-	replace dist_daily = 0 if cm_b01 == 1 
+	reshape wide cm_b01 cm_b03, i(id_01 id_02 id_03 id_04) j(cboa) string
 	
-	gen dist_weekly = cm_b03 if cboa_num == 13 
-	replace dist_weekly = 0 if cm_b01 == 1 
+	rename cm_b03L dist_daily
+	rename cm_b03M dist_weekly
+	
+	replace dist_daily = 0 if cm_b01L == 1 
+	replace dist_weekly = 0 if cm_b01M == 1 
 	* do this for the weekly market 
 	
+	drop cm_b01*
+	
 * merge in agrodealer and repeat ^ 
-	merge m:1 id_01 id_02 id_03 id_04 using "$root/COMSEC_CE"
-	* 10,819 matched, 997 not matched from master
+	merge 1:1 id_01 id_02 id_03 id_04 using "$root/COMSEC_CE"
+	* 360 merged 33 didnt
+	
+* merge in 
 
 * generate year
 	gen year = 2010
@@ -74,6 +76,8 @@
 	rename id_03 	ward
 	rename id_04	ea
 	rename cm_e07_d dist_supply
+	
+	lab var year
 	* generate year 
 
 * prepare for export
