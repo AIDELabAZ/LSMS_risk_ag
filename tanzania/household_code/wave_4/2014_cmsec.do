@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_4/raw"
-	global export 	"$data/household_data/tanzania/wave_4/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_4/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_4"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -36,41 +36,52 @@
 * load data
 	use 		"$root/COM_SEC_CB", clear
 	
-	*keep if cboa == "L" | cboa == "M"
-	encode cboa, gen(cboa_num)
 
-	replace cboa_num = 12 if cboa == "L"
-	replace cboa_num = 13 if cboa == "M"
 	
-	gen dist_daily = cb3 if cboa_num == 12 
-	replace dist_daily = 0 if cb1 == 1 
+* drop cost of transportation, basic services, name of service/institution
+	drop cb2 cb0 cb4 occ
 	
-	gen dist_weekly = cb3 if cboa_num == 13 
-	replace dist_weekly = 0 if cb1 == 1 
+	keep if cboa == "L" | cboa == "M"
+
+	reshape wide cb1 cb3, i( y4_cluster ) j(cboa) string
+
+	rename cb3L dist_daily
+	rename cb3M dist_weekly
+	
+	replace dist_daily = 0 if cb1L == 1 
+	replace dist_weekly = 0 if cb1M == 1 
 	* do this for the weekly market 
 	
+	drop cb1*
+	
+* merge in regional identifiers 
+	merge 1:1 y4_cluster using "$root/com_sec_a1a2"
+	drop _merge
+	* all matched
+		
 * merge in agrodealer and repeat ^ 
-	merge m:1 y4_cluster using "$root/com_sec_ce"
+	merge 1:1 y4_cluster using "$root/COM_SEC_CE"
 	* all matched
 
 * generate year
 	gen year = 2014
 	
 * drop what we don't need
-	keep y4_cluster dist_daily dist_weekly cm_e07_2 year occ
-	* this file does not have region district ward ea
-	* can use occ + hhid as unique identifer
-
-	* rename everything
-	*rename id_01 	region
-	*rename id_02 	district
-	*rename id_03 	ward
-	*rename id_04	ea
+	keep id_01 id_02 id_03 id_05 dist_daily dist_weekly cm_e07_2 year
+	
+	
+* rename everything
+	rename id_01 	region
+	rename id_02 	district
+	rename id_03 	ward
+	rename id_05	ea
 	rename cm_e07_2 dist_supply
+	
+	lab var year	"year of survey- wv4 2014"
 	* generate year 
 
 * prepare for export
-	isid			y4_cluster occ
+	isid			region district ward ea
 	describe
 	summarize 
 	save 			"$export/CMSEC.dta", replace
@@ -80,5 +91,4 @@
 * close the log
 	log	close
 
-/* END */
-	
+/* END */ 

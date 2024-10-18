@@ -77,7 +77,7 @@
 	rename id_04	ea
 	rename cm_e07_d dist_supply
 	
-	lab var year
+	lab var year "year of survey- wv2 2010"
 	* generate year 
 
 * prepare for export

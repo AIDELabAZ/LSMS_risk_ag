@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: oct 16
 * Created by: reece
-* Edited on: oct 16 2024
+* Edited on: oct 18 2024
 * Edited by: reece
 * Stata v.18
 
@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_3/raw"
-	global export 	"$data/household_data/tanzania/wave_3/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_3/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_3"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -36,30 +36,32 @@
 * load data
 	use 		"$root/COM_SEC_CB", clear
 	
-	drop cm_b02 
+	
+	drop cm_b02 cm_b0b cm_b04
 	
 	keep if cm_b0a == "L" | cm_b0a == "M"
-	encode cm_b0a, gen(cboa_num)
-
-	replace cboa_num = 12 if cm_b0a == "L"
-	replace cboa_num = 13 if cm_b0a == "M"
 	
-	gen dist_daily = cm_b03 if cboa_num == 12 
-	replace dist_daily = 0 if cm_b01 == 1 
+	reshape wide cm_b01 cm_b03, i(id_01 id_02 id_03 id_04) j(cm_b0a) string
 	
-	gen dist_weekly = cm_b03 if cboa_num == 13 
-	replace dist_weekly = 0 if cm_b01 == 1 
+	rename cm_b03L dist_daily
+	rename cm_b03M dist_weekly
+	
+	replace dist_daily = 0 if cm_b01L == 1 
+	replace dist_weekly = 0 if cm_b01M == 1 
 	* do this for the weekly market 
 	
+	drop cm_b01*
+	
 * merge in agrodealer and repeat ^ 
-	merge m:1 id_01 id_02 id_03 id_04 using "$root/COM_SEC_CE"
-	* all matched
+	merge 1:1 id_01 id_02 id_03 id_04 using "$root/COM_SEC_CE"
+	* 401 matched 0 not matched
+	
 
 * generate year
 	gen year = 2012
 	
 * drop what we don't need
-	keep id_01 id_02 id_03 id_04 y3_cluster dist_daily dist_weekly cm_e07_2 year
+	keep id_01 id_02 id_03 id_04 dist_daily dist_weekly cm_e07_2 year
 	
 	* add for ce file 
 	* drop everything that isn't the distance to the input dealer 
@@ -73,6 +75,8 @@
 	rename id_03 	ward
 	rename id_04	ea
 	rename cm_e07_2 dist_supply
+	
+	lab var year	"year of survey- wv3 2012"
 	* generate year 
 
 * prepare for export
@@ -87,4 +91,5 @@
 	log	close
 
 /* END */
+
 	
