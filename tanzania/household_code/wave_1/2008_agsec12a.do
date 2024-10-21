@@ -19,9 +19,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_1/raw"
-	global export 	"$data/household_data/tanzania/wave_1/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_1/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_1"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -33,34 +33,45 @@
 
 * load data
 	use 		"$root/SEC_13A", clear
-	*13A in wv1
+	
 	
 * ***********************************************************************
 **#2 - extension access
 * ***********************************************************************
 
-* did respondant receive advice about ag production
+* did respondant receive advice
+	drop if source == .
+	drop		s13q2_b s13q2_c s13q2_d s13q2_e s13q2_f s13q3 s13q4 s13q5 s13q6 s13q1
 
-	gen		extension = 0
-	replace extension = 1 if s13q2_a == 1
 	
-	gen 	year = 2008
+	replace s13q2_a = 0 if s13q2_a == 2
 	
-	label var extension "did you receive advice for agricultural productivity?"
+	reshape wide s13q2_a, i(hhid) j(source)
+	
+	egen extension = rowtotal(s13q2_a1 s13q2_a2 s13q2_a3 s13q2_a4 s13q2_a5)
+	replace extension = 1 if extension > 0
+	
+	
+* must merge in regional identifiers from HHSECA
+	merge		1:1 hhid using "$export/HH_SECA"
+	tab			_merge
+	* 74 percent matched
+	
+* generate year
+	gen 		year = 2008
+	
+	lab var year "year of survey- wv1 2008"
+	lab var extension "does respondent have access to extension?"
 
 * drop what we don't need 
-	keep hhid source extension year
+	keep hhid extension year region ward ea district 
 	
-* must merge in regional identifiers from 2012_HHSECA to impute
-	merge			m:1 hhid using "$export/HH_SECA"
-	tab				_merge
 	
 * prepare for export
-	isid	
-	* cant find unique identifier
+	isid			hhid
 	describe
 	summarize 
-	save 			"$export/2010_AGSEC12A.dta", replace
+	save 			"$export/AGSEC12A.dta", replace
 	
 
 
