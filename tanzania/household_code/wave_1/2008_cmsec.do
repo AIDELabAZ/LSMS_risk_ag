@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_1/raw"
-	global export 	"$data/household_data/tanzania/wave_1/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_1/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_1"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -30,45 +30,39 @@
 
 	
 * ***********************************************************************
-**#1 - prepare TZA 2010 (Wave 2) - Community Section B
+**#1 - prepare TZA 2008 (Wave 1) - Community Section B
 * ***********************************************************************
 
 * load data
 	use 		"$root/SEC_B", clear
 	
 	
-	drop cb2 
+	drop cb2 ea_id locality
 	
-	*keep if cboa == "L" | cboa == "M"
-	*encode cboa, gen(cboa_num)
-
-	*replace cboa_num = 12 if cboa == "L"
-	*replace cboa_num = 13 if cboa == "M"
+	keep if cb0 == 12 | cb0 == 13
 	
-	gen dist_daily = cb3 if cb0 == 12 
-	replace dist_daily = 0 if cb1 == 1 
+	drop if missing(region) | missing(district) | missing(ward) | missing(ea)
+	* 6 obs missing all regional identifiers, dropping these to reshape
 	
-	gen dist_weekly = cb3 if cb0 == 13 
-	replace dist_weekly = 0 if cb1 == 1 
-	* do this for the weekly market 
+	reshape wide cb1 cb3, i(region district ward ea) j(cb0)
+	
+	rename cb312 dist_daily
+	rename cb313 dist_weekly
+	
+	replace dist_daily = 0 if cb112 == 1 
+	replace dist_weekly = 0 if cb113 == 1 
+	
+	drop 	cb1*
 	
 * merge in agrodealer and repeat ^ 
-	merge m:1 id_01 id_02 id_03 id_04 using "$root/COMSEC_CE"
+	merge 1:1  using "$root/SEC_E_F_G"
 	* 10,819 matched, 997 not matched from master
 
 * generate year
-	gen year = 2010
+	gen year = 2008
 	
 * drop what we don't need
 	keep id_01 id_02 id_03 id_04 dist_daily dist_weekly cm_e07_d year
-	
-	* add for ce file 
-	* drop everything that isn't the distance to the input dealer 
-	* save it 
-	
-	* merge together the cb and ce 
-	
-	* rename everything
 	rename cm_e07_d dist_supply
 	* generate year 
 

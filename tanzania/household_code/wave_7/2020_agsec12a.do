@@ -1,15 +1,12 @@
 * Project: WB Weather
 * Created on: March 2024
 * Created by: reece
-* Edited on: oct 8 2024
+* Edited on: oct 20 2024
 * Edited by: reece
 * Stata v.18
 
 * does
-	* cleans Tanzania household variables, wave 7 (NPSY5) Ag sec4a
-	* kind of a crop roster, with harvest weights, long rainy season
-	* generates weight harvested, harvest month, percentage of plot planted with given crop, value of seed purchases
-	* generates crop prices, access to extension, and market (daily and weekly)
+	* cleans tza access to extension variable
 	
 * assumes
 	* access to all raw data
@@ -23,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_7/raw"
-	global export 	"$data/household_data/tanzania/wave_7/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_7/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_7"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -45,6 +42,7 @@
 	replace ag12a_01_1 = 0 if ag12a_01_1 == 2
 	replace ag12a_01_2 = 0 if ag12a_01_2 == 2
 	
+	
 	/*
 	Source ID |      Freq.     Percent        Cum.
 ---------------------------------+-----------------------------------
@@ -62,14 +60,16 @@ COOPERATIVE/FARMER'S ASSOCIATION |      2,810       20.00       60.00
 	 
 	 replace access = 1 if access > 0
 	 
+* must merge in regional identifiers from 2020_HHSECA
+	merge		1:1 y5_hhid using "$export/HH_SECA"
+	tab			_merge		 
 	 *should we drop ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25?
 	 
-* must merge in regional identifiers from 2020_HHSECA
-	merge		m:1 y5_hhid using "$export/HH_SECA"
-	tab			_merge
+
+	keep y5_hhid region district ward ea access 
 	 
 * prepare for export
-	isid			y5_hhid 
+	isid			y5_hhid region ward ea district
 	compress
 	describe
 	summarize 

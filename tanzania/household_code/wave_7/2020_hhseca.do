@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Feb 2024
 * Created by: reece
-* Edited on: 21 May 2024
-* Edited by: jdm
+* Edited on: 20 oct 2024
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -45,12 +45,15 @@
 	rename		hh_a02_1 district
 	rename		y5_panelweight hhweight
 	rename		hh_a10 mover2020
+	rename 		hh_a03_1 ward
+	rename		hh_a04_1 ea
+	
 
 * keep variables of interest
 	keep 		y5_hhid region district y5_rural ///
-					clusterid strataid hhweight y4_hhid mover2020
+					clusterid strataid hhweight y4_hhid mover2020 ward ea
 
-	order		y4_hhid y5_hhid region district y5_rural ///
+	order		y4_hhid y5_hhid region district ward ea y5_rural ///
 					clusterid strataid hhweight mover2020
 	
 * relabel variables
@@ -62,6 +65,8 @@
 	lab var		strataid "Design Strata"
 	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
 	lab var		mover2020 "Original or split household"
+	lab var		ward "Ward Code"
+	lab var 	ea "EA Code"
 					
 * prepare for export
 	compress

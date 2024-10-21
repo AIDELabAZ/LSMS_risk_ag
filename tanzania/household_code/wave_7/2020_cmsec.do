@@ -1,7 +1,7 @@
 * Project: WB Weather
-* Created on: March 2024
+* Created on: oct 16 2014
 * Created by: reece
-* Edited on: oct 8 2024
+* Edited on: oct 20 2024
 * Edited by: reece
 * Stata v.18
 
@@ -20,9 +20,10 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_7/raw"
-	global export 	"$data/household_data/tanzania/wave_7/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_7/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_7"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
+
 
 * open log 
 	cap log close 
@@ -37,25 +38,28 @@
 	use 		"$root/cm_sec_b", clear
 	
 	
-	drop cm_b01 cm_b02 cm_b04 interview__id
+	drop  cm_b02 cm_b04 interview__id
 	
 	keep if service_id == 12 | service_id == 13
 	
-	reshape wide cm_b03, i(interview__key) j(service_id)
-	
-	*gen dist_mkt = cm_b0312
-	*replace dist_mkt = cm_b0313 if dist_mkt == .
+	reshape wide cm_b01 cm_b03, i(interview__key) j(service_id)
 	
 	rename		cm_b0312 dist_daily
 	rename 		cm_b0313 dist_weekly
+	drop		cm_b01*
 	
 	merge 1:1 interview__key using "$root/cm_sec_a"
+	drop	_merge
+	* all matched
 
-	
+* merge in agrodealer and repeat ^ 
+	merge 1:1 interview__key using "$root/CM_SEC_E"
+	* all matched
 
+* generate year
+	gen year = 2020
 	
 	duplicates tag id_01 id_02 id_03 id_04 id_05, generate(dup)
-	
 	drop if cm_a05 == "" & dup > 0
 	drop if id_05 == . & dup > 0
 	
@@ -67,16 +71,22 @@
 	drop if id_03 == .
 	drop if id_05 == .
 	
+	keep dist_daily dist_weekly year interview__key cm_e07_2 id_01 id_02 id_03 id_05
+	
 	rename id_01 	region
 	rename id_02 	district
 	rename id_03 	ward
 	rename id_05	ea
-	gen 	year = 2020
+	rename cm_e07_2	dist_supply
 	
-	keep region district ward ea dist_daily dist_weekly year interview__key id_04
+	lab var region "region"
+	lab var district "district"
+	lab var ward "ward"
+	lab var ea "ea"
+	lab var year "year of survey wv7 2020"
 	
 * prepare for export
-	isid			region district ward ea id_04
+	isid			region district ward ea interview__key
 	compress
 	describe
 	summarize 
@@ -86,5 +96,4 @@
 	log	close
 
 /* END */
-	
 	

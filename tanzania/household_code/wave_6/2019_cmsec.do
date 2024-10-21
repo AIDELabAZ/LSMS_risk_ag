@@ -1,7 +1,7 @@
 * Project: WB Weather
-* Created on: March 2024
+* Created on: oct 16 2014
 * Created by: reece
-* Edited on: oct 8 2024
+* Edited on: oct 20 2024
 * Edited by: reece
 * Stata v.18
 
@@ -61,7 +61,18 @@
 * generate year
 	gen year = 2019
 	
+* dropping dups
+	duplicates tag id_01 id_02 id_03 id_04 id_05, generate(dup)
+	drop if cm_a05 == "" & dup > 0
+	drop if id_05 == . & dup > 0
+	drop if cm_start == "" & dup >0 
+	
+	drop if id_05 == .
+
+* keeping what we need 
 	keep dist_daily dist_weekly year interview__key cm_e07_2 id_01 id_02 id_03 id_05
+	
+	
 	
 	rename id_01 	region
 	rename id_02 	district
@@ -76,12 +87,11 @@
 	lab var year "year of survey wv6 2019"
 	
 * prepare for export
-	isid			region district ward ea
-	* need to revisit, "vars should never be missing"
+	isid			region district ward ea interview__key
 	compress
 	describe
 	summarize 
-	save 			"$export/2020_CMSEC.dta", replace
+	save 			"$export/2019_CMSEC.dta", replace
 
 * close the log
 	log	close
