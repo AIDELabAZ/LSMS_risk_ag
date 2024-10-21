@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: McG
-* Edited on: 21 May 2024
-* Edited by: jdm
+* Edited on: oct 21 2024
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -21,9 +21,9 @@
 * **********************************************************************
 
 * define paths
-	global	root		"$data/household_data/tanzania/wave_4/raw"
-	global export		"$data/household_data/tanzania/wave_4/refined"
-	global logout		"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_4/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_4"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log
 	cap log close 

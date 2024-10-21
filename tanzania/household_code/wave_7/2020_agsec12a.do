@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: March 2024
 * Created by: reece
-* Edited on: oct 20 2024
+* Edited on: oct 21 2024
 * Edited by: reece
 * Stata v.18
 
@@ -56,9 +56,9 @@ COOPERATIVE/FARMER'S ASSOCIATION |      2,810       20.00       60.00
 
 	*/
 	 reshape wide ag12a_01_1 ag12a_01_2, i(y5_hhid) j(sourceid)
-	 egen access = rowtotal (ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25)
+	 egen extension = rowtotal (ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25)
 	 
-	 replace access = 1 if access > 0
+	 replace extension = 1 if extension > 0
 	 
 * must merge in regional identifiers from 2020_HHSECA
 	merge		1:1 y5_hhid using "$export/HH_SECA"
@@ -66,10 +66,17 @@ COOPERATIVE/FARMER'S ASSOCIATION |      2,810       20.00       60.00
 	 *should we drop ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25?
 	 
 
-	keep y5_hhid region district ward ea access 
+	keep y5_hhid region district ward ea extension 
+	
+* generate year
+	gen 		year = 2020
+	
+		
+	lab var year "year of survey- wv7 2020"
+	lab var extension "does respondent have access to extension?"
 	 
 * prepare for export
-	isid			y5_hhid region ward ea district
+	isid			y5_hhid 
 	compress
 	describe
 	summarize 

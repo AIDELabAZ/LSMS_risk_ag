@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: oct 16
 * Created by: reece
-* Edited on: oct 16 2024
+* Edited on: oct 21 2024
 * Edited by: reece
 * Stata v.18
 
@@ -19,9 +19,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_4/raw"
-	global export 	"$data/household_data/tanzania/wave_4/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_4/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_4"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -38,25 +38,35 @@
 **#2 - extension access
 * ***********************************************************************
 
-* did respondant receive advice about ag production
-
-	gen		extension = 0
-	replace extension = 1 if ag12a_01_4 == 1
+* did respondant receive advice
+	drop if sourceid == .
+	drop		ag12a_02 ag12a_03_1 ag12a_03_2 ag12a_03_3 ag12a_03_4 ag12a_04 ag12a_05 ag12a_06 ag12a_07
+	drop 		 occ ag12a_01_3 ag12a_01_4 ag12a_01_5 ag12a_01_6 ag12a_01_7 ag12a_01_8
 	
-	gen 	year = 2014
+	replace ag12a_01_1 = 0 if ag12a_01_1 == 2
+	replace ag12a_01_2 = 0 if ag12a_01_2 == 2
 	
-	label var extension "did you receive advice for agricultural productivity?"
+	 reshape wide ag12a_01_1 ag12a_01_2, i(y4_hhid) j(sourceid)
+	 egen extension = rowtotal (ag12a_01_11 ag12a_01_21 ag12a_01_12 ag12a_01_22 ag12a_01_13 ag12a_01_23 ag12a_01_14 ag12a_01_24 ag12a_01_15 ag12a_01_25)
+	 
+	 replace extension = 1 if extension > 0
+	
+* must merge in regional identifiers from HHSECA
+	merge		1:1 y4_hhid using "$export/HH_SECA"
+	tab			_merge	
+	* 62 percent matched
+* generate year
+	gen 		year = 2014
+	
+	lab var year "year of survey- wv4 2014"
+	lab var extension "does respondent have access to extension?"
 
 * drop what we don't need 
-	keep y4_hhid sourceid extension year occ
+	keep y4_hhid extension year region ward ea district 
 	
-* must merge in regional identifiers from 2008_HHSECA to impute
-	merge		m:1 y4_hhid using "$export/HH_SECA"
-	tab			_merge
-
 	
 * prepare for export
-	isid			y4_hhid occ
+	isid			y4_hhid
 	describe
 	summarize 
 	save 			"$export/AGSEC12A.dta", replace

@@ -21,9 +21,9 @@
 * **********************************************************************
 
 * define paths
-	global	root		"$data/household_data/tanzania/wave_5/raw"
-	global export		"$data/household_data/tanzania/wave_5/refined"
-	global logout		"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_5/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_5"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log
 	cap log close 
@@ -52,10 +52,10 @@
 	rename		hh_a10 mover2014
 
 * keep variables of interest
-	keep 		y4_hhid region district ward ea y4_rural ///
+	keep 		y4_hhid region district ward ea occ y4_rural ///
 					clusterid strataid y4_weight mover2014
 
-	order		y4_hhid region district ward ea y4_rural ///
+	order		y4_hhid region district ward ea occ y4_rural ///
 					clusterid strataid y4_weight mover2014
 	
 	rename		y4_weight hhweight
