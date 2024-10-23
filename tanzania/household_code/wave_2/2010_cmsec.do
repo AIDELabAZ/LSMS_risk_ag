@@ -55,11 +55,14 @@
 * merge in agrodealer and repeat ^ 
 	merge 1:1 id_01 id_02 id_03 id_04 using "$root/COMSEC_CE"
 	* 360 merged 33 didnt
-	
-* merge in 
 
 * generate year
 	gen year = 2010
+	
+
+* is it possible to buy improved seeds in village? if possible dist = 0
+	replace cm_e07_d = 0 if cm_e05 == 1
+	
 	
 * drop what we don't need
 	keep id_01 id_02 id_03 id_04 dist_daily dist_weekly cm_e07_d year
@@ -75,7 +78,7 @@
 	rename id_02 	district
 	rename id_03 	ward
 	rename id_04	ea
-	rename cm_e07_d dist_supply
+	rename cm_e07_d out_supply
 	
 	lab var year "year of survey- wv2 2010"
 	* generate year 

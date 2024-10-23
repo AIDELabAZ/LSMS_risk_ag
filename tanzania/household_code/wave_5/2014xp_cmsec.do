@@ -66,6 +66,10 @@
 * generate year
 	gen year = 2014
 	
+
+* is it possible to buy improved seeds in village? if possible dist = 0
+	replace cm_e07_2 = 0 if cm_e05 == 1
+	
 * drop what we don't need
 	keep id_01 id_02 id_03 id_05 dist_daily dist_weekly cm_e07_2 year
 	
@@ -75,7 +79,7 @@
 	rename id_02 	district
 	rename id_03 	ward
 	rename id_05	ea
-	rename cm_e07_2 dist_supply
+	rename cm_e07_2 out_supply
 	
 	lab var year	"year of survey- wv4 2014 extended panel"
 	* generate year 
