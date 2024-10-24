@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: oct 22
 * Created by: reece
-* Edited on: oct 22 2024
+* Edited on: oct 23 2024
 * Edited by: reece
 * Stata v.18
 
@@ -28,7 +28,7 @@
 	log using "$logout/wv1_ph_secta5a", append
 	
 * ***********************************************************************
-**#1 - prepare TZA 2010 (Wave 1) - ag sec 5a
+**#1 - prepare TZA 2010 (Wave 1) - ag sec 5a post harvest
 * ***********************************************************************
 
 * load data
@@ -40,13 +40,14 @@
 
 
 * did respondant receive advice
-	drop	ag12a_02_2 ag12a_02_3 ag12a_02_4 ag12a_02_5 ag12a_02_6 ag12a_03 ag12a_04 ag12a_05 ag12a_06	ag12a_0b ag12a_01
+	keep if topic_cd == 1 | topic_cd == 2 | topic_cd == 3 | topic_cd == 4 | topic_cd == 5
+	drop sa5aq2a sa5aq2b trackingobs
 	
-	replace ag12a_02_1 = 0 if ag12a_02_1 == 2
+	replace sa5aq1 = 0 if sa5aq1 == 2
 	
-	reshape wide ag12a_02_1, i(y2_hhid) j(sourceid)
+	reshape wide sa5aq1, i(zone state lga sector ea hhid) j(topic_cd)
 	
-	egen extension = rowtotal(ag12a_02_11 ag12a_02_12 ag12a_02_13 ag12a_02_14 ag12a_02_15)
+	egen extension = rowtotal(sa5aq11 sa5aq12 sa5aq13 sa5aq14 sa5aq15)
 	replace extension = 1 if extension > 0
 	
 	
@@ -57,14 +58,14 @@
 	lab var extension "does respondent have access to extension?"
 
 * drop what we don't need 
-	keep y2_hhid extension year region ward ea district 
+	keep hhid extension year zone state lga sector ea
 	
 	
 * prepare for export
-	isid			hhid
+	isid			hhid zone state lga sector ea
 	describe
 	summarize 
-	save 			"$export/AGSEC12A.dta", replace
+	save 			"$export/ph_secta5a.dta", replace
 	
 
 
