@@ -1,7 +1,7 @@
 * Project: WB Weather
-* Created on: oct 22
+* Created on: oct 28
 * Created by: reece
-* Edited on: oct 27 2024
+* Edited on: oct 28 2024
 * Edited by: reece
 * Stata v.18
 
@@ -20,23 +20,23 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/raw_lsms_data/ethiopia/wave_2/raw"
-	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_2"
+	global root 	"$data/raw_lsms_data/ethiopia/wave_4/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_4"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/sect4_com_w2", append
+	log using "$logout/sect4_com_w4", append
 
 	
 * ***********************************************************************
-**#1 - prepare ethiopia 2013 (Wave 2) - Community Section 4
+**#1 - prepare ethiopia 2018 (Wave 4) - Community Section 4
 * ***********************************************************************
 
 * load data
-	use 		"$root/sect4_com_w2", clear
+	use 		"$root/sect04_com_w4", clear
 	
-	keep sa1q01 sa1q02 sa1q03 sa1q06 sa1q07 cs4q14 cs4q15 ea_id2
+	keep saq01 saq02 saq03 saq06 saq07 cs4q14 cs4q15 ea_id
 	
 * distance to weekly market? (only weekly available)
 	
@@ -47,19 +47,19 @@
 	
 
 * generate year
-	gen year = 2013
-	lab var year "year of survey- wv2 2013"
+	gen year = 2018
+	lab var year "year of survey- wv4 2018"
 	
 * rename vars
-	rename sa1q01 region
-	rename sa1q02 zone
-	rename sa1q03 woreda
-	rename sa1q06 kebele
-	rename sa1q07 ea
+	rename saq01 region
+	rename saq02 zone
+	rename saq03 woreda
+	rename saq06 kebele
+	rename saq07 ea
 	
 	
 * prepare for export
-	isid			region zone woreda kebele ea ea_id2
+	isid			region zone woreda kebele ea ea_id
 	describe
 	summarize 
 	save 			"$export/com_sect4.dta", replace
