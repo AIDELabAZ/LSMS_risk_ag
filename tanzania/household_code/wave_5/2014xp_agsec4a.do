@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: May 2024
 * Created by: jdm
-* Edited on: oct 8 2024
+* Edited on: oct 28 2024
 * Edited by: reece
 * Stata v.18
 
@@ -24,9 +24,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_5/raw"
-	global export 	"$data/household_data/tanzania/wave_5/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_5/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_5"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -235,25 +235,27 @@ egen dst_price = mean(cropprice), by(district crop_code)
 	lab var			ea "Village / Enumeration Area Code"	
 	lab var			mz_hrv "Quantity of Maize Harvested (kg)"
 	lab var			mz_damaged "Was Maize Harvest Damaged to the Point of No Yield"
-	lab var			hvst_value "Value of Harvest (2015 USD)"
 	lab var 		crop_code "Crop Identifier"
 	lab var			crop_id "Unique Crop ID Within Plot"
 	lab var			pure_stand "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
-	lab var			percent_field "Percent of Field Crop Was Planted On"
-	lav var			improved_sds "Were improved seeds used?"
+ 
 							
 * check for duplicates
 	duplicates		report y4_hhid plotnum crop_code
 	*** there are 2 duplicates
 	
-	collapse (sum)	hvst_value percent_field , by(y4_hhid ///
+	collapse (sum)	hvst_value percent_field cropprice improved_sds, by(y4_hhid ///
 						plotnum plot_id crop_code crop_id clusterid ///
 						strataid hhweight region district ward ea ///
 						any_* pure_stand mz_hrv mz_damaged)
 	** two fewer obs, should be the dupes from line 63
-
+	lab var			percent_field "Percent of Field Crop Was Planted On"
+	lab var			improved_sds "Were improved seeds used?"
+	lab var			cropprice "maize price (harvest value/ harvest weight)" 
+	lab var			hvst_value "Value of Harvest (2015 USD)"
+	
 * prepare for export
 	isid			y4_hhid plotnum crop_code
 	compress

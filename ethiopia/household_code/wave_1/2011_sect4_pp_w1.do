@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: July 2020
 * Created by: McG
-* Edited on: 20 May 2024
-* Edited by: jdm
+* Edited on: 28 oct 2024
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -24,21 +24,21 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/household_data/ethiopia/wave_1/raw"
-	loc export = "$data/household_data/ethiopia/wave_1/refined"
-	loc logout = "$data/household_data/ethiopia/logs"
+* define paths
+	global root 	"$data/raw_lsms_data/ethiopia/wave_1/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_1"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
-* open log
-	cap log close
-	log using "`logout'/wv3_PPSEC4", append
-
+* open log 
+	cap log close 
+	log using "$logout/sect4_com_w1", append
 
 * **********************************************************************
 * 1 - preparing ESS (Wave 1) - Post Planting Section 4
 * **********************************************************************
 
 * load data
-	use 		"`root'/sect4_pp_w1.dta", clear
+	use 		"$root/sect4_pp_w1.dta", clear
 	
 * dropping duplicates
 	duplicates drop	
@@ -121,9 +121,15 @@
 * the years for some reason mostly say 2003
 * i don't think this is of interest to us anyway
 
+* ***********************************************************************
+* 3 - improved seeds
+* ***********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if pp_s4q11 == 1
+	lab var		improved_sds "were improved seeds used?"
 
 * ***********************************************************************
-* 3 - cleaning and keeping
+* 4 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -134,7 +140,7 @@
 	rename		saq05 ea
 
 * restrict to variables of interest
-	keep  		holder_id- crop_code pesticide_any herbicide_any field_prop ///
+	keep  		holder_id- crop_code improved_sds pesticide_any herbicide_any field_prop ///
 					damaged damaged_pct parcel_id field_id crop_id
 	order 		holder_id- ea
 	
@@ -145,7 +151,7 @@
 	describe
 	summarize 
 	sort 		holder_id parcel field crop_code
-	save		"`export'.PP_SEC4.dta", replace
+	save		"$export.PP_SEC4.dta", replace
 
 * close the log
 	log	close

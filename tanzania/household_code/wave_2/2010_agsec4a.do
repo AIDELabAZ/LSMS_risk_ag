@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: McG
-* Edited on: oct 8 2024
+* Edited on: oct 28 2024
 * Edited by: reece
 * Stata v.18
 
@@ -24,9 +24,9 @@
 
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_2/raw"
-	global export 	"$data/household_data/tanzania/wave_2/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_2/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_2"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -237,6 +237,7 @@ egen dst_price = mean(cropprice), by(district crop_code)
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
 	lab var			percent_field "Percent of Field Crop Was Planted On"
 	lab var			improved_sds "Were improved seeds used?"
+	lab var 		cropprice "maize price (harvest value/ harvest weight)"
 			
 * prepare for export
 	isid			y2_hhid plotnum crop_code

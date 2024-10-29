@@ -24,13 +24,14 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/household_data/ethiopia/wave_3/raw"
-	loc export = "$data/household_data/ethiopia/wave_3/refined"
-	loc logout = "$data/household_data/ethiopia/logs"
+	global root 	"$data/raw_lsms_data/ethiopia/wave_3/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_3"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
+
 
 * open log
 	cap log close
-	log using "`logout'/wv3_PPSEC4", append
+	log using "$logout/wv3_PPSEC4", append
 
 
 * **********************************************************************
@@ -38,7 +39,7 @@
 * **********************************************************************
 
 * load data
-	use 		"`root'/sect4_pp_w3.dta", clear
+	use 		"$root/sect4_pp_w3.dta", clear
 
 * dropping duplicates
 	duplicates drop
@@ -125,9 +126,15 @@
 * the years for some reason mostly say 2005. 
 * i don't think this is of interest to us anyway.
 
+* ***********************************************************************
+* 3 - improved seeds
+* ***********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if pp_s4q11 == 1
+	lab var		improved_sds "were improved seeds used?"
 
 * ***********************************************************************
-* 3 - cleaning and keeping
+* 4 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -139,7 +146,7 @@
 	rename 		saq05 ea
 	
 * restrict to variables of interest
-	keep  		holder_id- pp_s4q01_b pesticide_any herbicide_any field_prop ///
+	keep  		holder_id- pp_s4q01_b pesticide_any improved_sds herbicide_any field_prop ///
 					damaged damaged_pct parcel_id field_id crop_id
 	order 		holder_id- ea
 
@@ -150,7 +157,7 @@
 	describe
 	summarize 
 	sort 		holder_id parcel field crop_code
-	save 		"`export'/PP_SEC4.dta", replace
+	save 		"$export/PP_SEC4.dta", replace
 
 * close the log
 	log	close

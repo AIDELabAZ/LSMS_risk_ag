@@ -1,7 +1,7 @@
 * Project: WB Weather
 * Created on: March 2024
 * Created by: reece
-* Edited on: oct 8 2024
+* Edited on: oct 28 2024
 * Edited by: reece
 * Stata v.18
 
@@ -23,9 +23,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_7/raw"
-	global export 	"$data/household_data/tanzania/wave_7/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_7/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_7"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
@@ -189,23 +189,12 @@
 
 	
 * **********************************************************************
-**#3 - gen crop price 
+**#4 - gen crop price 
 * **********************************************************************
 
 gen cropprice = hvst_value/wgt_hvsted
 egen dst_price = mean(cropprice), by(district crop_code)
 
-* **********************************************************************
-**#4 - gen access to extension
-* **********************************************************************
-
-* import extension data
-	*merge 			m:1 y5_hhid  using "$root/ag_sec_12a", generate(_12A)
-	* having trouble merging
-	
-* trying market data
-	 *merge 			m:1 interview__key using "$root/cm_sec_b", generate(_B)
-		*variables available do not uniquely identify obs for ^^
 
 * **********************************************************************
 **#5 - end matter, clean up to save
@@ -231,24 +220,26 @@ egen dst_price = mean(cropprice), by(district crop_code)
 	lab var			district "District Code"	
 	lab var			mz_hrv "Quantity of Maize Harvested (kg)"
 	lab var			mz_damaged "Was Maize Harvest Damaged to the Point of No Yield"
-	lab var			hvst_value "Value of Harvest (2015 USD)"
 	lab var 		crop_code "Crop Identifier"
 	lab var			pure_stand "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
 	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
-	lab var			percent_field "Percent of Field Crop Was Planted On"
-	lab var			improved_sds "Were improved seeds used?"
+
 						
 * check for duplicates
 	duplicates		report y5_hhid plot_id crop_code
-	*** there is 1 duplicate
+
 	
-	collapse (sum)	hvst_value percent_field, by(y5_hhid ///
+	collapse (sum)	hvst_value percent_field cropprice improved_sds, by(y5_hhid ///
 						plot_id crop_code clusterid ///
 						strataid hhweight region district ///
 						any_* pure_stand mz_hrv mz_damaged)
 	** 0 fewer obs
-
+	lab var			percent_field "Percent of Field Crop Was Planted On"
+	lab var			improved_sds "Were improved seeds used?"
+	lab var			cropprice "maize price (harvest value/weight harvested)"
+	lab var			hvst_value "Value of Harvest (2015 USD)"
+	
 * prepare for export
 	isid			y5_hhid plot_id crop_code
 	compress

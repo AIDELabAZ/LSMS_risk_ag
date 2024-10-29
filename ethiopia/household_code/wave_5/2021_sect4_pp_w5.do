@@ -24,9 +24,9 @@
 * **********************************************************************
 
 * define paths	
-	global		root 		 	"$data/household_data/ethiopia/wave_5/raw"  
-	global		export 		 	"$data/household_data/ethiopia/wave_5/refined"
-	global		logout 		 	"$data/household_data/ethiopia/logs"
+	global root 	"$data/raw_lsms_data/ethiopia/wave_5/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_5"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 	
 * open log	
 	cap log 	close
@@ -34,7 +34,7 @@
 
 
 * **********************************************************************
-* 1 - preparing ESS (Wave 3) - Post Planting Section 4
+* 1 - preparing ESS (Wave 5) - Post Planting Section 4
 * **********************************************************************
 
 * load data
@@ -121,9 +121,15 @@
 * pp_s4q12_a and pp_s4q12_b give month and year seeds were planted
 * the years are from 2010 and 2011, so in ethiopian calendar 
 
+* ***********************************************************************
+* 3 - improved seeds
+* ***********************************************************************
+	gen			improved_sds = 0
+	replace 	improved_sds = 1 if s4q11 == 1
+	lab var		improved_sds "were improved seeds used?"
 
 * ***********************************************************************
-* 3 - cleaning and keeping
+* 4 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -134,7 +140,7 @@
 	rename 		saq05 ea
 	
 * restrict to variables of interest
-	keep  		holder_id- crop_code pesticide_any herbicide_any field_prop ///
+	keep  		holder_id- crop_code pesticide_any improved_sds herbicide_any field_prop ///
 					damaged damaged_pct parcel_id field_id crop_id
 	order 		holder_id- ea
 	
