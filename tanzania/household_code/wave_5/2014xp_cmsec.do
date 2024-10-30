@@ -50,7 +50,7 @@
 	
 	replace dist_daily = 0 if cb1L == 1 
 	replace dist_weekly = 0 if cb1M == 1 
-	* do this for the weekly market 
+
 	
 	drop cb1*
 	

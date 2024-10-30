@@ -46,6 +46,10 @@
 	
 	rename		cm_b0312 dist_daily
 	rename 		cm_b0313 dist_weekly
+	
+	replace 	dist_daily = 0 if cm_b0112 == 1
+	replace 	dist_weekly = 0 if cm_b0113 == 1
+	
 	drop		cm_b01*
 	
 	merge 1:1 interview__key using "$root/cm_sec_a"
@@ -87,6 +91,8 @@
 	lab var district "district"
 	lab var ward "ward"
 	lab var ea "ea"
+	lab var dist_daily "distance to daily market"
+	lab var dist_weekly "distance to weekly market"
 	lab var year "year of survey wv7 2020"
 	
 * prepare for export
