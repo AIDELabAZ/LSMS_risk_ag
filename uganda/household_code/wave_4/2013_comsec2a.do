@@ -20,61 +20,54 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/raw_lsms_data/uganda/wave_1/raw"
-	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_1"
+	global root 	"$data/raw_lsms_data/uganda/wave_4/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_4"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/2009_csect2a", append
+	log using "$logout/2013_csect2a", append
 	
 * ***********************************************************************
-**#1 - prepare uganda 2009 (Wave 1) - Community Section 2A
+**#1 - prepare uganda 2013 (Wave 4) - Community Section 2A
 * ***********************************************************************
 
 * load data
-	use 		"$root/2009_CSECTION2A", clear
+	use 		"$root/community/CSEC2a", clear
 	
-	keep Comcod C2asn  C2aq3 C2aq5
+	keep District_Name SubCounty Parish Villagecode CFService_ID C2AQ3 C2AQ5
 	
 * reshape
 	
-	keep if C2asn == 15 | C2asn == 16 | C2asn == 17 | C2asn == 24
+	keep if CFService_ID == 15 | CFService_ID == 16 | CFService_ID == 17 | CFService_ID == 24
+	duplicates drop District_Name SubCounty Parish Villagecode CFService_ID, force
+	* drops 44 obs
 	
+	reshape wide C2AQ3 C2AQ5, i(District_Name SubCounty Parish Villagecode ) j(CFService_ID) 
 	
-	reshape wide C2aq3 C2aq5, i(Comcod) j(C2asn) 
+	rename		C2AQ515 dist_supply
+	rename  	C2AQ516 dist_agprod
+	rename 		C2AQ517 dist_nonagprod
+	rename 		C2AQ524 extension
 	
-	rename		C2aq515 dist_supply
-	rename  	C2aq516 dist_agprod
-	rename 		C2aq517 dist_nonagprod
-	rename 		C2aq524 extension
-	
-	replace dist_supply = 0 if C2aq315 == 1 
-	replace dist_agprod = 0 if C2aq316 == 1 
-	replace dist_nonagprod = 0 if C2aq317 == 1
-	replace extension = 0 if C2aq324 == 1
+	replace dist_supply = 0 if C2AQ315 == 1 
+	replace dist_agprod = 0 if C2AQ316 == 1 
+	replace dist_nonagprod = 0 if C2AQ317 == 1
+	replace extension = 0 if C2AQ324 == 1
 	* yes in village is always 0, to avoid unreasonable in-village values
 	
-	drop		C2aq3*
+	drop		C2AQ3*
 	
-	merge 1:1 Comcod using "$root/2009_CSECTION1"
-	drop	_merge
-	* 299 matched 21 not matched
-	
-	keep Comcod dist_agprod dist_nonagprod dist_supply extension Year C1aq1 C1aq2 C1aq3 C1aq4 C1aq5 
-
+* generate year
+	gen			year = 2013
+	lab var year "year of survey- wv4 2013"
 	
 * rename vars
-	rename C1aq1 district
-	rename C1aq2 county
-	rename C1aq3 subcounty
-	rename C1aq4 parish
-	rename C1aq5 ea
-	
-	drop if county == .
-	* dropping 1 observation, isid does not run if we don't
-	* the district and ea for this obs are unique, don't think we can identify what this county is through other identifiers 
-	
+	rename District_Name district
+	rename Villagecode village
+	rename SubCounty subcounty
+	rename Parish parish
+
 * relabel 
 	lab var dist_supply "distance to agrodealer"
 	lab var dist_agprod "distance to market selling agricultural produce"
@@ -83,7 +76,7 @@
 	
 	
 * prepare for export
-	isid			district county subcounty parish ea Comcod
+	isid			district village subcounty parish 
 	describe
 	summarize 
 	save 			"$export/com_sect2a.dta", replace

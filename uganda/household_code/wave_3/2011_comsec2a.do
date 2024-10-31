@@ -20,29 +20,29 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/raw_lsms_data/uganda/wave_2/raw"
-	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_2"
+	global root 	"$data/raw_lsms_data/uganda/wave_3/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_3"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/2010_csect2a", append
+	log using "$logout/2011_csect2a", append
 	
 * ***********************************************************************
-**#1 - prepare uganda 2010 (Wave 2) - Community Section 2A
+**#1 - prepare uganda 2011 (Wave 3) - Community Section 2A
 * ***********************************************************************
 
 * load data
-	use 		"$root/CSECTION2A", clear
+	use 		"$root/CSEC2a", clear
 	
-	keep comcod c2asn  c2aq3 c2aq5
+	keep c1aq1 c1aq2 c1aq3 c1aq4 c2aq2 c2aq3 c2aq5
 	
 * reshape
 	
-	keep if c2asn == 15 | c2asn == 16 | c2asn == 17 | c2asn == 24
-	duplicates drop comcod c2asn, force
+	keep if c2aq2 == 15 | c2aq2 == 16 | c2aq2 == 17 | c2aq2 == 24
+	*duplicates drop comcod c2asn, force
 	
-	reshape wide c2aq3 c2aq5, i(comcod) j(c2asn) 
+	reshape wide c2aq3 c2aq5, i(c1aq1 c1aq2 c1aq3 c1aq4) j(c2aq2) 
 	
 	rename		c2aq515 dist_supply
 	rename  	c2aq516 dist_agprod
@@ -57,25 +57,16 @@
 	
 	drop		c2aq3*
 	
-	merge 1:1 comcod using "$root/CSECTION1"
-	drop	_merge
-	* 311 matched 11 not matched
-	*** regional identifiers not in file??
-	
-	keep comcod dist_agprod dist_nonagprod dist_supply extension c1aq1 c1aq2 c1aq3 c1aq4 c1aq5 
-
+* generate year
+	gen			year = 2011
+	lab var year "year of survey- wv3 2011"
 	
 * rename vars
 	rename c1aq1 district
 	rename c1aq2 county
 	rename c1aq3 subcounty
 	rename c1aq4 parish
-	rename c1aq5 ea
-	
-	drop if county == .
-	* dropping 1 observation, isid does not run if we don't
-	* the district and ea for this obs are unique, don't think we can identify what this county is through other identifiers 
-	
+
 * relabel 
 	lab var dist_supply "distance to agrodealer"
 	lab var dist_agprod "distance to market selling agricultural produce"
@@ -84,7 +75,7 @@
 	
 	
 * prepare for export
-	isid			district county subcounty parish ea Comcod
+	isid			district county subcounty parish 
 	describe
 	summarize 
 	save 			"$export/com_sect2a.dta", replace
