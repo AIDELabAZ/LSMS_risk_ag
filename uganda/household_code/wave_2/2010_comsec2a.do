@@ -57,25 +57,17 @@
 	
 	drop		c2aq3*
 	
-	merge 1:1 comcod using "$root/CSECTION1"
-	drop	_merge
-	* 311 matched 11 not matched
-	*** regional identifiers not in file??
+* merge in location idenitfiers 
+	*merge 1:1 comcod using "$root/CSECTION1"
+	*drop	_merge
+	*** unlike other uganda waves, csect1 lacks location identifiers
+	*** location identifers exist in gsect1
+	*** will use those identifers for this wave
 	
 	keep comcod dist_agprod dist_nonagprod dist_supply extension c1aq1 c1aq2 c1aq3 c1aq4 c1aq5 
+	rename comcod comm
+	
 
-	
-* rename vars
-	rename c1aq1 district
-	rename c1aq2 county
-	rename c1aq3 subcounty
-	rename c1aq4 parish
-	rename c1aq5 ea
-	
-	drop if county == .
-	* dropping 1 observation, isid does not run if we don't
-	* the district and ea for this obs are unique, don't think we can identify what this county is through other identifiers 
-	
 * relabel 
 	lab var dist_supply "distance to agrodealer"
 	lab var dist_agprod "distance to market selling agricultural produce"
@@ -84,7 +76,7 @@
 	
 	
 * prepare for export
-	isid			district county subcounty parish ea Comcod
+	isid			comm 
 	describe
 	summarize 
 	save 			"$export/com_sect2a.dta", replace
