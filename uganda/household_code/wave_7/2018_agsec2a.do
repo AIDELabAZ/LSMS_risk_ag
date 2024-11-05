@@ -24,9 +24,9 @@
 ************************************************************************
 
 * define paths	
-	global 	root  		"$data/household_data/uganda/wave_7/raw"  
-	global  export 		"$data/household_data/uganda/wave_7/refined"
-	global 	logout 		"$data/household_data/uganda/logs"
+	global root 	"$data/raw_lsms_data/uganda/wave_7/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_7"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 	
 * open log	
 	cap log 			close
@@ -181,7 +181,7 @@
 ************************************************************************
 	
 	keep 			hhid HHID prcid region district county subcounty ///
-					parish hh_status2011 wgt11 ///
+					parish ///
 					plotsize irr_any
 
 	compress
@@ -189,8 +189,7 @@
 	summarize
 
 * save file
-		customsave , idvar(hhid) filename("2011_AGSEC2A.dta") ///
-			path("`export'") dofile(2011_AGSEC2A) user($user)
+	save		"$export/2018_agsec2a.dta", replace 
 
 * close the log
 	log	close

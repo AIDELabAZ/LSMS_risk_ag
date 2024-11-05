@@ -22,9 +22,9 @@
 ***********************************************************************
 
 * define paths	
-	global 	root 		"$data/household_data/uganda/wave_5/raw"  
-	global  export 		"$data/household_data/uganda/wave_5/refined"
-	global 	logout 		"$data/household_data/uganda/logs"
+	global root 	"$data/raw_lsms_data/uganda/wave_5/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_5"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 
 
 * open log	
@@ -182,7 +182,7 @@
 	summarize
 
 * save file
-	save 			"$export/2015_agsec2.dta", replace
+	save 			"$export/2015_agsec2b.dta", replace
 
 * close the log
 	log	close

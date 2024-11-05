@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths	
-	global 			root 	"$data/household_data/uganda/wave_7/raw"  
-	global 			export 	"$data/household_data/uganda/wave_7/refined"
-	global 			logout 	"$data/household_data/uganda/logs"
+	global root 	"$data/raw_lsms_data/uganda/wave_7/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_7"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 	
 * open log	
 	cap 			log 	close
@@ -40,7 +40,7 @@
 
 * rename variables
 	isid 			hhid
-	rename			hhid hh_7_8
+	*rename			hhid hh_7_8
 	rename			t0_hhid HHID
 
 	rename 			distirct_name district
@@ -61,7 +61,7 @@
 * 2 - end matter, clean up to save
 * **********************************************************************
 
-	keep 			hh_7_8 HHID year region district county subcounty parish ///
+	keep 			hhid HHID year hhid region district county subcounty parish ///
 						wgt18 subreg
 
 	compress

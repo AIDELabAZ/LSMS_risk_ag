@@ -21,9 +21,10 @@
 ************************************************************************
 
 * define paths	
-	global root 		 "$data/household_data/uganda/wave_3/raw"  
-	global export 		 "$data/household_data/uganda/wave_3/refined"
-	global logout 		 "$data/household_data/uganda/logs"
+* define paths
+	global root 	"$data/raw_lsms_data/uganda/wave_3/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/uganda/wave_3"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/uganda/logs"
 	
 * open log	
 	cap 				log close

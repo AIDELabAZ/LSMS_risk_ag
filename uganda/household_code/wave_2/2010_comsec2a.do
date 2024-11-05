@@ -64,7 +64,7 @@
 	*** location identifers exist in gsect1
 	*** will use those identifers for this wave
 	
-	keep comcod dist_agprod dist_nonagprod dist_supply extension c1aq1 c1aq2 c1aq3 c1aq4 c1aq5 
+	keep comcod dist_supply dist_agprod dist_nonagprod extension
 	rename comcod comm
 	
 
