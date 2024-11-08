@@ -6,7 +6,7 @@
 * Stata v.18, mac
 
 * does
-	* reads Uganda wave 5 crops grown and seed (AGSEC4A) for the 1st season
+	* reads Uganda wave 7 crops grown and seed (AGSEC4A) for the 1st season
 	* questionaire 4B is for 1st season
 	* cleans
 		* planting date
@@ -45,7 +45,6 @@
 * rename variables	
 
 	rename			parcelID prcid
-	rename			pltID pltid
 	rename 			cropID cropid
 	rename 			ACrop2_ID cropid2
 	rename 			cropID_other cropid3

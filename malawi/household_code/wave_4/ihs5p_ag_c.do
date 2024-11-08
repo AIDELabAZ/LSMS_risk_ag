@@ -19,20 +19,20 @@
 * **********************************************************************
 
 * define paths
-	loc		root 	= 	"$data/household_data/malawi/wave_6/raw"	
-	loc		export 	= 	"$data/household_data/malawi/wave_6/refined"
-	loc		logout 	= 	"$data/household_data/malawi/logs"
+	global root 	"$data/raw_lsms_data/malawi/wave_6/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_6"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
 
 * open log
 	cap 	log			close
-	log 	using 		"`logout'/mwi_ag_mod_c19", append
+	log 	using 		"$logout/mwi_ag_mod_c19", append
 
 * **********************************************************************
 * 1 - clean plot area 
 * **********************************************************************
 
 * load data
-	use 			"`root'/ag_mod_c_19.dta", clear
+	use 			"$root/ag_mod_c_19.dta", clear
 	
 * drop observations with missing plot id variable or garden id variable 
 	summarize 		if missing(plotid)
@@ -148,7 +148,7 @@
 	summarize 
 	
 * save data
-	save 			"`export'/ag_mod_c_19.dta", replace
+	save 			"$export/ag_mod_c_19.dta", replace
 
 * close the log
 	log			close
