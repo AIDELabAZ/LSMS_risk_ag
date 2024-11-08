@@ -50,7 +50,7 @@
 	rename 			A4aq8 area_plnt
 
 	rename			A4aq11 seed_vle
-	rename 			A4aq13 seed_type
+	rename 			A4aq13 improved_sds
 	
 	sort 			hhid prcid pltid cropid  
 	
@@ -68,16 +68,12 @@
 ***********************************************************************
 
 * see how many hh used traditional vs improved seed 
-	tab 			seed_type
+	tab 			improved_sds
 	* 2,863 used traditional
 	* 672 used improved
 	*  missing 8,831
 	
-* generate a variable showing seed purchase
-	gen				seed_purch = 1 if A4aq10 ==1
-	replace 		seed_purch = 0 if seed_purch ==.
-	tab 			seed_purch
-	* 28.81% purchased seeds
+	replace 		improved_sds = 0 if improved_sds == 2	
 
 * make a variable that shows if intercropped or not
 	gen				intrcrp_any =1 if A4aq7 == 2
@@ -92,9 +88,9 @@
 ***********************************************************************
 
 	keep 			hhid prcid cropid pltid intrcrp_any /// 
-					area_plnt seed_type
+					area_plnt improved_sds
 	
-	lab var			seed_type "Traditional/improved"
+	lab var			improved_sds "were improved seeds used?"
 	lab var			intrcrp "=1 if intercropped"
 	lab var			area_plnt "Total area of plot planted"
 

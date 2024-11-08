@@ -54,7 +54,7 @@
 	rename 			cropID cropid
 	rename			a4aq11b unit
 	rename			a4aq11a seed
-	rename 			a4aq13 seed_type
+	rename 			a4aq13 improved_sds
 	rename 			a4aq7 area_plnt
 	rename			a4aq9 prct_plnt
 	rename			a4aq9_1 plnt_month
@@ -95,11 +95,12 @@
 ***********************************************************************
 
 * see how many hh used traditional vs improved seed 
-	tab 			seed_type, missing
+	tab 			improved_sds, missing
 	* 5,977 used traditional
 	* 577 used improved
 	* 1,638 missing
 	* missing is mostly tubers
+	replace			improved_sds = 0 if improved_sds == 2
 
 * create a variable showing used of seed 
 	gen 			seed_any = 1 if a4aq16 == 1
@@ -198,10 +199,10 @@
 ***********************************************************************
 
 	keep 			hhid hh prcid cropid pltid intrcrp seed_qty ///
-						seed_type crop_area plnt_month plnt_year ///
+						improved_sds crop_area plnt_month plnt_year ///
 						area_plnt prct_plnt 
 
-	lab var			seed_type "Traditional/improved"
+	lab var			improved_sds "were improved seeds used?"
 	lab var			intrcrp "=1 if intercropped"
 	lab var			area_plnt "Total area of plot planted"
 	lab var			prct_plnt "Percent planted to crop"
