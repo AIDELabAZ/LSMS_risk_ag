@@ -1,21 +1,25 @@
-* Project: WB Weather
-* Created on: May 2020
-* Created by: McG
-* Edited on: 21 May 2024
+* Project: LSMS Risk Ag
+* Created on: Nov 2024
+* Created by: jdm
+* Edited on: 12 Nov 2024
 * Edited by: jdm
-* Stata v.18
+* Stata v.18.5
 
 * does
-	* cleans Tanzania household variables, wave 1 Ag sec2a
-	* looks like a parcel roster, 2008 long rainy season
-	* generates imputed plot sizes
+	* reads Tanzania wave 1 plot info
+	* merges in household locations and plot characteristics
+	* cleans
+		* plot sizes
+	* merge in owner characteristics from gsec2 gsec4
+	* output is ready to be appended to 2013_AGSEC2B to make 2013_AGSEC2
 
 * assumes
-	* access to all raw data
-	* distinct.ado
+	* access to the raw data
+	* access to cleaned SEC_A, SEC_3A
+	* mdesc.ado
 
 * TO DO:
-	* completed
+	* done
 
 	
 * **********************************************************************
@@ -23,14 +27,13 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_1/raw"
-	global export 	"$data/household_data/tanzania/wave_1/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/raw_lsms_data/tanzania/wave_1/raw"
+	global export 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_1"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wv1_AGSEC2A", append
-
+	log using "$logout/2008_AGSEC2A", append
 
 	
 * ***********************************************************************
@@ -45,8 +48,8 @@
 	*** 0 obs dropped
 
 * renaming variables of interest
-	rename 		s2aq4 plotsize_self_ac
-	rename 		area plotsize_gps_ac
+	rename 		s2aq4 plotsize_self
+	rename 		area plotsize_gps
 	
 * check for uniquie identifiers
 	drop			if plotnum == ""
@@ -54,16 +57,15 @@
 	*** 0 obs dropped - none lack plot ids
 
 * generating unique ob id
-	gen				plot_id = hhid + " " + plotnum
-	lab var			plot_id "Unique plot identifier"
-	isid			plot_id
+	gen				pltid = hhid + " " + plotnum
+	lab var			pltid "Unique plot identifier"
+	isid			pltid
 	
 * convert from acres to hectares
-	gen				plotsize_self = plotsize_self_ac * 0.404686
+	replace			plotsize_self = plotsize_self * 0.404686
 	lab var			plotsize_self "Self-reported Area (Hectares)"
-	gen				plotsize_gps = plotsize_gps_ac * 0.404686
+	replace			plotsize_gps = plotsize_gps * 0.404686
 	lab var			plotsize_gps "GPS Measured Area (Hectares)"
-	drop			plotsize_gps_ac plotsize_self_ac
 
 	
 * ***********************************************************************
@@ -72,17 +74,10 @@
 
 * must merge in regional identifiers from 2012_HHSECA to impute
 	merge			m:1 hhid using "$export/HH_SECA"
-	tab				_merge
 	*** 981 not matched, using only
 	
 	drop if			_merge == 2
 	drop			_merge
-	
-* unique district id
-	sort			region district
-	egen			uq_dist = group(region district)
-	distinct		uq_dist
-	*** 125 distinct ditricts
 	
 * must merge in regional identifiers from 2012_AG_SEC_3A to impute
 	merge			1:1 hhid plotnum using "$root/SEC_3A"

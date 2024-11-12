@@ -1,19 +1,22 @@
-* Project: WB Weather
-* Created on: May 2020
-* Created by: McG
-* Edited on: 21 May 2024
+* Project: LSMS Risk Ag
+* Created on: Nov 2024
+* Created by: jdm
+* Edited on: 12 Nov 2024
 * Edited by: jdm
-* Stata v.18
+* Stata v.18.5
 
 * does
-	* cleans Tanzania household variables, wave 1 hh secA
-	* pulls regional identifiers
-	
-* assumes
-	* access to all raw data
+	* reads in household Location data (SEC_A)
+	* cleans
+		* political geography locations
+		* survey weights
+	* outputs file of location for merging with other ag files that lack this info
 
+* assumes
+	* access to raw data
+	
 * TO DO:
-	* completed
+	* done
 
 	
 * **********************************************************************
@@ -27,7 +30,7 @@
 
 * open log 
 	cap log 		close 
-	log 			using 	"$logout/wv1_HHSECA", append
+	log 			using 	"$logout/2008_HHSECA", append
 
 * ***********************************************************************
 * 1 - TZA 2008 (Wave 1) - Household Section A
@@ -46,28 +49,32 @@
 					locality
 					
 * rename variables
-	rename		hh_weight hhweight
-	rename		locality y1_rural
+	rename		hh_weight wgt
+	rename		locality sector
+	rename		region admin_1
+	rename 		district admin_2
+	rename 		ward admin_3
 	
-	order		hhid region district ward ea y1_rural ///
-					clusterid strataid hhweight
+	order		hhid admin_1 admin_2 admin_3 ea sector ///
+					clusterid strataid wgt
 	
 * relabel variables
-	lab var		hhid "Unique Household Identification NPS Y1"
-	lab var		region "Region Code"
-	lab var		district "District Code"
-	lab var		ward "Ward Code"
-	lab var		ea "Village / Enumeration Area Code"
-	lab var		y1_rural "Cluster Type"
-	lab var		clusterid "Unique Cluster Identification"
+	lab var		hhid "Household Identification NPS Y1"
+	lab var		admin_1 "Region Code"
+	lab var		admin_2 "District Code"
+	lab var		admin_3 "Ward Code"
+	lab var		ea "Enumeration Area Code"
+	lab var		sector "Urban/Rural Identifier"
+	lab var		clusterid "Cluster Identification"
 	lab var		strataid "Design Strata"
-	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
+	lab var		wgt "Household Weights"
 	
 * prepare for export
 	compress
 	describe
 	summarize 
-	sort hhid
+
+	isid		hhid
 	
 	save 			"$export/HH_SECA.dta", replace
 	

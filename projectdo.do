@@ -1,7 +1,7 @@
-* Project: WB Weather - metric 
+* Project: LSMS Risk Ag
 * Created on: Jan 2024
-* Created by: cda
-* Stata v.18.0
+* Created by: JDM
+* Stata v.18.5
 
 * does
 	* establishes an identical workspace between users
@@ -25,7 +25,7 @@
 	global 			pack 	0
 		
 * Specify Stata version in use
-    global stataVersion 18.0    // set Stata version
+    global stataVersion 18.5    // set Stata version
     version $stataVersion
 
 * **********************************************************************
@@ -35,7 +35,7 @@
 * Define root folder globals
 
 if `"`c(username)'"' == "jdmichler" {
-        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/LSMS_risk_ag"
+        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/lsms_risk_ag"
 		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
     }
 if `"`c(username)'"' == "annal" {
