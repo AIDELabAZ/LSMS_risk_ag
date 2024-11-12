@@ -17,9 +17,9 @@
 	* add run time 
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+************************************************************************
+**# 0 - setup
+************************************************************************
 
 * set $pack to 0 to skip package installation
 	global 			pack 	0
@@ -28,9 +28,9 @@
     global stataVersion 18.5    // set Stata version
     version $stataVersion
 
-* **********************************************************************
-* 0 (a) - Create user specific paths
-* **********************************************************************
+************************************************************************
+**## 0.1 - Create user specific paths
+************************************************************************
 
 * Define root folder globals
 
@@ -49,9 +49,9 @@ if `"`c(username)'"' == "rbrnhm" {
     }	
 	 
 
-* **********************************************************************
-* 0 (b) - Check if any required packages are installed:
-* **********************************************************************
+************************************************************************
+**## 0.2 - Check if any required packages are installed:
+************************************************************************
 
 * install packages if global is set to 1
 if $pack == 1 {
@@ -96,9 +96,9 @@ if $pack == 1 {
 		set more off
 }
 
-* **********************************************************************
-* 1 - run weather data cleaning .do file
-* **********************************************************************
+************************************************************************
+**# 1 - run weather data cleaning .do file
+************************************************************************
 
 /*	this code requires access to the weather data sets, which are confidential
 	and held by the World Bank. They are not publically available
@@ -111,9 +111,9 @@ if $pack == 1 {
 	do 			"$code/uganda/weather_code/uga_unps_masterdo.do"
 */
 
-* **********************************************************************
-* 2 - run household data cleaning .do files and merge with weather data
-* **********************************************************************
+************************************************************************
+**# 2 - run household data cleaning .do files and merge with weather data
+************************************************************************
 
 /*	this code requires a user to have downloaded the publically available 
 	household data sets and placed them into the folder structure detailed
@@ -127,9 +127,9 @@ if $pack == 1 {
 	do 			"$code/uganda/household_code/uga_hh_masterdo.do"
 */
 
-* **********************************************************************
-* 2 - run analysis .do files
-* **********************************************************************
+************************************************************************
+**# 3 - run analysis .do files
+************************************************************************
 /*
 	do			"$code/analysis/viz_code/sum_table.do"
 	do			"$code/analysis/viz_code/sum_vis.do"

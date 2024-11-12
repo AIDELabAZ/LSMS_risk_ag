@@ -22,9 +22,9 @@
 	* done
 
 	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+************************************************************************
+**# 0 - setup
+************************************************************************
 
 * define paths
 	global root 	"$data/raw_lsms_data/tanzania/wave_1/raw"
@@ -36,9 +36,9 @@
 	log using "$logout/2008_AGSEC2A", append
 
 	
-* ***********************************************************************
-* 1 - prepare TZA 2008 (Wave 1) - Agriculture Section 2A 
-* ***********************************************************************
+************************************************************************
+**# 1 - prepare TZA 2008 (Wave 1) - Agriculture Section 2A 
+************************************************************************
 
 * load data
 	use				"$root/SEC_2A", clear
@@ -48,8 +48,8 @@
 	*** 0 obs dropped
 
 * renaming variables of interest
-	rename 		s2aq4 plotsize_self
-	rename 		area plotsize_gps
+	rename 			s2aq4 plotsize_self
+	rename 			area plotsize_gps
 	
 * check for uniquie identifiers
 	drop			if plotnum == ""
@@ -68,9 +68,9 @@
 	lab var			plotsize_gps "GPS Measured Area (Hectares)"
 
 	
-* ***********************************************************************
-* 2 - merge in regional ID and cultivation status
-* ***********************************************************************	
+************************************************************************
+**# 2 - merge in regional ID and cultivation status
+************************************************************************
 
 * must merge in regional identifiers from 2012_HHSECA to impute
 	merge			m:1 hhid using "$export/HH_SECA"
@@ -101,9 +101,9 @@
 	drop			s3aq2_1- status
 
 
-* ***********************************************************************
-* 3 - clean and impute plot size
-* ***********************************************************************
+************************************************************************
+**# 3 - clean and impute plot size
+************************************************************************
 	
 * interrogating plotsize variables
 	count 		if plotsize_gps != . & plotsize_self != .
@@ -202,9 +202,9 @@
 	*** no observations dropped
 	
 
-* **********************************************************************
-* 4 - end matter, clean up to save
-* **********************************************************************	
+************************************************************************
+**# 4 - end matter, clean up to save
+************************************************************************
 
 * keep what we want, get rid of the rest
 	keep		hhid plotnum plot_id plotsize clusterid strataid ///

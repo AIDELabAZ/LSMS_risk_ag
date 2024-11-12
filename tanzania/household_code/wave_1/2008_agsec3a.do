@@ -9,6 +9,7 @@
 	* reads Tanzania wave 1 plot info
 	* merges in household locations and plot characteristics
 	* cleans
+		* crop name
 		* irrigation
 		* pesticide and herbicide
 		* fertilizer
@@ -21,15 +22,16 @@
 * assumes
 	* access to the raw data
 	* access to cleaned SEC_A
+	* access to cleaned SEC_B
 	* distinct.ado
 
 * TO DO:
 	* working on ownership/management
 
 	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+************************************************************************
+**# 0 - setup
+************************************************************************
 
 * define paths
 	global root 	"$data/raw_lsms_data/tanzania/wave_1/raw"
@@ -42,9 +44,9 @@
 	log using "$logout/2008_AGSEC3A", append
 
 
-* **********************************************************************
-* 1 - prepare TZA 2008 (Wave 1) - Agriculture Section 3A 
-* **********************************************************************
+************************************************************************
+**# 1 - prepare TZA 2008 (Wave 1) - Agriculture Section 3A 
+************************************************************************
 
 * load data
 	use 		"$root/SEC_3A", clear
@@ -70,18 +72,138 @@
 	drop if			_merge == 2
 	drop			_merge
 	
+* rename crop
+	rename			s3aq5code cropid
+	
 * record if field was cultivated during long rains
 	gen 			status = s3aq3 == 1 if s3aq3 != .
-	lab var			status "=1 if field cultivated during long rains"
+	lab var			status "=1 if plot cultivated during long rains"
 	***4,408 observations were cultivated (86%)
 
+* verify no crop on uncultivated plot
+	tab				cropid if status == 0		
+	*** 4 plots with crops - all rented out so drop
+	
 * drop uncultivated plots
 	drop			if status == 0	
 	* dropped 718
+
 	
-* ***********************************************************************
-* 2 -fertilizer
-* ***********************************************************************
+************************************************************************
+**# 2 - merge in manager and owner characteristics
+************************************************************************
+
+
+************************************************************************
+**## 2.1 - merge in manager characteristics
+************************************************************************
+
+* rename manager variables to person id
+	rename			s3aq6_1 pid
+	rename			s3aq6_2 pid2
+	rename			s3aq6_3 pid3
+	
+* merge in characteristics for manager 1
+	merge m:1 		hhid pid using "$export/2008_hhsecb.dta"	
+	*** 267 in master not merged
+	
+	tab pid if _merge == 1
+	*** all but 4 are missing pid
+
+	drop 			if _merge == 2
+	drop 			_merge	
+
+* rename variables
+	rename 			pid manage_rght_a
+	rename			gender gender_mgmt_a
+	rename			age age_mgmt_a
+	rename			edu edu_mgmt_a
+	
+* rename pid for b to just pid so we can merge	
+	rename			pid2 pid	
+
+* merge in characteristics for manager 2
+	merge m:1 		hhid pid using "$export/2008_hhsecb.dta"	
+	*** 2,661 in master not merged
+
+	drop 			if _merge == 2
+	drop 			_merge	
+
+* rename variables
+	rename 			pid manage_rght_b
+	rename			gender gender_mgmt_b
+	rename			age age_mgmt_b
+	rename			edu edu_mgmt_b
+	
+	gen 			two_mgmt = 1 if manage_rght_a != . & manage_rght_b != .
+	replace 		two_mgmt = 0 if two_mgmt ==.	
+	
+* rename pid for b to just pid so we can merge	
+	rename			pid3 pid	
+
+* merge in characteristics for manager 3
+	merge m:1 		hhid pid using "$export/2008_hhsecb.dta"	
+	*** 4.326 in master not merged
+
+	drop 			if _merge == 2
+	drop 			_merge	
+
+* rename variables
+	rename 			pid manage_rght_c
+	rename			gender gender_mgmt_c
+	rename			age age_mgmt_c
+	rename			edu edu_mgmt_c
+
+	gen 			three_mgmt = 1 if manage_rght_a != . & manage_rght_b != . & ///
+						manage_rght_c != . 
+	replace 		three_mgmt = 0 if three_mgmt ==.	
+
+	
+************************************************************************
+**## 2.2 - merge in owner characteristics
+************************************************************************
+	
+* rename owner variables to person id
+	rename			s3aq27_1 pid
+	rename			s3aq27_2 pid2
+	replace			pid2 = . if pid2 == 99
+
+* merge in characteristics for manager 3
+	merge m:1 		hhid pid using "$export/2008_hhsecb.dta"	
+	*** 744 in master not merged
+
+	drop 			if _merge == 2
+	drop 			_merge
+	
+* rename variables
+	rename 			pid ownshp_rght_a
+	rename			gender gender_own_a
+	rename			age age_own_a
+	rename			edu edu_own_a
+	
+* rename PID for b to just PID so we can merge	
+	rename			pid2 pid
+
+* merge in characteristics for manager 2
+	merge m:1 		hhid pid using "$export/2008_hhsecb.dta"	
+	*** 3,304 in master not merged
+
+	drop 			if _merge == 2
+	drop 			_merge	
+	
+* rename variables
+	rename 			pid ownshp_rght_b
+	rename			gender gender_own_b
+	rename			age age_own_b
+	rename			edu edu_own_b
+	
+	gen 			two_own = 1 if ownshp_rght_a != . & ownshp_rght_b != .
+	replace 		two_own = 0 if two_own==.	
+	
+	
+************************************************************************
+**# 3 -fertilizer
+************************************************************************
 	
 * constructing fertilizer variables
 	rename			s3aq43 fert_any
@@ -107,9 +229,9 @@
 	replace			fert_any = 0 if fert_any == 2	
 	
 	
-* ***********************************************************************
-* 3 - irrigation, pesticide, herbicide, and ownership
-* ***********************************************************************
+************************************************************************
+**# 4 - irrigation, pesticide, herbicide, and ownership
+************************************************************************
 	
 * make a variable that shows the irrigation
 	gen				irr_any = 1 if s3aq15 == 1
@@ -130,12 +252,12 @@
 	
 * make tenure variables
 	gen				tenure = 1 if s3aq22 == 1 | s3aq22 == 5
-	replaced		tenure = 0 if tenure == .
+	replace			tenure = 0 if tenure == .
 	lab var			tenure "=1 if owned"
 	
-* ***********************************************************************
-* 4 - generate labor variables
-* ***********************************************************************
+************************************************************************
+**# 5 - generate labor variables
+************************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -219,48 +341,76 @@
 	*** mean 82, max 1,018, min 0	
 
 	
-* **********************************************************************
-* 5 - end matter, clean up to save
-* **********************************************************************
+************************************************************************
+**# 6 - end matter, clean up to save
+************************************************************************
 
-
-
-* **********************************************************************
-* 5 - end matter, clean up to save
-* **********************************************************************
-dfsdd
 * keep what we want, get rid of the rest
-	keep			hhid plotnum plot_id irrigated fert_any kilo_fert ///
-						pesticide_any herbicide_any labor_days plotnum ///
-						region district ward ea y1_rural clusterid strataid ///
-						hhweight
-	order			hhid plotnum plot_id
+	keep			hhid plotnum pltid cropid manage_rght_a manage_rght_b ///
+						manage_rght_c ownshp_rght_a ownshp_rght_b fert_org ///
+						fert_any fert_qty admin_1 admin_2 admin_3 ea sector ///
+						clusterid strataid wgt status gender_mgmt_a age_mgmt_a ///
+						edu_mgmt_a gender_mgmt_b age_mgmt_b edu_mgmt_b two_mgmt  ///
+						gender_mgmt_c age_mgmt_c edu_mgmt_c three_mgmt ///
+						gender_own_a age_own_a edu_own_a gender_own_b age_own_b ///
+						edu_own_b two_own irr_any pest_any herb_any tenure ///
+						fam_lab hrd_lab tot_lab
+						
+	order			hhid admin_1 admin_2 admin_3 ea sector clusterid ///
+						strataid wgt plotnum pltid status cropid tenure ///
+						fert_org fert_any fert_qty irr_any pest_any herb_any ///
+						fam_lab hrd_lab tot_lab ownshp_rght_a gender_own_a ///
+						age_own_a edu_own_a ownshp_rght_b gender_own_b ///
+						age_own_b edu_own_b two_own manage_rght_a gender_mgmt_a /// 
+						age_mgmt_a edu_mgmt_a manage_rght_b gender_mgmt_b ///
+						age_mgmt_b edu_mgmt_b two_mgmt manage_rght_c ///
+						gender_mgmt_c age_mgmt_c edu_mgmt_c three_mgmt
 	
 * renaming and relabelling variables
-	lab var			hhid "Unique Household Identification NPS Y1"
-	lab var			y1_rural "Cluster Type"
-	lab var			hhweight "Household Weights (Trimmed & Post-Stratified)"
+	lab var			hhid "Household Identification NPS Y1"
 	lab var			plotnum "Plot ID Within household"
-	lab var			plot_id "Unique Plot Identifier"
-	lab var			clusterid "Unique Cluster Identification"
-	lab var			strataid "Design Strata"
-	lab var			region "Region Code"
-	lab var			district "District Code"
-	lab var			ward "Ward Code"
-	lab var			ea "Village / Enumeration Area Code"
-	lab var			labor_days "Total Labor (days), Imputed"
-	lab var			irrigated "Is plot irrigated?"
-	lab var			pesticide_any "Was Pesticide Used?"
-	lab var			herbicide_any "Was Herbicide Used?"	
-	lab var			kilo_fert "Fertilizer Use (kg), Imputed"
-	
+	lab var			pltid "Unique Plot Identifier"
+	lab var			fert_qty "Inorganic Fertilizer (kg)"
+	lab var			fert_org "=1 if organic fertilizer used"
+	lab var			fam_lab "Total family labor (days)"
+	lab var			hrd_lab "Total hired labor (days)"
+	lab var			tot_lab "Total labor (days)"
+	lab var			tenure "=1 if owned"
+	lab var			irr_any "=1 if irrigated"
+	lab var			pest_any "=1 if pesticide used"
+	lab var			herb_any "=1 if herbicide used"
+	lab var			cropid "Crop code"
+	lab var			fert_any "=1 if any inorganic fertilizer used"
+	lab var			ownshp_rght_a "pid for first owner"
+	lab var			gender_own_a "Gender of first owner"
+	lab var			age_own_a "Age of first owner"
+	lab var			edu_own_a "=1 if first owner has formal edu"
+	lab var			ownshp_rght_b "pid for second owner"
+	lab var			gender_own_b "Gender of second owner"
+	lab var			age_own_b "Age of second owner"
+	lab var			edu_own_b "=1 if second owner has formal edu"
+	lab var			two_own "=1 if there is joint ownership"
+	lab var			manage_rght_a "pid for first manager"
+	lab var			gender_mgmt_a "Gender of first manager"
+	lab var			age_mgmt_a "Age of first manager"
+	lab var			edu_mgmt_a "=1 if first manager has formal edu"
+	lab var			manage_rght_b "pid for second manager"
+	lab var			gender_mgmt_b "Gender of second manager"
+	lab var			age_mgmt_b "Age of second manager"
+	lab var			edu_mgmt_b "=1 if second manager has formal edu"
+	lab var			two_mgmt "=1 if there is two managers"
+	lab var			manage_rght_c "pid for third manager"
+	lab var			gender_mgmt_c "Gender of third manager"
+	lab var			age_mgmt_c "Age of third manager"
+	lab var			edu_mgmt_c "=1 if third manager has formal edu"
+	lab var			three_mgmt "=1 if there is three managers"
 		
 * prepare for export
 	isid			hhid plotnum
+	
 	compress
-	describe
-	summarize 
-	sort 			plot_id
+
+* save file
 	save 			"$export/AG_SEC3A.dta", replace
 
 * close the log
