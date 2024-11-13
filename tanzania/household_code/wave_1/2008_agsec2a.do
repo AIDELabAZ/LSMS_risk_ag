@@ -1,7 +1,7 @@
 * Project: LSMS Risk Ag
 * Created on: Nov 2024
 * Created by: jdm
-* Edited on: 12 Nov 2024
+* Edited on: 13 Nov 2024
 * Edited by: jdm
 * Stata v.18.5
 
@@ -15,11 +15,10 @@
 
 * assumes
 	* access to the raw data
-	* access to cleaned SEC_A, SEC_3A
-	* mdesc.ado
+	* access to cleaned HHSECA, AGSEC3A
 
 * TO DO:
-	* input land
+	* done
 
 	
 ************************************************************************
@@ -48,8 +47,8 @@
 	*** 0 obs dropped
 
 * renaming variables of interest
-	rename 			s2aq4 plotsize_self
-	rename 			area plotsize_gps
+	rename 			s2aq4 pltsizeSR
+	rename 			area pltsizeGPS
 	
 * check for uniquie identifiers
 	drop			if plotnum == ""
@@ -62,10 +61,10 @@
 	isid			pltid
 	
 * convert from acres to hectares
-	replace			plotsize_self = plotsize_self * 0.404686
-	lab var			plotsize_self "Self-reported Area (Hectares)"
-	replace			plotsize_gps = plotsize_gps * 0.404686
-	lab var			plotsize_gps "GPS Measured Area (Hectares)"
+	replace			pltsizeSR = pltsizeSR * 0.404686
+	lab var			pltsizeSR "Self-reported Area (Hectares)"
+	replace			pltsizeGPS = pltsizeGPS * 0.404686
+	lab var			pltsizeGPS "GPS Measured Area (Hectares)"
 
 	
 ************************************************************************
@@ -80,158 +79,93 @@
 	drop			_merge
 	
 * must merge in regional identifiers from 2012_AG_SEC_3A to impute
-	merge			1:1 hhid plotnum using "$root/SEC_3A"
-	*** 2 not matched from master, 0 not matched from using
-	*** this doesn't come up in any other waves - issue?
+	merge			1:1 hhid plotnum using "$export/AG_SEC3A.dta"
+	*** 945 not matched from master, 0 not matched from using
+	*** must be plots without cultivation that we dropped in SEC3A cleaning
 	
-	drop if			_merge == 2
+	keep if			_merge == 3
 	drop			_merge
 	
-* record if field was cultivated during long rains
-	gen 			status = s3aq3==1 if s3aq3!=.
-	lab var			status "=1 if field cultivated during long rains"
-	*** 4,408 observations were cultivated (86%)
-	
-* drop observations that were not cultivated
-	drop if			status == 0
-	*** dropped 718 observations that were not cultivated in long rains
-	*** this code does not drop the 2 obs w/ missing sec 3 info
-	*** their valus will be imputed, but w/ no input info the obs are likely useless
-	
-	drop			s3aq2_1- status
-
 
 ************************************************************************
 **# 3 - clean and impute plot size
 ************************************************************************
 	
-* interrogating plotsize variables
-	count 		if plotsize_gps != . & plotsize_self != .
-	*** only 856 not mising, out of 5,128
+* how many missing values are there?
+	mdesc 			pltsizeGPS
+	*** 3,446 missing, 82% of observations
 
-	pwcorr 		plotsize_gps plotsize_self
-	*** high correlation (0.8027)
+* convert acres to hectares
+	gen				pltsize = pltsizeGPS
+	label var		pltsize "Parcel size (ha)"
 
-* investigating the high and low end of gps measurments
-	* high end
-		tab			plotsize_gps
-		*hist		plotsize_gps if plotsize_gps > 2
-		sum			plotsize_gps, detail
-		*** mean = 0.935
-		*** 90% of obs < 2.18
+* examine gps outlier values
+	sum 			pltsize, detail
+	*** mean 0.91, max 16, min 0, std. dev. 1.4
 
-		sort		plotsize_gps
-		sum 		plotsize_gps if plotsize_gps > 2
-		*** 101 obs > 2
+	list 			pltsize pltsizeSR if pltsize > 10 & !missing(pltsize)
+	*** these all look reasonable
+			
+* check correlation between the two
+	corr 			pltsize pltsizeSR
+	*** 0.81 correlation, high correlation between GPS and self reported
+	
+* replace 0 values with missing
+	replace			pltsize = . if pltsize == 0
+	*** 1 change made
+	
+/* since GPS looks good, we don't need to replace GPS outliers using following code
+* compare GPS and self-report, and look for outliers in GPS 
+	sum				pltsize, detail
+	*** save command as above to easily access r-class stored results 
 
-		list		plotsize_gps plotsize_self if plotsize_gps > 2 ///
-						& !missing(plotsize_gps), sep(0)
-		pwcorr		plotsize_gps plotsize_self if plotsize_gps > 2 ///
-						& !missing(plotsize_gps)
-		*** corr = 0.6891 (not terrible)
-
-		sum 		plotsize_gps if plotsize_gps>3
-		*** 54 obs > 2
-
-		list		plotsize_gps plotsize_self if plotsize_gps > 3 ///
-						& !missing(plotsize_gps), sep(0)
-		pwcorr		plotsize_gps plotsize_self if plotsize_gps > 3 ///
-						& !missing(plotsize_gps)
-		*** corr = 0.6461 (still not terrible)
-		*** the high end seems okay, maybe not dropping anything here...
-
-	* low end
-		tab			plotsize_gps
-		*hist		plotsize_gps if plotsize_gps < 0.5
-		sum			plotsize_gps, detail
-		*** mean = 0.935
-		*** 10% of obs < 0.084
-
-		sum 		plotsize_gps if plotsize_gps < 0.085
-		*** 88 obs < 0.085
-
-		list		plotsize_gps plotsize_self if plotsize_gps < 0.085 ///
-						& !missing(plotsize_gps), sep(0)
-		pwcorr		plotsize_gps plotsize_self if plotsize_gps < 0.085 ///
-						& !missing(plotsize_gps)
-		*** corr = -0.3194 (inverse correlation! interesting! but not completely useless)
-
-		sum 		plotsize_gps if plotsize_gps<0.05
-		*** 43 obs < 0.05
-
-		list		plotsize_gps plotsize_self if plotsize_gps < 0.05 ///
-						& !missing(plotsize_gps), sep(0)
-		pwcorr		plotsize_gps plotsize_self if plotsize_gps < 0.05 ///
-						& !missing(plotsize_gps)
-		*** corr = -0.5301 (even higher inverse correlation)
-		*** inverse correlation seems like it could be useful in imputing values
-
-	* will drop the lone '0' value, to be imputed later
-		replace 	plotsize_gps = . if plotsize_gps == 0
+* look at GPS and self-reported observations that are > ±3 Std. Dev's from the median 
+	list			pltsize pltsizeSR if !inrange(pltsize,`r(p50)'-(3*`r(sd)'),`r(p50)'+(3*`r(sd)')) ///
+						& !missing(pltsize)
+	*** these all look good, largest size is 16 ha
+	
+* summarize before imputation
+	sum				pltsize
+	*** mean 0.58, max 16.67, min 0.004
+*/
+* impute missing GPS plot sizes using predictive mean matching
+	mi set 			wide // declare the data to be wide.
+	mi xtset		, clear // this is a precautinary step to clear any existing xtset
+	mi register 	imputed pltsize // identify plotsize_GPS as the variable being imputed
+	sort			admin_1 admin_2 admin_3 ea hhid pltid, stable // sort to ensure reproducability of results
+	mi impute 		pmm pltsize i.admin_2 pltsizeSR cropid, add(1) rseed(245780) noisily dots ///
+						force knn(5) bootstrap
+	mi unset
 		
-		count			if plotsize_gps < 0.05 & plotsize_gps != .
-		*** 39 obs < 0.05
-		*** I will not drop any low end values at this time
+* how did imputing go?
+	sum 			pltsize_1_
+	*** mean 0.93, max 16, min 0.0034
 
-* impute missing + irregular plot sizes using predictive mean matching
-* imputing 3,650 observations (out of 4,410) - 82.77% 
-* including plotsize_self as control
-	mi set 		wide 	// declare the data to be wide.
-	mi xtset	, clear 	// this is a precautinary step to clear any existing xtset
-	mi register	imputed plotsize_gps // identify plotsize_GPS as the variable being imputed
-	sort		hhid plotnum, stable // sort to ensure reproducability of results
-	mi impute 	pmm plotsize_gps plotsize_self i.uq_dist, add(1) rseed(245780) ///
-					noisily dots force knn(5) bootstrap
-	mi 			unset
-
-* how did the imputation go?
-	tab			mi_miss
-	pwcorr 		plotsize_gps plotsize_gps_1_ if plotsize_gps != .
-	tabstat 	plotsize_gps plotsize_self plotsize_gps_1_, ///
-					by(mi_miss) statistics(n mean min max) columns(statistics) ///
-					longstub format(%9.3g)
-	rename		plotsize_gps_1_ plotsize
-	*** imputed 3,650 values out of 4,410 total observations
+	replace 		pltsize = pltsize_1_ if pltsize == .
 	
-	sum				plotsize_self plotsize_gps	plotsize
-	*** self reported	:	mean 0.95 and s.d. 4.1
-	*** gps				:	mean 0.92 and s.d. 1.4
-	*** imputed			:	mean 0.91 and s.d. 1.4
+	drop			mi_miss pltsize_1_
 	
-	drop			if plotsize == . & plotsize_self ==.
-	*** no observations dropped
-	
+	mdesc 			pltsize
+	*** none missing
 
 ************************************************************************
 **# 4 - end matter, clean up to save
 ************************************************************************
 
 * keep what we want, get rid of the rest
-	keep		hhid plotnum plot_id plotsize clusterid strataid ///
-					hhweight region district ward ea y1_rural
-	order		hhid plotnum plot_id clusterid strataid hhweight ///
-					region district ward ea y1_rural plotsize
+	keep		hhid plotnum pltid admin_1 admin_2 admin_3 ea sector ///
+					clusterid strataid wgt cropid pltsize
 	
 * renaming and relabelling variables
 	lab var		hhid "Unique Household Identification NPS Y1"
-	lab var		y1_rural "Cluster Type"
-	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
 	lab var		plotnum "Plot ID Within household"
-	lab var		plot_id "Unique Plot Identifier"
-	lab var		plotsize "Plot size (ha), imputed"
-	lab var		clusterid "Unique Cluster Identification"
-	lab var		strataid "Design Strata"
-	lab var		region "Region Code"
-	lab var		district "District Code"
-	lab var		ward "Ward Code"
-	lab var		ea "Village / Enumeration Area Code"
 
 * prepare for export
 	isid			hhid plotnum
+
 	compress
-	describe
-	summarize 
-	sort 			plot_id
+
+* save file	
 	save 			"$export/AG_SEC2A.dta", replace
 	
 * close the log

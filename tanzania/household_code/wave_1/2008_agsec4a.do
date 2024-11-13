@@ -5,17 +5,24 @@
 * Edited by: jdm
 * Stata v.18.5
 
+
 * does
-	* cleans Tanzania household variables, wave 1 Ag sec4a
-	* kind of a crop roster, with harvest weights, long rainy season
-	* generates weight harvested, harvest month, percentage of plot planted with given crop, value of seed purchases
-	
+	* reads Tanzania wave 1 harvest info
+	* merges in household locations
+	* cleans
+		* intercropped
+		* harvest date
+		* crops
+		* output (qty and val)
+		* seed and seed type
+		* plot shock
+	* outputs cleaned harvest date file
+
 * assumes
-	* access to all raw data
-	* mdesc.ado
+	* access to the raw data
 
 * TO DO:
-	* review
+	* done
 
 	
 * **********************************************************************
@@ -44,233 +51,137 @@
 	*** 0 obs dropped
 
 * rename variables of interest
-	rename 		zaocode crop_code
+	rename 		zaocode cropid
 	
-* create percent of area to crops
-	gen				pure_stand = s4aq3 == 1
-	gen				any_pure = pure_stand == 1
-	gen				any_mixed = pure_stand == 0
-	
-	gen				percent_field = 0.25 if s4aq4 == 1
-	replace			percent_field = 0.25 if s4aq4==.25
-	replace			percent_field = 0.50 if s4aq4==2
-	replace			percent_field = 0.75 if s4aq4==3
-	replace			percent_field = 1 if pure_stand==1
-	replace			percent_field = 1 if s4aq6 == 2 & percent_field == .
-	duplicates		report hhid plotnum crop_code
-	*** there are 0 duplicates
-
-* create total area on field (total on plot across ALL crops)
-	bys 			hhid plotnum: egen total_percent_field = total(percent_field)
-	replace			percent_field = percent_field / total_percent_field ///
-						if total_percent_field > 1	
-	*** 2,278 changes made
-
 * check for missing values
-	mdesc 				crop_code s4aq15
+	mdesc 				cropid s4aq15
 	*** 1 obs missing crop code
 	*** 522 obs missing harvest weight
 	
 * drop if crop code is missing
-	drop				if crop_code == .
+	drop				if cropid == .
 	*** 1 observations dropped
-
-* drop if no harvest occured during long rainy season
-	drop				if s4aq1 != 1
-	*** 513 obs dropped
-
-* replace missing weight 
-	replace 			s4aq15 = 0 if s4aq15 == .
-	*** 8 changes made	
-
-* generate hh x plot x crop identifier
-	isid				hhid plotnum crop_code
-	gen		 			plot_id = hhid + " " + plotnum
-	tostring 			crop_code, generate(crop_num)
-	gen str20 			crop_id = hhid + " " + plotnum + " " + crop_num
-	duplicates report 	crop_id
-	*** 0 duplicate crop_ids	
 	
-* must merge in regional identifiers from 2008_HHSECA to impute
-	merge			m:1 hhid using "$export/HH_SECA"
-	tab				_merge
-	*** 1,386 not matched
-	
-	drop if			_merge == 2
-	drop			_merge
-	
-* unique district id
-	sort			region district
-	egen			uq_dist = group(region district)
-	distinct		uq_dist
-	*** 125 distinct districts
+* check for uniquie identifiers
+	drop			if plotnum == ""
+	isid			hhid plotnum cropid
+	*** 0 obs dropped - none lack plot ids
 
-* checking on percent_field
-	 tab			percent_field, missing
-	 *** missing two obs, I can't determine why...
-	 
-	 sort percent_field hhid plotnum
-	*** they both come from the same plot
-	*** the other two obs on that plot are both equal to 0.25
-	*** all for obs together should equal 1
-	
-	replace		percent_field = .25 if percent_field == .
-	*** will replace these two obs equl to .25
-	*** they may not both actually equal .25, but they should sum to .5
-	
-* ***********************************************************************
-* 2 - generate harvest variables
-* ***********************************************************************	
+* generating unique ob id
+	gen				pltid = hhid + " " + plotnum
+	lab var			pltid "Unique plot identifier"
 
-* other variables of interest
-	rename 				s4aq15 wgt_hvsted
-	rename				s4aq16 hvst_value
-	tab					hvst_value, missing
-	*** hvst_value missing seven observations	
+* harvest start and end dates
+	rename			s4aq11_1 harv_str_month
+	rename			s4aq11_2 harv_stp_month
 
-	tab					wgt_hvsted if hvst_value == . , missing
-	*** six of seven obs w/ hvst_value = . where wgt_hvsted = 0
-	*** if no weight is harvested, I'm comfortable setting harvest value to 0
+* drop observations from plots that did not harvest because crop was immature
+	drop if 		s4aq2 < 3
+	*** 137 observations deleted
 
-	tab					crop_code if hvst_value == .
-	*** maize, paddy (2), green gram, pigeon pea, coffee, pumpkins
+* drop cropid is annual, other, fallow, pasture, and trees
+	drop 			if cropid > 43 & cropid < 47
+	drop 			if cropid > 52 & cropid < 86
+	drop			if cropid == 98 | cropid == 99
+	drop			if cropid > 100
+	*** 113 observations deleted 
 	
-	tab					crop_code if hvst_value == . & wgt_hvsted == 0
-	*** paddy (2), green gram, pigeon pea, coffee, pumpkins
-	*** no maize in six obs where wgt_hvsted == 0
+***********************************************************************
+**# 2 - percentage planted 	
+***********************************************************************
 	
-	replace				hvst_value = 0 if wgt_hvsted == 0 & hvst_value == .
-	*** 6 changes made	
+* create percent of area to crops
+	gen				intrcrp = 1 if s4aq6 == 1
+	replace			intrcrp = 0 if intrcrp == .
 	
-	tab					wgt_hvsted if hvst_value == . , missing
-	tab					crop_code if hvst_value == .
-	*** 1 observation left w/ missing hvst_value and weight given
-	*** wgt_hvsted = 5400, crop_cope == 11 (Maize)
-	*** missing maize ob (w/ hvst_value) will be left unchnaged
-	*** to be imputed
-
-* currency conversion to 2015 usd
-	replace				hvst_value = hvst_value/1823.0731
-	*** Value comes from World Bank: world_bank_exchange_rates.xlxs
-	
-* summarize value of harvest
-	sum				hvst_value, detail
-	*** median 21.94, mean 55.07, max 3,027.85
-
-* replace any +3 s.d. away from median as missing
-	replace			hvst_value = . if hvst_value > `r(p50)'+(3*`r(sd)')
-	*** replaced 77 values, max is now 641.23
-	
-* impute missing values
-	mi set 			wide 	// declare the data to be wide.
-	mi xtset		, clear 	// clear any xtset that may have had in place previously
-	mi register		imputed hvst_value // identify kilo_fert as the variable being imputed
-	sort			hhid plotnum crop_num, stable // sort to ensure reproducability of results
-	mi impute 		pmm hvst_value i.uq_dist i.crop_code, add(1) rseed(245780) ///
-						noisily dots force knn(5) bootstrap
-	mi 				unset	
-
-* how did the imputation go?
-	tab				mi_miss
-	tabstat			hvst_value hvst_value_1_, by(mi_miss) ///
-						statistics(n mean min max) columns(statistics) ///
-						longstub format(%9.3g) 
-	replace			hvst_value = hvst_value_1_
-	drop			hvst_value_1_
-	*** imputed 78 values out of 5,190 total observations	
-	
-* generate new varaible for measuring maize harvest
-	gen					mz_hrv = wgt_hvsted if crop_code == 11
-	gen					mz_damaged = 1 if crop_code == 11 & mz_hrv == 0
-	tab					mz_damaged, missing
-	*** five obs with damaged maize harvest leading to zero harvested
-
-* summarize value of harvest
-	sum				mz_hrv, detail
-	*** median 216, mean 492, max 40,000
-	
-* replace any +3 s.d. away from median as missing
-	replace			mz_hrv = . if mz_hrv > `r(p50)' + (3*`r(sd)')
-	*** replaced 18 values, max is now 3,888
-
-* impute missing values
-	mi set 			wide 	// declare the data to be wide.
-	mi xtset		, clear 	// clear any xtset that may have had in place previously
-	mi register		imputed mz_hrv // identify kilo_fert as the variable being imputed
-	sort			hhid plotnum crop_num, stable // sort to ensure reproducability of results
-	mi impute 		pmm mz_hrv i.uq_dist if crop_code == 11, add(1) rseed(245780) ///
-						noisily dots force knn(5) bootstrap
-	mi 				unset	
-
-* how did the imputation go?
-	tab				mi_miss1 if crop_code == 11
-	tabstat			mz_hrv mz_hrv_1_ if crop_code == 11, by(mi_miss) ///
-						statistics(n mean min max) columns(statistics) ///
-						longstub format(%9.3g) 
-	replace			mz_hrv = mz_hrv_1_  if crop_code == 11
-	drop			mz_hrv_1_
-	*** imputed 18 values out of 1,864 total observations		
-	
-* **********************************************************************
-**#3 - gen improved seeds var
-* **********************************************************************
-	gen			improved_sds = 0
-	replace 	improved_sds = 1 if s4aq22 == 1
-	* 1,075 real changes made
-	* 303 real changes made
+	gen				prct_plnt = 0.25 if s4aq4 == 1
+	replace			prct_plnt = 0.25 if s4aq4 == .25
+	replace			prct_plnt = 0.50 if s4aq4 == 2
+	replace			prct_plnt = 0.75 if s4aq4 == 3
+	replace			prct_plnt = 1 if prct_plnt == .
 
 	
-* **********************************************************************
-**#3 - gen crop price 
-* **********************************************************************
+***********************************************************************
+**# 3 - seed
+***********************************************************************
 
-gen cropprice = hvst_value/wgt_hvsted
-egen dst_price = mean(cropprice), by(district crop_code)
+* rename variables
+	rename			s4aq20 seed_val
+	label var		seed_val "Value of purchased seed (TSH)"
+	
+	rename			s4aq22 seed_type
+	
+* see how many hh used traditional vs improved seed 
+	tab 			seed_type, missing
+	* 5,149 used traditional
+	* 524 used improved
+	* 30 missing
+	* missing is mostly trees and tubers
+	
+	
+***********************************************************************
+**# 4 - create harvested quantity
+***********************************************************************
+
+* create missing harvest dummy
+	gen				harv_miss = 1 if s4aq15 == .
+	replace			harv_miss = 0 if harv_miss == .					
+
+* create ag shock variable
+	gen				plt_shck = 1 if s4aq9 == 1 | s4aq17 == 1
+	replace			plt_shck = 0 if plt_shck == .
+
+* create harvest quantity and value
+	rename			s4aq16 harv_val
+	rename			s4aq15 harv_qty
+	mdesc 			harv_qty
+	*** 366 missing, same as above
+	
+* summarize harvest quantity
+	sum				harv_qty
+	*** mean 401, max 40,000
+	*** couple crazy values, mostly potato but some maize
+	*** will keep for now
+
+* generate crop price
+	gen 		cropprice = harv_val/harv_qty
 
 	
-* **********************************************************************
-* 4 - end matter, clean up to save
-* **********************************************************************
+************************************************************************
+**# 4 - end matter, clean up to save
+************************************************************************
 	
 * keep what we want, get rid of what we don't
-	keep 				hhid plotnum plot_id crop_code crop_id clusterid ///
-							strataid hhweight region district ward ea ///
-							any_* pure_stand percent_field mz_hrv hvst_value ///
-							mz_damaged y1_rural cropprice improved_sds
+	keep 				hhid plotnum cropid pltid intrcrp prct_plnt harv_miss ///
+							plt_shck harv_str_month harv_stp_month harv_qty ///
+							harv_val cropprice seed_val seed_type
 
-	order				hhid plotnum plot_id crop_code crop_id clusterid ///
-							strataid hhweight region district ward ea
+	order				hhid plotnum pltid cropid harv_str_month harv_stp_month ///
+							intrcrp prct_plnt harv_miss plt_shck harv_qty ///
+							harv_val cropprice seed_val seed_type
 	
 * renaming and relabelling variables
-	lab var			hhid "Unique Household Identification NPS Y1"
-	lab var			y1_rural "Cluster Type"
-	lab var			hhweight "Household Weights (Trimmed & Post-Stratified)"
+	lab var			hhid "Household Identification NPS Y1"
 	lab var			plotnum "Plot ID Within household"
-	lab var			plot_id "Plot Identifier"
-	lab var			clusterid "Unique Cluster Identification"
-	lab var			strataid "Design Strata"
-	lab var			region "Region Code"
-	lab var			district "District Code"
-	lab var			ward "Ward Code"
-	lab var			ea "Village / Enumeration Area Code"	
-	lab var			mz_hrv "Quantity of Maize Harvested (kg)"
-	lab var			mz_damaged "Was Maize Harvest Damaged to the Point of No Yield"
-	lab var			hvst_value "Value of Harvest (2015 USD)"
-	lab var 		crop_code "Crop Identifier"
-	lab var			crop_id "Unique Crop ID Within Plot"
-	lab var			pure_stand "Is Crop Planted in Full Area of Plot (Purestand)?"
-	lab var			any_pure "Is Crop Planted in Full Area of Plot (Purestand)?"
-	lab var			any_mixed "Is Crop Planted in Less Than Full Area of Plot?"
-	lab var			percent_field "Percent of Field Crop Was Planted On"
-	lab var			improved_sds "Were improved seeds used?"
-	lab var 		cropprice "maize price (harvest value/ harvest weight)"
-		
+	lab var			pltid "Unique Plot Identifier"
+	lab var			cropid "Crop code"
+	lab var			harv_str_month "Harvest start month"
+	lab var			harv_stp_month "Harvest stp month"
+	lab var			harv_val "Value of Harvest (TSH)"
+	lab var			harv_qty "Harvest quantity (kg)"
+	lab var			plt_shck "=1 if pre-harvest shock"
+	lab var			harv_miss "=1 if harvest qty missing"
+	lab var			intrcrp "=1 if intercropped"
+	lab var			seed_type "Traditional/improved"
+	lab var			prct_plnt "Percent planted to crop"
+	lab var 		cropprice "Crop price (harvest value/ harvest weight)"
+
 * prepare for export
-	isid			hhid plotnum crop_code
+	isid			hhid plotnum cropid
+	
 	compress
-	describe
-	summarize 
-	sort 			plot_id
+
+* save file
 	save 			"$export/AG_SEC4A.dta", replace
 
 * close the log

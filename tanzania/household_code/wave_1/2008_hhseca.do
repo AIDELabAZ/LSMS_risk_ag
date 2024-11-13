@@ -70,12 +70,11 @@
 	lab var		wgt "Household Weights"
 	
 * prepare for export
-	compress
-	describe
-	summarize 
+	isid			hhid
 
-	isid		hhid
-	
+	compress
+
+* save file		
 	save 			"$export/HH_SECA.dta", replace
 	
 

@@ -344,6 +344,10 @@
 **# 6 - end matter, clean up to save
 ************************************************************************
 
+* drop if crop id is missing
+	drop if			cropid == .
+	*** dropped 225 observations
+
 * keep what we want, get rid of the rest
 	keep			hhid plotnum pltid cropid manage_rght_a manage_rght_b ///
 						manage_rght_c ownshp_rght_a ownshp_rght_b fert_org ///
