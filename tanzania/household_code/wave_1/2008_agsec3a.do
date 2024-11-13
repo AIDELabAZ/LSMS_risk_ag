@@ -23,10 +23,9 @@
 	* access to the raw data
 	* access to cleaned SEC_A
 	* access to cleaned SEC_B
-	* distinct.ado
 
 * TO DO:
-	* working on ownership/management
+	* done
 
 	
 ************************************************************************
@@ -40,8 +39,8 @@
 
 
 * open log 
-	cap log close 
-	log using "$logout/2008_AGSEC3A", append
+	cap 	log 	close 
+	log 	using 	"$logout/2008_AGSEC3A", append
 
 
 ************************************************************************

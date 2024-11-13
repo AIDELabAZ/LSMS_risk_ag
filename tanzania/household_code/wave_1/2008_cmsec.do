@@ -1,20 +1,22 @@
-* Project: WB Weather
-* Created on: oct 14
+* Project: LSMS Risk Ag
+* Created on: Oct 2024
 * Created by: reece
-* Edited on: oct 14 2024
-* Edited by: reece
-* Stata v.18
+* Edited on: 12 Nov 2024
+* Edited by: jdm
+* Stata v.18.5
 
 * does
-	* cleans community data- daily and weekly market, distance to input supplier, year, region, district, ward, ea
+	* reads in Tanzania wave 1 community survey
+	* cleans community data
+		* daily and weekly market
+		* distance to input supplier
+	* outputs community file for merging
 	
 * assumes
 	* access to all raw data
-	* mdesc.ado
-	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
 	
 	
 ************************************************************************
@@ -27,8 +29,8 @@
 	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
-	cap log close 
-	log using "$logout/wv1_CMSECB", append
+	cap 	log 	close 
+	log 	using 	"$logout/2008_CMSECB", append
 
 	
 ************************************************************************
@@ -38,47 +40,57 @@
 * load data
 	use 		"$root/SEC_B", clear
 	
+	drop 		cb2 ea_id locality
 	
-	drop cb2 ea_id locality
+	keep if 	cb0 == 12 | cb0 == 13
 	
-	keep if cb0 == 12 | cb0 == 13
-	
-	drop if missing(region) | missing(district) | missing(ward) | missing(ea)
+	drop if 	missing(region) | missing(district) | missing(ward) | missing(ea)
 	* 6 obs missing all regional identifiers, dropping these to reshape
 	
-	reshape wide cb1 cb3, i(region district ward ea) j(cb0)
+	reshape 	wide cb1 cb3, i(region district ward ea) j(cb0)
 	
-	rename cb312 dist_daily
-	rename cb313 dist_weekly
+	rename 		cb312 dist_daily
+	rename 		cb313 dist_weekly
 	
-	replace dist_daily = 0 if cb112 == 1 
-	replace dist_weekly = 0 if cb113 == 1 
+	replace 	dist_daily = 0 if cb112 == 1 
+	replace 	dist_weekly = 0 if cb113 == 1 
 	
-	drop 	cb1*
+	drop 		cb1*
 	
 * merge in agrodealer and repeat ^ 
-	merge 1:1 region ward district ea using "$root/SEC_E_F_G"
+	merge 1:1 	region ward district ea using "$root/SEC_E_F_G"
 	* 404 matched, 3 not matched from using
-
-* generate year
-	gen year = 2008
 	
 * drop what we don't need
-	keep region ward district ea dist_daily dist_weekly ce05 year
-	rename ce05 out_supply
+	keep 		region ward district ea dist_daily dist_weekly ce05
+	rename 		ce05 out_supply
 	
-	replace out_supply = 0 if out_supply == 1
-	replace out_supply = 1 if out_supply == 2
+	replace 	out_supply = 0 if out_supply == 1
+	replace 	out_supply = 1 if out_supply == 2
 	
-	lab var out_supply "Is it possible to buy improved seeds in this village? (0 = in village 1 = out of village) "
+	lab var 	out_supply "Buy improved seeds in this village? (0 = in village 1 = out of village)"
+	
+	
+************************************************************************
+**# 2 - end matter, clean up to save
+************************************************************************
+	
+* rename political locality vars
+	rename		region admin_1
+	rename 		district admin_2
+	rename 		ward admin_3
+	
+	lab var		admin_1 "Region Code"
+	lab var		admin_2 "District Code"
+	lab var		admin_3 "Ward Code"
+	lab var		ea "Enumeration Area Code"
 	
 * prepare for export
-	isid			region district ward ea
-	describe
-	summarize 
-	save 			"$export/CMSEC.dta", replace
-	
+	isid			admin_1 admin_2 admin_3 ea
 
+	compress
+	
+	save 			"$export/CMSEC.dta", replace
 
 * close the log
 	log	close

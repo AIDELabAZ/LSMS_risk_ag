@@ -1,6 +1,6 @@
 * Project: LSMS Risk Ag
 * Created on: Jan 2024
-* Created by: JDM
+* Created by: jdm
 * Stata v.18.5
 
 * does

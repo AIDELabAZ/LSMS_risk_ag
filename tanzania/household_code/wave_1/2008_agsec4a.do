@@ -1,9 +1,9 @@
-* Project: WB Weather
-* Created on: May 2020
-* Created by: McG
-* Edited on: oct 28 2024
-* Edited by: reece
-* Stata v.18
+* Project: LSMS Risk Ag
+* Created on: Nov 2024
+* Created by: jdm
+* Edited on: 12 Nov 2024
+* Edited by: jdm
+* Stata v.18.5
 
 * does
 	* cleans Tanzania household variables, wave 1 Ag sec4a
@@ -15,7 +15,7 @@
 	* mdesc.ado
 
 * TO DO:
-	* completed
+	* review
 
 	
 * **********************************************************************
@@ -28,8 +28,8 @@
 	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
-	cap log close 
-	log using "$logout/wv1_AGSEC4A", append
+	cap 	log 	close 
+	log 	using 	"$logout/wv1_AGSEC4A", append
 
 	
 * **********************************************************************

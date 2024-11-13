@@ -1,7 +1,9 @@
-* Project: WB Weather
-* Created on: May 2020
-* Created by: McG
-	* access to all raw data
+* Project: LSMS Risk Ag
+* Created on: Nov 2024
+* Created by: jdm
+* Edited on: 12 Nov 2024
+* Edited by: jdm
+* Stata v.18.5
 
 * does
 	* merges individual cleaned plot datasets together
@@ -12,7 +14,7 @@
 	* previously cleaned household datasets
 
 * TO DO:
-	* complete 
+	* everything
 
 
 * **********************************************************************
@@ -25,8 +27,8 @@
 	global logout 	"$data/household_data/tanzania/logs"
 
 * open log 
-	cap log 		close 
-	log 			using "$logout/npsy1_merge", append
+	cap 	log 	close 
+	log 	using 	"$logout/npsy1_merge", append
 
 	
 * **********************************************************************

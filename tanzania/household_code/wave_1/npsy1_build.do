@@ -1,9 +1,9 @@
-* Project: WB Weather
-* Created on: May 2020
-* Created by: mcg
-* Edited on: 21 May 2024
+* Project: LSMS Risk Ag
+* Created on: Nov 2024
+* Created by: jdm
+* Edited on: 12 Nov 2024
 * Edited by: jdm
-* Stata v.18
+* Stata v.18.5
 
 * does
 	* merges weather data with Tanzania NPSY1 data
@@ -13,7 +13,7 @@
 	* processed wave 1 weather data
 
 * TO DO:
-	* complete
+	* review
 
 	
 * **********************************************************************
@@ -27,8 +27,8 @@
 	global		logout 	= 	"$data/merged_data/tanzania/logs"
 
 * open log	
-	cap log 	close 
-	log 		using 		"$logout/npsy1_build", append
+	cap 	log 	close 
+	log 	using 	"$logout/npsy1_build", append
 
 	
 * **********************************************************************

@@ -19,7 +19,7 @@
 	* mdesc.ado
 
 * TO DO:
-	* done
+	* input land
 
 	
 ************************************************************************
@@ -32,8 +32,8 @@
 	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
-	cap log close 
-	log using "$logout/2008_AGSEC2A", append
+	cap 	log 	close 
+	log 	using 	"$logout/2008_AGSEC2A", append
 
 	
 ************************************************************************

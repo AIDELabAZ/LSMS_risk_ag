@@ -29,8 +29,8 @@
 	global logout 	"$data/lsms_risk_ag_data/refined_data/tanzania/logs"
 
 * open log 
-	cap log 		close 
-	log 			using 	"$logout/2008_HHSECA", append
+	cap 	log 	close 
+	log 	using 	"$logout/2008_HHSECA", append
 
 ************************************************************************
 **# 1 - TZA 2008 (Wave 1) - Household Section A
