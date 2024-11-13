@@ -1,20 +1,21 @@
 * Project: LSMS Risk Ag
 * Created on: Nov 2024
 * Created by: jdm
-* Edited on: 12 Nov 2024
+* Edited on: 13 Nov 2024
 * Edited by: jdm
 * Stata v.18.5
 
 * does
-	* merges individual cleaned plot datasets together
-	* imputes values for continuous variables
-	* collapses wave 1 plot level data to household level for combination with other waves
+	* merges together all cleaned data sets
+	* imputs harvest quantity
+	* generates variables to identify crop, country, wave
+	* outputs cleaned plot-crop data for merging with weather data
 
 * assumes
 	* previously cleaned household datasets
 
 * TO DO:
-	* everything
+	* need electricity, shock, and asset data
 
 
 * **********************************************************************
@@ -22,9 +23,9 @@
 * **********************************************************************
 	
 * define paths
-	global root 	"$data/household_data/tanzania/wave_1/refined"
-	global export 	"$data/household_data/tanzania/wave_1/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/lsms_risk_ag_data/refined_data/tanzania/wave_1"
+	global export 	"$data/lsms_risk_ag_data/merged_data/tanzania/wave_1"
+	global logout 	"$data/lsms_risk_ag_data/merged_data/tanzania/logs"
 
 * open log 
 	cap 	log 	close 
@@ -38,30 +39,81 @@
 * start by loading harvest quantity and value, since this is our limiting factor
 	use 			"$root/AG_SEC4A", clear
 
-	isid			crop_id
+	isid			hhid plotnum cropid
 
 * merge in plot size data
-	merge 			m:1 plot_id using "$root/AG_SEC2A", generate(_2A)
-	*** 23 out of 5,167 missing in using data (master only) 
-	*** meaning these 23 have no plotsize info...
-	
-	*** all other unmerged obs came from using data 
-	*** meaning we lacked production data
-	*** per Malawi (rs_plot) we drop all unmerged observations
-	
-	drop			if _2A != 3
-	
-* generate area planted
-	replace			plotsize = percent_field * plotsize if percent_field != .
+	merge 			m:1 hhid plotnum using "$root/AG_SEC2A", generate(_2A)
+	*** matched 5,424
+	*** 29 unmatched from master
+
+	drop 			if _2A != 3
+	*** 757 dropped	
 	
 * merging in production inputs data
-	merge			m:1 plot_id using "$root/AG_SEC3A", generate(_3A)
-	*** 0 out of 5,167 missing in master 
-	*** all unmerged obs came from using data 
-	*** meaning we lacked production data
-	*** stragnely, the same # of unmatched obs from using in 3A as in 2A
+	merge			m:1 hhid plotnum using "$root/AG_SEC3A", generate(_3A)
+	*** matched 5,424
+	*** 0 unmatched from master
 	
 	drop			if _3A != 3
+	*** 953 dropped
+
+	
+************************************************************************
+**# 2 - merge household level data in
+************************************************************************
+
+
+* merge in livestock data
+	merge 			m:1 hhid using "$root/AGSEC10A", generate(_10A)
+	*** matched 4,380
+	*** 1,044 unmatched from master
+
+	drop 			if _10A == 2
+	*** 316 dropped	
+	
+* merge in extension data
+	merge 			m:1 hhid using "$root/AGSEC12A", generate(_12A)
+	*** matched 5,424
+	*** 0 unmatched from master
+
+	drop 			if _12A != 3
+	*** 497 dropped	
+	
+* merge in household size
+	merge 			m:1 hhid using "$root/2008_hhsecbh", generate(_B)
+	*** matched 5,424
+	*** 0 unmatched from master
+
+	drop 			if _B != 3
+	*** 1,333 dropped	
+
+* merge in geovars
+	merge 			m:1 hhid using "$root/2008_geovars", generate(_geo)
+	*** matched 5,110
+	*** 314 unmatched from master
+
+	drop 			if _geo == 2
+	*** 1,183 dropped	
+	
+	
+************************************************************************
+**# 3 - merge community level data in
+************************************************************************
+	
+* merge in community vars
+	merge 			m:1 admin_1 admin_2 admin_3 ea using "$root/2008_CMSEC", generate(_cmsec)
+	*** matched 5,417
+	*** 7 unmatched from master
+
+	drop 			if _cmsec == 2
+	*** 90 dropped	
+	
+* **********************************************************************
+* 1b - create total farm and maize variables
+* **********************************************************************
+
+* generate area planted
+	replace			plotsize = percent_field * plotsize if percent_field != .
 	
 * fill in missing values
 	replace			irrigated = 2 if irrigated == .
@@ -76,10 +128,6 @@
 
 	drop			_2A _3A
 	
-* **********************************************************************
-* 1b - create total farm and maize variables
-* **********************************************************************
-
 * rename some variables
 	rename 			hvst_value vl_hrv
 	rename			labor_days	labordays

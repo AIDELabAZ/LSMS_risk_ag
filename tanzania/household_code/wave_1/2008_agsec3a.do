@@ -9,7 +9,6 @@
 	* reads Tanzania wave 1 plot info
 	* merges in household locations and plot characteristics
 	* cleans
-		* crop name
 		* irrigation
 		* pesticide and herbicide
 		* fertilizer
@@ -82,11 +81,11 @@
 * verify no crop on uncultivated plot
 	tab				cropid if status == 0		
 	*** 4 plots with crops - all rented out so drop
-	
+
 * drop uncultivated plots
 	drop			if status == 0	
 	* dropped 718
-
+	
 	
 ************************************************************************
 **# 2 - merge in manager and owner characteristics
@@ -344,12 +343,8 @@
 **# 6 - end matter, clean up to save
 ************************************************************************
 
-* drop if crop id is missing
-	drop if			cropid == .
-	*** dropped 225 observations
-
 * keep what we want, get rid of the rest
-	keep			hhid plotnum pltid cropid manage_rght_a manage_rght_b ///
+	keep			hhid plotnum pltid manage_rght_a manage_rght_b ///
 						manage_rght_c ownshp_rght_a ownshp_rght_b fert_org ///
 						fert_any fert_qty admin_1 admin_2 admin_3 ea sector ///
 						clusterid strataid wgt status gender_mgmt_a age_mgmt_a ///
@@ -360,7 +355,7 @@
 						fam_lab hrd_lab tot_lab
 						
 	order			hhid admin_1 admin_2 admin_3 ea sector clusterid ///
-						strataid wgt plotnum pltid status cropid tenure ///
+						strataid wgt plotnum pltid status tenure ///
 						fert_org fert_any fert_qty irr_any pest_any herb_any ///
 						fam_lab hrd_lab tot_lab ownshp_rght_a gender_own_a ///
 						age_own_a edu_own_a ownshp_rght_b gender_own_b ///
@@ -382,7 +377,6 @@
 	lab var			irr_any "=1 if irrigated"
 	lab var			pest_any "=1 if pesticide used"
 	lab var			herb_any "=1 if herbicide used"
-	lab var			cropid "Crop code"
 	lab var			fert_any "=1 if any inorganic fertilizer used"
 	lab var			ownshp_rght_a "pid for first owner"
 	lab var			gender_own_a "Gender of first owner"

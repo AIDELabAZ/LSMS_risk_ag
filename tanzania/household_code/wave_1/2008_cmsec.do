@@ -90,7 +90,7 @@
 
 	compress
 	
-	save 			"$export/CMSEC.dta", replace
+	save 			"$export/2008_CMSEC.dta", replace
 
 * close the log
 	log	close
