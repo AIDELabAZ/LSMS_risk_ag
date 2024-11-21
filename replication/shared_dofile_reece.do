@@ -10,7 +10,7 @@
  * totharv, measure of total production (proxy for income)
  
 cd "........"
-use "C:\Users\rbrnhm\Documents\GitHub\LSMS_risk_ag\replication\final_data_risk_aversion.dta" 
+use "C:\Users\rbrnhm\Documents\GitHub\LSMS_risk_ag\replication\final_data_risk_aversion.dta", clear 
  
 capture drop std_income
 egen std_income=std(totharv)
@@ -216,8 +216,9 @@ capture drop tot_shockd4
 gen tot_shockd4=0
 replace tot_shockd4=1 if mod_dr_anomaly_t_1==1 & mod_dr_anomaly_t_2==1 & mod_dr_anomaly_t_3==1
 
-drop shock*_mu2*
-drop shock*_mu3*
+*drop shock*_mu2*
+*** code stops here- reece
+*drop shock*_mu3*
 gen shock1_mu2_seed=tot_shockd2*mu2_seed
 gen shock2_mu2_seed=tot_shockd3*mu2_seed
 gen shock3_mu2_seed=tot_shockd4*mu2_seed
