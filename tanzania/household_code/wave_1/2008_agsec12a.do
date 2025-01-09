@@ -51,7 +51,7 @@
 	replace 	exten = 1 if exten > 0
 	
 	lab var 	exten "=1 if has access to extension?"
-
+	
 * drop what we don't need 
 	keep 		hhid exten
 	
