@@ -80,6 +80,9 @@
 	drop if id_05 == .
 	
 	keep dist_daily dist_weekly year interview__key cm_e07_2 id_01 id_02 id_03 id_05
+	gen country = "Tanzania"
+	gen wave = 5 
+	
 	
 	rename id_01 	region
 	rename id_02 	district
