@@ -37,7 +37,7 @@
 	use 		"$root/AGSEC12A", clear
 	
 * merge in markets and agrodealer vars
-	merge m:1 region district ward ea using "$root/CMSEC"
+	merge m:1 admin_1 admin_2 admin_3 ea using "$root/CMSEC"
 	* region, district, ward, ea not in agsec12a- don't think we can merge
 	
 	
