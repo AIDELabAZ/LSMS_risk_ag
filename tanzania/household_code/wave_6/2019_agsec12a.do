@@ -37,7 +37,7 @@
 	use 		"$root/ag_sec_12a", clear
 
 	drop		ag12a_02 ag12a_03_1 ag12a_03_2 ag12a_03_3 ag12a_03_4 ag12a_04 ag12a_05 ag12a_06 ag12a_07
-	drop 		interview__key ag12a_01_3 ag12a_01_4 ag12a_01_5 ag12a_01_6 ag12a_01_7 ag12a_01_8
+	drop 		ag12a_01_3 ag12a_01_4 ag12a_01_5 ag12a_01_6 ag12a_01_7 ag12a_01_8
 	
 	replace ag12a_01_1 = 0 if ag12a_01_1 == 2
 	replace ag12a_01_2 = 0 if ag12a_01_2 == 2
@@ -52,7 +52,8 @@
 	tab			_merge		 
 	* only 60 percent merging
 
-	keep sdd_hhid region district ward ea extension 
+	keep sdd_hhid region district ward ea extension interview__key
+	rename sdd_hhid hh_id_merge
 
 * generate year
 	gen		year = 2019
@@ -61,7 +62,7 @@
 	lab var extension "does respondent have access to extension?"
 	 
 * prepare for export
-	isid			sdd_hhid 
+	isid			hh_id_merge
 	compress
 	describe
 	summarize 
