@@ -55,6 +55,9 @@
 * drop what we don't need 
 	keep 		hhid exten
 	
+	merge		1:1 hhid using "$export/HH_SECA"
+	
+	drop		_merge
 	
 ************************************************************************
 **# 2 - end matter, clean up to save
