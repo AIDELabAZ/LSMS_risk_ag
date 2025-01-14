@@ -36,7 +36,7 @@
 * load data
 	use 		"$root/All_others/Community/sect04_com_w3", clear
 	
-	keep sa1q01 sa1q02 sa1q03 sa1q06 sa1q07 cs4q14 cs4q15 ea_id2
+	keep sa1q01 sa1q02 sa1q03 sa1q06 sa1q07 cs4q14 cs4q15 ea_id2 ea_id
 	
 * distance to weekly market? (only weekly available)
 	

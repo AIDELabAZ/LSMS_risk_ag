@@ -20,37 +20,37 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/raw_lsms_data/malawi/wave_6/raw"
-	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_6"
+	global root 	"$data/raw_lsms_data/malawi/wb_raw_data/data/ihpsspnl/com"
+	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_2"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wv6_com_cd", append
+	log using "$logout/wv2_com_cd", append
 
 	
 * ***********************************************************************
-**#1 - prepare malawi 2019 (Wave 4) - Community Section CD
+**#1 - prepare malawi 2013 (Wave 2) - Community Section CD
 * ***********************************************************************
 
 * load data
-	use 		"$root/com_cd_19", clear
+	use 		"$root/com_mod_d", clear
 	
 	
-	keep com_cd15 com_cd16 com_cd17 com_cd18a com_cd19 com_cd20a ea_id 
+	keep com_cd15 com_cd16a com_cd17 com_cd18a ea_id 
 	
-	rename com_cd16 dist_daily
+	rename com_cd16a dist_daily
 	rename com_cd18a dist_weekly 
-	rename com_cd20a out_supply
+	*rename com_cd20a out_supply
 	
 	replace dist_daily = 0 if com_cd15 == 1 
 	replace dist_weekly = 0 if com_cd17 == 1 
-	replace out_supply = 0 if com_cd19 == 1
-	
+	*replace out_supply = 0 if com_cd19 == 1
+	*admarc (agrodealer) missing from wave 2, also not in ag survey
 	drop com_cd*
 	
 * merge in extension 
-	merge 1:1 ea_id using "$root/com_cf1_19"
+	merge 1:1 ea_id using "$root/com_mod_f1"
 	* all matched
 	
 * grab exension var
@@ -58,11 +58,11 @@
 	replace extension = 0 if com_cf07 == 1
 
 * generate year
-	gen year = 2019
-	lab var year "year of survey wv4- 2019"
+	gen year = 2013
+	lab var year "year of survey wv2- 2013"
 	
 * drop what we don't need
-	keep ea_id dist_daily dist_weekly out_supply extension year
+	keep ea_id dist_daily dist_weekly extension year
 
 	
 * prepare for export

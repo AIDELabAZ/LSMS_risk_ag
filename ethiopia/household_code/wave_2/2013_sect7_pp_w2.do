@@ -59,7 +59,7 @@
 	
 
 * drop what we don't need 
-	keep hhid hhid2 holder_id extension year zone region woreda kebele ea
+	keep hhid hhid2 holder_id extension year zone region woreda kebele ea ea_id2
 	
 * prepare for export
 	isid			hhid2 holder_id region zone woreda kebele ea
