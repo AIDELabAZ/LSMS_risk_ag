@@ -70,7 +70,7 @@
 	replace cm_e07_2 = 0 if cm_e05 == 1
 	
 * drop what we don't need
-	keep id_01 id_02 id_03 id_05 dist_daily dist_weekly cm_e07_2 year
+	keep id_01 id_02 id_03 id_05 dist_daily dist_weekly cm_e07_2 year occ
 	
 	
 * rename everything
@@ -82,6 +82,12 @@
 	
 	lab var year	"year of survey- wv4 2014"
 	* generate year 
+	
+* merge in regional identifiers 
+	merge m:1 occ region district ward ea using "$export/HH_SECA"
+	drop _merge
+	* all matched
+		
 
 * prepare for export
 	isid			region district ward ea

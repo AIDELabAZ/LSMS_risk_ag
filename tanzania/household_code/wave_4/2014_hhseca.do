@@ -52,7 +52,7 @@
 
 * keep variables of interest
 	keep 		y4_hhid region district ward ea y4_rural ///
-					clusterid strataid y4_weight 
+					clusterid strataid y4_weight occ
 
 	order		y4_hhid region district ward ea y4_rural ///
 					clusterid strataid y4_weight 
