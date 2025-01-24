@@ -1,19 +1,22 @@
-* Project: WB Weather
+* Project: LSMS Risk Ag
 * Created on: May 2020
 * Created by: McG
-* Edited on: 21 May 2024
+* Edited on: 24 Jan 25
 * Edited by: jdm
-* Stata v.18
+* Stata v.18.5
 
 * does
-	* cleans Tanzania household variables, wave 2 hh secA
-	* pulls regional identifiers
+	* reads in household Location data (SEC_A)
+	* cleans
+		* political geography locations
+		* survey weights
+	* outputs file of location for merging with other ag files that lack this info
 
 * assumes
-	* access to all raw data
-
+	* access to raw data
+	
 * TO DO:
-	* completed
+	* done
 
 
 * **********************************************************************
@@ -68,26 +71,30 @@
 	order		y2_hhid region district ward ea y2_rural ///
 					clusterid strataid y2_weight mover_R1R2 location_R1_to_R2
 					
-	rename		y2_weight hhweight
+	rename		y2_weight wgt
+	rename		y2_rural sector
+	rename		region admin_1
+	rename 		district admin_2
+	rename 		ward admin_3
 	
 * relabel variables
 	lab var		y2_hhid "Unique Household Identification NPS Y2"
-	lab var		region "Region Code"
-	lab var		district "District Code"
-	lab var		ward "Ward Code"
-	lab var		ea "Village / Enumeration Area Code"
-	lab var		y2_rural "Cluster Type"
-	lab var		clusterid "Unique Cluster Identification"
+	lab var		admin_1 "Region Code"
+	lab var		admin_2 "District Code"
+	lab var		admin_3 "Ward Code"
+	lab var		ea "Enumeration Area Code"
+	lab var		sector "Urban/Rural Identifier"
+	lab var		clusterid "Cluster Identification"
 	lab var		strataid "Design Strata"
-	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
+	lab var		wgt "Household Weights (Trimmed & Post-Stratified)"
 	
 * prepare for export
+	isid		y2_hhid
+
 	compress
-	describe
-	summarize
-	sort y2_hhid
-	
-	save 			"$export/HH_SECA.dta", replace
+
+* save file			
+	save 		"$export/HH_SECA.dta", replace
 
 * close the log
 	log	close

@@ -1,7 +1,7 @@
 * Project: LSMS Risk Ag
 * Created on: Oct 2024
 * Created by: reece
-* Edited on: 12 Nov 2024
+* Edited on: 24 Jan 25
 * Edited by: jdm
 * Stata v.18.5
 
@@ -55,7 +55,15 @@
 	replace 	dist_daily = 0 if cb112 == 1 
 	replace 	dist_weekly = 0 if cb113 == 1 
 	
+	lab var		dist_daily	"Distance (km) to daily market"
+	lab var		dist_weekly	"Distance (km) to weekly market"
+	
 	drop 		cb1*
+	
+	
+************************************************************************
+**# 2 - merge in Community Section E, F, G
+************************************************************************
 	
 * merge in agrodealer and repeat ^ 
 	merge 1:1 	region ward district ea using "$root/SEC_E_F_G"
@@ -69,12 +77,11 @@
 	replace 	out_supply = 1 if out_supply == 2
 	
 	lab var 	out_supply "Buy improved seeds in this village? (0 = in village 1 = out of village)"
-	
-	
+
 ************************************************************************
-**# 2 - end matter, clean up to save
+**# 3 - end matter, clean up to save
 ************************************************************************
-	
+
 * rename political locality vars
 	rename		region admin_1
 	rename 		district admin_2
@@ -83,14 +90,14 @@
 	lab var		admin_1 "Region Code"
 	lab var		admin_2 "District Code"
 	lab var		admin_3 "Ward Code"
-	lab var		ea "Enumeration Area Code"
-	
+	lab var		ea "Enumeration Area Code"	
+
 * prepare for export
 	isid			admin_1 admin_2 admin_3 ea
 
 	compress
 	
-	save 			"$export/2008_CMSEC.dta", replace
+	save 			"$export/CMSEC.dta", replace
 
 * close the log
 	log	close

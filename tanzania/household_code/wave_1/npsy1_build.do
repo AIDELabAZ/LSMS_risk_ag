@@ -1,7 +1,7 @@
 * Project: LSMS Risk Ag
 * Created on: Nov 2024
 * Created by: jdm
-* Edited on: 12 Nov 2024
+* Edited on: 24 Jan 25
 * Edited by: jdm
 * Stata v.18.5
 
@@ -22,9 +22,10 @@
 
 * define paths
 	global		rootw 	= 	"$data/weather_data/tanzania/wave_1/refined/npsy1_up"
-	global		rooth 	= 	"$data/household_data/tanzania/wave_1/refined"
-	global		export 	= 	"$data/merged_data/tanzania/wave_1"
-	global		logout 	= 	"$data/merged_data/tanzania/logs"
+	global		rooth 	= 	"$data/lsms_risk_ag_data/merged_data/tanzania/wave_1"
+	global		rootl 	= 	"$data/lsms_risk_ag_data/refined_data"
+	global		export 	= 	"$data/lsms_risk_ag_data/merged_data/tanzania/wave_1"
+	global		logout 	= 	"$data/lsms_risk_ag_data/merged_data/tanzania/logs"
 
 * open log	
 	cap 	log 	close 
@@ -36,7 +37,7 @@
 * **********************************************************************
 
 * import the .dta houeshold file
-	use 		"$rooth/hhfinal_npsy1.dta", clear
+	use 		"$rooth/npsy1_merge.dta", clear
 	
 * generate variable to record data source
 	gen 		data = "npsy1"
@@ -181,23 +182,26 @@
 			drop 		*2008													
 }
 
+
+* **********************************************************************
+* 3 - merge harmonized lsms data
+* **********************************************************************
+
 * rename hhid
-	rename			hhid y1_hhid
+	rename			hhid hh_id_merge
 	
-* create wide data set 	
-	rename 			* *2008
-	rename 			region2008 region
-	rename 			district2008 district
-	rename 			ward2008 ward
-	rename 			ea2008 ea
-	rename 			*hhid2008 *hhid
+* merge in data
+	merge 1:m		hh_id_merge using "$rootl/allrounds_final_year", generate(_lsms)
+	* 12,356 merged, all from master merged
 	
-* drop unneeded variables
-	drop			y1_rural2008 year2008 
+	keep if			_lsms == 3
+	drop			_lsms
 	
 * prepare for export
 	qui: compress
-	sort y1_hhid
+	order			country crop_name season pw ea_id_merge ea_id_obs urban ///
+						lat_modified lon_modified geocoords_id parcel_id_obs ///
+						parcel_id_merge plot_id_obs plot_id_merge hh_id_obs
 	
 * save file
 	save 				"$export/npsy1_merged.dta", replace

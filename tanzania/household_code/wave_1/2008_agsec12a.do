@@ -1,7 +1,7 @@
 * Project: LSMS Risk Ag
 * Created on: Oct 2024
 * Created by: reece
-* Edited on: 12 Nov 2024
+* Edited on: 24 Jan 25
 * Edited by: jdm
 * Stata v.18.5
 
@@ -43,7 +43,7 @@
 	drop if 	source == .
 	drop		s13q2_b s13q2_c s13q2_d s13q2_e s13q2_f s13q3 s13q4 s13q5 s13q6 s13q1
 	
-	replace 	s13q2_a = 0 if s13q2_a == 2
+	replace 	s13q2_a = 0 if s13q2_a == 2 | s13q2_a == .
 	
 	reshape 	wide s13q2_a, i(hhid) j(source)
 	
@@ -56,6 +56,7 @@
 	keep 		hhid exten
 	
 	merge		1:1 hhid using "$export/HH_SECA"
+	* 2,429 matched, all matched from master
 	
 	drop		_merge
 	

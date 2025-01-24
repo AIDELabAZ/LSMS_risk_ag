@@ -1,7 +1,7 @@
 * Project: LSMS Risk Ag
 * Created on: Nov 2024
 * Created by: jdm
-* Edited on: 12 Nov 2024
+* Edited on: 24 Jan 25
 * Edited by: jdm
 * Stata v.18.5
 
@@ -32,6 +32,7 @@
 	cap 	log 	close 
 	log 	using 	"$logout/2008_HHSECA", append
 
+	
 ************************************************************************
 **# 1 - TZA 2008 (Wave 1) - Household Section A
 ************************************************************************
@@ -77,7 +78,6 @@
 * save file		
 	save 			"$export/HH_SECA.dta", replace
 	
-
 * close the log
 	log	close
 
