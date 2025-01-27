@@ -4,43 +4,36 @@
  
  *KEY
  * dum_binis= improved seed use, proportion of area
-	***improved
  * dum_binis2=improved seed use squared
  * dum_fertrate= fertilizer application rate, kg/ha
  * dum_fertseed= interaction of improved seed and fertilizer
  * totharv, measure of total production (proxy for income)
-	***harvest_kg
  
 cd "........"
-use "C:\Users\rbrnhm\Documents\GitHub\LSMS_risk_ag\replication\allrounds_final_year.dta", clear 
+use "C:\Users\rbrnhm\Documents\GitHub\LSMS_risk_ag\replication\final_data_risk_aversion.dta", clear 
  
-*capture drop std_income
-egen std_income=std(harvest_kg)
+capture drop std_income
+egen std_income=std(totharv)
 
-*capture drop improved
-egen improved2=std(improved)
-* original code uses proportion of area for improved seed use, our data has improved seed use binary
+capture drop dum_binis
+egen dum_binis=std(new_percent_improved)
 
-*capture drop dum_binis2
-gen dum_binis2= improved2^2
-* does it make sense to use improved seed squared? leaving for now
+capture drop dum_binis2
+gen dum_binis2= dum_binis^2
 
-*capture drop dum_fertrate
-egen dum_fertrate=std(inorganic_fertilizer_value_USD)
-* original code used fertilizer application rate- ok to use fertilizer value? or should we go back and add fert application rate
+capture drop dum_fertrate
+egen dum_fertrate=std(new_avg_fertrate)
 
-*capture drop dum_fertrate2
+capture drop dum_fertrate2
 gen dum_fertrate2=dum_fertrate^2
 
-*capture drop dum_fertseed
-gen dum_fertseed=dum_fertrate*improved2
+capture drop dum_fertseed
+gen dum_fertseed=dum_fertrate*dum_binis
 
-*capture drop log_rain_t
-*gen log_rain_t=ln(rain_t)
-* not sure how to incorporate weather data atp- will revisit
 
-*capture drop log_rain_t
-gen log_shock=ln(crop_shock)
+capture drop log_rain_t
+gen log_rain_t=ln(rain_t)
+ 
 
 *##############################################################################
 * 				CALCULATING AP AND DS PARAMETERS
@@ -48,16 +41,7 @@ gen log_shock=ln(crop_shock)
 
 
 /////
-*xtivreg std_income primeage age drought_shock i.year (improved dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed= dist_agrodealer dist_fert extension rain_t_1), fe vce(cluster id)
-	*** don't have primeage(number of prime age adults), will replace dist_agrodealer and dist_fert and add extension access
-	*** need add rainfall (drought_shock for now)
-	
-xtset plot_id_merge year
-xtivreg std_income age crop_shock i.year (dum_fertrate2  = hh_electricity_access dist_popcenter), fe vce(cluster hh_id_obs)
-
-	*** just messing around here
-	*** having issues with xtset
-
+xtivreg std_income primeage age rain_t i.year (dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed= dist_agrodealer dist_fert bin_extension avg_maize_price rain_t_1), fe vce(cluster id)
 
 capture drop u1
 predict u1, xb
@@ -234,8 +218,6 @@ replace tot_shockd4=1 if mod_dr_anomaly_t_1==1 & mod_dr_anomaly_t_2==1 & mod_dr_
 
 *drop shock*_mu2*
 *drop shock*_mu3*
-*** code stops here, need to mute these drops- reece
-
 gen shock1_mu2_seed=tot_shockd2*mu2_seed
 gen shock2_mu2_seed=tot_shockd3*mu2_seed
 gen shock3_mu2_seed=tot_shockd4*mu2_seed
