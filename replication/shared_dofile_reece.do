@@ -52,8 +52,8 @@ gen log_shock=ln(crop_shock)
 	*** don't have primeage(number of prime age adults), will replace dist_agrodealer and dist_fert and add extension access
 	*** need add rainfall (drought_shock for now)
 	
-xtset plot_id_merge year
-xtivreg std_income age crop_shock i.year (dum_fertrate2  = hh_electricity_access dist_popcenter), fe vce(cluster hh_id_obs)
+xtset hh_id_obs
+xtivreg harvest_value_USD age crop_shock i.year i.cc (dum_fertrate2  = hh_electricity_access dist_popcenter), fe vce(cluster hh_id_obs)
 
 	*** just messing around here
 	*** having issues with xtset
