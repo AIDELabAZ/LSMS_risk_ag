@@ -63,10 +63,11 @@
 	
 * drop what we don't need
 	keep ea_id dist_daily dist_weekly out_supply extension year
+	rename ea_id ea_id_merge
 
 	
 * prepare for export
-	isid			ea_id
+	isid			ea_id_merge
 	describe
 	summarize 
 	save 			"$export/com_sec.dta", replace
