@@ -51,4 +51,6 @@
     Matched                             9,428  (_merge==3)
     -----------------------------------------
 
-/*
+*/
+
+	save 		"$root2/wave1_cleanrb", replace
