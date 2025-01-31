@@ -36,7 +36,7 @@
 * load data
 	use 		"$root/sect4_com_w1", clear
 	
-	keep sa1q01 sa1q02 sa1q03 sa1q06 sa1q07 cs4q14 cs4q15_1
+	keep sa1q01 sa1q02 sa1q03 sa1q04 sa1q05 sa1q06 sa1q07 cs4q14 cs4q15_1
 	
 * distance to weekly market? (only weekly available)
 	
@@ -54,9 +54,38 @@
 	rename sa1q01 region
 	rename sa1q02 zone
 	rename sa1q03 woreda
+	rename sa1q04 town
+	rename sa1q05 subcity
 	rename sa1q06 kebele
 	rename sa1q07 ea
+
 	
+/* create ea_id_merge for lsms_merge
+	gen region_str = "0" + string(region, "%12.0f")
+	gen zone_str = "0" + string(zone, "%12.0f")
+	gen woreda_str = "0" + string(woreda, "%12.0f")
+	gen town_str = "0" + string(town, "%12.0f")
+	gen subcity_string = "0" + string(subcity, "%12.0f")
+	gen ea_str = "0" + string(ea, "%12.0f")
+
+	gen ea_id_merge = region_str + zone_str + woreda_str + town_str + subcity_str + ea_str
+*/
+
+	gen region_str = cond(region < 10, "0" + string(region, "%12.0f"), string(region, "%12.0f"))
+	gen zone_str = cond(zone < 10, "0" + string(zone, "%12.0f"), string(zone, "%12.0f"))
+	gen woreda_str = cond(woreda < 10, "0" + string(woreda, "%12.0f"), string(woreda, "%12.0f"))
+	gen town_str = cond(town < 10, "0" + string(town, "%12.0f"), string(town, "%12.0f"))
+	gen subcity_str = cond(subcity < 10, "0" + string(subcity, "%12.0f"), string(subcity, "%12.0f"))
+	gen kebele_str = cond(kebele < 10, "0" + string(kebele, "%12.0f"), string(kebele, "%12.0f"))
+	gen ea_str = cond(ea < 10, "0" + string(ea, "%12.0f"), string(ea, "%12.0f"))
+
+	gen ea_id_merge = region_str + zone_str + woreda_str + town_str + subcity_str + kebele_str + ea_str
+
+* see if good
+	order region zone woreda town subcity kebele ea ea_id_merge
+
+* keep what we need
+	keep region zone woreda town subcity kebele ea ea_id_merge dist_weekly year
 	
 * prepare for export
 	isid			region zone woreda kebele ea

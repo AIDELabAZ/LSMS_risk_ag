@@ -47,6 +47,27 @@
 
     Matched                             3,239  (_merge==3)
     -----------------------------------------
-/*
-	* looks good
+
+	 looks good
+*/
+
+
 	
+* dropping these for isid error "... should never be missing"
+	drop if missing(holder_id) | missing(hhid) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea)
+	* 24 obs dropped
+	
+* keep what we need
+	keep holder_id hhid region zone woreda kebele ea extension year dist_weekly ea_id_merge
+	
+	rename hhid hh_id_merge
+	
+* final preparations to export
+	isid 		holder_id hh_id_merge region zone woreda ea kebele
+	compress
+	describe
+	summarize
+	save		"$export/wave1_rb_vars.dta", replace
+
+* close the log
+	log	close
