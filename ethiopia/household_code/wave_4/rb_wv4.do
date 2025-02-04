@@ -20,14 +20,14 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_2"
+	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_4"
 	global root2 	"$data/lsms_base/countries/ethiopia"
-	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_2"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_4"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wave1_rb_vars", append
+	log using "$logout/wave4_rb_vars", append
 
 	
 * ***********************************************************************
@@ -35,24 +35,25 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave2_clean", clear
+	use 		"$root2/wave4_clean", clear
 	
 	
 * merge in clean com sec
 	drop _merge
-	merge m:1 manager_id_merge using "$root/wave2_rb_vars"
+	merge m:1  manager_id_merge using "$root/wave4_rb_vars"
 
 /*
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                         4,417
-        from master                     3,685  (_merge==1)
-        from using                        732  (_merge==2)
+    Not matched                         6,399
+        from master                     5,491  (_merge==1)
+        from using                        908  (_merge==2)
 
-    Matched                            23,723  (_merge==3)
+    Matched                            12,973  (_merge==3)
     -----------------------------------------
 
 */
-
-	save 		"$export/wave2_cleanrb", replace
+	*manager id works, is this merge good enough?
+	
+	save 		"$export/wave4_cleanrb", replace

@@ -36,7 +36,7 @@
 * load data
 	use 		"$root/sect04_com_w4", clear
 	
-	keep saq01 saq02 saq03 saq06 saq07 cs4q14 cs4q15 ea_id
+	*keep saq01 saq02 saq03 saq06 saq07 cs4q14 cs4q15 ea_id
 	
 * distance to weekly market? (only weekly available)
 	
@@ -54,8 +54,23 @@
 	rename saq01 region
 	rename saq02 zone
 	rename saq03 woreda
+	rename saq04 town
+	rename saq05 subcity
 	rename saq06 kebele
 	rename saq07 ea
+
+* gen ea_id_merge for lsms_base 
+	gen region_str = cond(region < 10, "0" + string(region, "%12.0f"), string(region, "%12.0f"))
+	*gen zone_str = cond(zone < 10, "0" + string(zone, "%12.0f"), string(zone, "%12.0f"))
+	*gen woreda_str = cond(woreda < 10, "0" + string(woreda, "%12.0f"), string(woreda, "%12.0f"))
+	gen town_str = cond(town < 10, "0" + string(town, "%12.0f"), string(town, "%12.0f"))
+	gen subcity_str = cond(subcity < 10, "0" + string(subcity, "%12.0f"), string(subcity, "%12.0f"))
+	*gen kebele_str = cond(kebele < 10, "0" + string(kebele, "%12.0f"), string(kebele, "%12.0f"))
+	*gen ea_str = cond(ea < 10, "0" + string(ea, "%12.0f"), string(ea, "%12.0f"))
+
+	gen ea_id_merge = region_str + zone + woreda + town_str + subcity_str + kebele + ea
+	
+	keep region zone woreda town subcity kebele ea ea_id_merge dist_weekly year ea_id
 	
 	
 * prepare for export

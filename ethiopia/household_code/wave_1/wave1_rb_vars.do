@@ -61,9 +61,10 @@
 	keep holder_id hhid region zone woreda kebele ea extension year dist_weekly ea_id_merge
 	
 	rename hhid hh_id_merge
+	rename holder_id manager_id_merge
 	
 * final preparations to export
-	isid 		holder_id hh_id_merge region zone woreda ea kebele
+	isid 		manager_id_merge hh_id_merge region zone woreda ea kebele
 	compress
 	describe
 	summarize

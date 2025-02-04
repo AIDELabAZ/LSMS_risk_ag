@@ -38,6 +38,7 @@
 	
 * merge in markets and agrodealer vars
 	merge m:1 region zone woreda kebele ea ea_id using "$root/com_sect4"
+	
 	* pp_sect7 doesn't have ea_id2, can't merge
 	
 	/* 

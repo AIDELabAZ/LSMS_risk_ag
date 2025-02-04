@@ -57,6 +57,8 @@
 	rename sa1q06 kebele
 	rename sa1q07 ea
 	
+* dropping two missing ea_id obs, seeing if this will help with wave3_rb_vars merge
+	drop if missing(ea_id)
 	
 * prepare for export
 	isid			region zone woreda kebele ea ea_id2

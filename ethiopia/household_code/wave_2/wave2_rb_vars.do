@@ -53,16 +53,17 @@
 	* looks good
 	
 * keep what we need
-	keep holder_id hhid region zone woreda kebele ea extension year dist_weekly ea_id_merge
+	keep holder_id hhid region zone woreda kebele ea extension year dist_weekly ea_id_merge manager_id_merge
 	
 	rename hhid hh_id_merge
 
 * dropping these for isid error "... should never be missing"
-	drop if missing(holder_id) | missing(hh_id_merge) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea)
-	* 148 obs dropped
+	drop if missing(manager_id_merge) | missing(hh_id_merge) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea) | missing(ea_id_merge)
+	* 149 obs dropped
+
 	
 * final preparations to export
-	isid 		holder_id hh_id_merge region zone woreda ea kebele
+	isid 		manager_id_merge hh_id_merge region zone woreda ea kebele ea_id_merge
 	compress
 	describe
 	summarize

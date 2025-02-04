@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: January 2025
 * Created by: reece
-* Edited on: 31 Jan 2025
+* Edited on: 4 Feb 2025
 * Edited by: reece
 * Stata v.18
 
@@ -40,19 +40,20 @@
 	
 * merge in clean com sec
 	drop _merge
-	merge 1:1 ea_id_merge using "$root/wave1_rb_vars"
+	merge m:1  manager_id_merge using "$root/wave1_rb_vars"
 
+/*
 
-
-/*    Result                      Number of obs
+    Result                      Number of obs
     -----------------------------------------
-    Not matched                           564
-        from master                         0  (_merge==1)
-        from using                        564  (_merge==2)
+    Not matched                         3,516
+        from master                     2,204  (_merge==1)
+        from using                      1,312  (_merge==2)
 
-    Matched                             9,428  (_merge==3)
+    Matched                             6,989  (_merge==3)
     -----------------------------------------
 
 */
-
-	save 		"$root2/wave1_cleanrb", replace
+	*manager id works, is this merge good enough?
+	
+	save 		"$export/wave1_cleanrb", replace

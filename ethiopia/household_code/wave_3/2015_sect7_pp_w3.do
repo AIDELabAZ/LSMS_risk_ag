@@ -44,6 +44,10 @@
 	replace		extension = 1 if pp_s7q04 == 1
 	replace 	extension = 0 if pp_s7q04 == 2
 	
+	
+* merge in identifiers
+		merge 1:1 saq01 saq02 saq03 saq04 saq05 saq06 saq08 household_id household_id2 ea_id using "$root/sect1_hh_w3"	
+		
 * generate year
 	gen 		year = 2015
 	
@@ -57,6 +61,7 @@
 	rename household_id hhid
 	rename household_id2 hhid2
 	* no hhid for wv3?
+
 	
 
 * drop what we don't need 

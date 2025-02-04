@@ -48,5 +48,27 @@
 
     Matched                             2,063  (_merge==3)
     -----------------------------------------
-/*
+*/
 	* pretty good
+	
+* keep what we need
+	keep holder_id hhid region zone woreda kebele ea extension year dist_weekly  
+	rename hhid hh_id_merge
+	
+* create manager_id_merge for lsms_base merge	
+	gen manager_id_merge = substr(holder_id, 1, length(holder_id) - 2) + "-" + substr(holder_id, -1, 1)
+
+* dropping these for isid error "... should never be missing"
+	drop if missing(manager_id_merge) | missing(hh_id_merge) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea)
+	* 233 obs dropped
+
+* final preparations to export
+	isid 		manager_id_merge hh_id_merge region zone woreda ea kebele 
+	compress
+	describe
+	summarize
+	save		"$export/wave5_rb_vars.dta", replace
+
+* close the log
+	log	close
+	

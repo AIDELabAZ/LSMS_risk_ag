@@ -57,9 +57,14 @@
 	rename household_id hhid
 	rename household_id2 hhid2
 	
+* need to create correct manager_id_merge for lsms_base merge
+* looks like it is household_id2 + holder id(pp_saq07)
+	gen holder_str = cond(pp_saq07 < 10, "0" + string(pp_saq07, "%12.0f"), string(pp_saq07, "%12.0f"))
+	gen manager_id_merge = hhid2 + holder_str
+	
 
 * drop what we don't need 
-	keep hhid hhid2 holder_id extension year zone region woreda kebele ea ea_id2
+	keep hhid hhid2 holder_id manager_id_merge extension year zone region woreda kebele ea ea_id2
 	
 * prepare for export
 	isid			hhid2 holder_id region zone woreda kebele ea
