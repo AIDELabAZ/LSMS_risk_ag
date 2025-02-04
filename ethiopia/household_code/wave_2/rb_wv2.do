@@ -1,7 +1,7 @@
 * Project: lsms risk ag
-* Created on: January 2025
+* Created on: Feb 2025
 * Created by: reece
-* Edited on: 31 Jan 2025
+* Edited on: 3 Feb 2025
 * Edited by: reece
 * Stata v.18
 
@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_1"
+	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_2"
 	global root2 	"$data/lsms_base/countries/ethiopia"
-	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_1"
+	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_2"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
 * open log 
@@ -35,14 +35,20 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave1_clean", clear
+	use 		"$root2/wave2_clean", clear
 	
 	
 * merge in clean com sec
 	drop _merge
+	merge 1:m ea_id_merge hh_id_merge using "$root/wave2_rb_vars"
+
+	
+	
+	
+	
+	
+	
 	merge 1:1 ea_id_merge using "$root/wave1_rb_vars"
-
-
 
 /*    Result                      Number of obs
     -----------------------------------------

@@ -40,7 +40,7 @@
 	
 * merge in clean malawi data
 	drop _merge
-	merge m:1 ea_id_merge using "$root/com_sec
+	merge m:1 ea_id_merge using "$root/com_sec"
 
 /*    Result                      Number of obs
     -----------------------------------------
