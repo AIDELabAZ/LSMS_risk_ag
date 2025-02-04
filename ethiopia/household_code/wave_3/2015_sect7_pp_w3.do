@@ -45,7 +45,7 @@
 	replace 	extension = 0 if pp_s7q04 == 2
 	
 	
-* merge in identifiers
+* merge in identifiers to add in ea_id2
 		merge 1:1 saq01 saq02 saq03 saq04 saq05 saq06 saq08 household_id household_id2 ea_id using "$root/sect1_hh_w3"	
 		
 * generate year
