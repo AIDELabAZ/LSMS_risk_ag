@@ -58,9 +58,15 @@
 * rename for merge 
 	rename ea_id2 ea_id_merge
 
+* generate manager id for merging with lsms_base
+	rename		manager_id_merge manager_id_old
+	
+	gen 		manager_id = substr(manager_id_old, 15, 2)
+	
+	egen		manager_id_merge = concat(hh_id_merge manager_id)
 	
 * final preparations to export
-	isid 		manager_id_merge region zone woreda ea kebele 
+	isid 		manager_id_merge
 	compress
 	describe
 	summarize
