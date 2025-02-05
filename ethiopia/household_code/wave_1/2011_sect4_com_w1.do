@@ -1,20 +1,21 @@
 * Project: WB Weather
 * Created on: oct 22
 * Created by: reece
-* Edited on: oct 27 2024
-* Edited by: reece
+* Edited on: 5 Feb 25
+* Edited by: jdm
 * Stata v.18
 
 * does
-	* cleans community data- daily and weekly market, year, region, district, ward, ea
-	*harvest
+	* cleans community data- daily and weekly market
+	* outputs ea level data for merging with extension data
+	
 * assumes
 	* access to all raw data
-	* mdesc.ado
-	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
+	
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -44,7 +45,6 @@
 	replace dist_weekly = 0 if cs4q14 == 1 
 	
 	drop cs4q14
-	
 
 * generate year
 	gen year = 2011

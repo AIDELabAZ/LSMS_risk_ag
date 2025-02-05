@@ -1,19 +1,21 @@
 * Project: WB Weather
 * Created on: oct 27
 * Created by: reece
-* Edited on: oct 27 2024
-* Edited by: reece
+* Edited on: 5 feb 25
+* Edited by: jdm
 * Stata v.18
 
 * does
-	* cleans access to extension
+	* reads in sec 7, access to extension by holder
+	* outputs holder-level use of extension
+	
 * assumes
 	* access to all raw data
-	* mdesc.ado
-	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
+	
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -27,6 +29,7 @@
 	cap log close 
 	log using "$logout/wv1_pp_sect7", append
 	
+	
 * ***********************************************************************
 **#1 - prepare ethiopia (Wave 1) - ag sec 7 post planting
 * ***********************************************************************
@@ -38,6 +41,7 @@
 **#2 - extension access
 * ***********************************************************************
 
+	isid		holder_id
 
 * did respondant participate in extension program
 	gen 		extension = 0
@@ -47,27 +51,25 @@
 * generate year
 	gen 		year = 2011
 	
-	lab var year "year of survey- wv1 2011"
-	lab var extension "does respondent have access to extension?"
-	rename household_id hhid
-	rename saq01 region
-	rename  saq02 zone
-	rename saq03 woreda
-	rename saq04 kebele
-	rename saq05 ea	
+	lab var 	year "year of survey- wv1 2011"
+	lab var 	extension "does respondent have access to extension?"
+	rename 		household_id hhid
+	rename 		saq01 region
+	rename  	saq02 zone
+	rename 		saq03 woreda
+	rename 		saq04 kebele
+	rename 		saq05 ea	
 	
 
 * drop what we don't need 
-	keep hhid holder_id extension year zone region woreda kebele ea
+	keep 		hhid holder_id extension year zone region woreda kebele ea
 	
 * prepare for export
-	isid			hhid holder_id region zone woreda kebele ea
+	isid			holder_id
 	describe
 	summarize 
 	save 			"$export/pp_sect7.dta", replace
 	
-
-
 * close the log
 	log	close
 

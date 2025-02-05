@@ -1,20 +1,22 @@
 * Project: lsms risk ag
 * Created on: January 2025
 * Created by: reece
-* Edited on: 14 Jan 2025
-* Edited by: reece
+* Edited on: 5 Feb 25
+* Edited by: jdm
 * Stata v.18
 
 * does
 	* merges dist market vars, dist to supplier, and extension var
+	* outputs community and holder iv's for merging with harmonized data
 	
 * assumes
-	* access to all raw data
-	* mdesc.ado
-	* cleaned hh_seca.dta
+	* cleaned pp_sect7
+	* cleaned com_sect4
 
 * TO DO:
-	* 
+	* done
+	
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -36,6 +38,8 @@
 * load data- starting with extension
 	use 		"$root/pp_sect7", clear
 	
+	isid		holder_id
+	
 * merge in markets and agrodealer vars
 	merge m:1 region zone woreda kebele ea using "$root/com_sect4"
 	/*
@@ -50,8 +54,6 @@
 
 	 looks good
 */
-
-
 	
 * dropping these for isid error "... should never be missing"
 	drop if missing(holder_id) | missing(hhid) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea)
@@ -64,7 +66,7 @@
 	rename holder_id manager_id_merge
 	
 * final preparations to export
-	isid 		manager_id_merge hh_id_merge region zone woreda ea kebele
+	isid 		manager_id_merge
 	compress
 	describe
 	summarize
@@ -72,3 +74,5 @@
 
 * close the log
 	log	close
+
+/* END */
