@@ -44,9 +44,40 @@
 	replace		extension = 1 if pp_s7q04 == 1
 	replace 	extension = 0 if pp_s7q04 == 2
 	
+* renaming these so we can rename the following vars
+	rename saq01 saq01a
+	rename saq02 saq02a
+	rename saq03 saq03a
+	rename saq04 saq04a
+	rename saq05 saq05a
+	rename saq06 saq06a
+	*rename saq07 saq07a
+	*rename saq08 saq08a
+	rename holder_id individual_id
+	
+* rename hh identifiers to match with sect7_pp_w3 so we can merge with sect1_hh_w3
+	rename hh_saq01 saq01
+	rename hh_saq02 saq02
+	rename hh_saq03 saq03
+	rename hh_saq04 saq04
+	rename hh_saq05 saq05
+	rename hh_saq06 saq06
+	rename hh_saq07 saq07
+	rename hh_saq08 saq08
 	
 * merge in identifiers to add in ea_id2
-		merge 1:1 saq01 saq02 saq03 saq04 saq05 saq06 saq08 household_id household_id2 ea_id using "$root/sect1_hh_w3"	
+		merge m:1 saq01 saq02 saq03 saq04 saq05 saq06 saq07 saq08 household_id household_id2 individual_id using "$root/sect1_hh_w3"	
+
+		/*
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        24,222
+        from master                        31  (_merge==1)
+        from using                     24,191  (_merge==2)
+
+    Matched                             3,799  (_merge==3)
+    -----------------------------------------
+*/
 		
 * generate year
 	gen 		year = 2015
@@ -58,17 +89,24 @@
 	rename saq03 woreda
 	rename saq04 kebele
 	rename saq05 ea	
-	rename household_id hhid
-	rename household_id2 hhid2
-	* no hhid for wv3?
-
-	
+	rename household_id hh_id_obs
+	rename household_id2 hh_id_merge
+	rename individual_id manager_id_merge
 
 * drop what we don't need 
-	keep hhid hhid2 holder_id extension year zone region woreda kebele ea ea_id
+	keep hh_id_obs hh_id_merge extension year zone region woreda kebele ea ea_id manager_id_merge ea_id2
+	
+* drop duplicate manager_id_merge so we can merge later
+	duplicates tag manager_id_merge, generate(dups)
+	drop if dups > 0
+	* 22 obs dropped
+	
+* dropping these for isid error "... should never be missing"
+	drop if missing(manager_id_merge) | missing(region) | missing(zone) | missing(woreda) | missing(kebele) | missing(ea) 
+	* 28 obs dropped
 	
 * prepare for export
-	isid			hhid2 holder_id region zone woreda kebele ea
+	isid			 manager_id_merge region zone woreda kebele ea
 	describe
 	summarize 
 	save 			"$export/pp_sect7.dta", replace

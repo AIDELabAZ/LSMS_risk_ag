@@ -1,12 +1,12 @@
 * Project: lsms risk ag
-* Created on: January 2025
+* Created on: Feb 2025
 * Created by: reece
-* Edited on: 14 Jan 2025
+* Edited on: 4 Feb 2025
 * Edited by: reece
 * Stata v.18
 
 * does
-	* merges dist market vars, dist to supplier, and extension var
+	* merges community vars with lsms_base 
 	
 * assumes
 	* access to all raw data
@@ -21,6 +21,7 @@
 
 * define paths
 	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_3"
+	global root2 	"$data/lsms_base/countries/ethiopia"
 	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_3"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
@@ -30,42 +31,30 @@
 
 	
 * ***********************************************************************
-**#1 - load agsec12a and merge cmsec 
+**#1 - load lsms_base then merge community vars
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root/pp_sect7", clear
+	use 		"$root2/wave3_clean", clear
 	
-* merge in markets and agrodealer vars
-	merge m:1  ea_id2 using "$root/com_sect4"
 	
-	/* 
+* merge in clean com sec
+	drop _merge
+	merge m:1  manager_id_merge using "$root/wave3_rb_vars"
+
+/*
+
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                            91
-        from master                        91  (_merge==1)
-        from using                          0  (_merge==2)
+    Not matched                        55,259
+        from master                    27,288  (_merge==1)
+        from using                     27,971  (_merge==2)
 
-    Matched                            27,880  (_merge==3)
+    Matched                                 0  (_merge==3)
     -----------------------------------------
-		
-		*/
-		
-* keep what we need
-	keep region zone woreda kebele ea extension year dist_weekly manager_id_merge hh_id_merge ea_id2
-	
-* rename for merge 
-	rename ea_id2 ea_id_merge
 
-	
-* final preparations to export
-	isid 		manager_id_merge region zone woreda ea kebele 
-	compress
-	describe
-	summarize
-	save		"$export/wave3_rb_vars.dta", replace
 
-* close the log
-	log	close
-		
+*/
+
+	*save 		"$export/wave3_cleanrb", replace
