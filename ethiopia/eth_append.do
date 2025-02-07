@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 7 June 2024
-* Edited by: jdm
+* Edited on: 6 Feb 2025
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -12,7 +12,6 @@
 
 
 * assumes
-	* all ethiopia data has been cleaned and merged with rainfall
 	* xfill.ado
 
 * TO DO:
@@ -22,69 +21,80 @@
 * **********************************************************************
 * 0 - setup
 * **********************************************************************
-
-* define paths
-	global		root 	= 	"$data/merged_data/ethiopia"
-	global		export 	= 	"$data/regression_data/ethiopia"
-	global		logout 	= 	"$data/merged_data/ethiopia/logs"
-
-* open log	
-	cap log 	close
-	log 		using 		"$logout/eth_append_build", append
 	
+* define paths
+	global root 	"$data/lsms_risk_ag_data/merged_data/ethiopia"
+	global export 	"$data/lsms_risk_ag_data/regression_data/ethiopia"
+	global logout 	"$data/lsms_risk_ag_data/merged_data/ethiopia/logs"
+
+* open log 
+	cap log close 
+	log using 		"$logout/eth_append_build", append
+
 	
 * **********************************************************************
 * 1 - append data
 * **********************************************************************
 
 * import wave 1 dataset
-	use 		"$root/wave_1/essy1_merged.dta", clear
+	use 		"$root/wave_1/wave1_cleanrb.dta", clear
 
 * append wave 2 dataset
-	append		using "$root/wave_2/essy2_merged.dta", force
+	append		using "$root/wave_2/wave2_cleanrb.dta", force
 	
 * append wave 3 dataset
-	append		using "$root/wave_3/essy3_merged", force	
+	append		using "$root/wave_3/wave3_cleanrb", force	
 	
 * append wave 4 dataset
-	append		using "$root/wave_4/essy4_merged", force	
+	append		using "$root/wave_4/wave4_cleanrb", force	
 	
 * append wave 5 dataset
-	append		using "$root/wave_5/essy5_merged", force	
+	append		using "$root/wave_5/wave5_cleanrb", force	
 	
 * check the number of observations again
 	count
-	*** 10,709 observations 
+	*** 77,552 observations 
 	count if 		year == 2011
-	*** wave 1 has 1689
+	*** wave 1 has 6,988
 	count if 		year == 2013
-	*** wave 2 has 2900
+	*** wave 2 has 23,708
 	count if 		year == 2015
-	*** wave 3 has 2718
+	*** wave 3 has 24,023
 	count if 		year == 2018
-	*** wave 4 has 1996
+	*** wave 4 has 12,815
 	count if 		year == 2021
-	*** wave 5 has 1406
+	*** wave 5 has 10,018
 	
 * drop observations missing year 1 household id
-	drop if			household_id == ""
-	* 35 observations deleted
+	drop if			manager_id_merge == ""
+	* note: is this the right var here?
+	* didnt use household bc all of hh_id_merge was missing and hh_id_obs has type mismatch error- can fix later
+	* using manager_id_merge bc this is what we used for merge in most waves
+	* 0 observations deleted
 
 * generate ethiopia panel id
-	egen			eth_id = group(household_id)
+	egen			eth_id = group(manager_id_merge plot_id_merge ea_id_merge)
 	lab var			eth_id "Ethiopia panel household id"	
 
 * generate country and data types
-	gen				country = "ethiopia"
-	lab var			country "Country"
+	*gen				country = "ethiopia"
+	*lab var			country "Country"
 
 	gen				dtype = "lp"
 	lab var			dtype "Data type"
 	
+	duplicates tag eth_id, generate(dup)
+	count if dup > 0
+	* 44,600
+
+ 	drop if dup > 0
+	* 44,600 dropped
+	* don't know why there are so many dups
+	
 	isid			eth_id year
 	
 * generate one variable for sampling weight
-	gen				weight = pw
+/*	gen				weight = pw
 	
 	replace			weight = pw2 if weight == .
 	replace			weight = pw_w3 if weight == .
@@ -92,7 +102,7 @@
 	replace			weight = pw_w5 if weight == .
 	
 	drop			pw pw2 pw_w3 pw_w4 pw_w5
-	
+*/ 	* muted- not missing any weight observations
 	rename			weight pw
 	lab var			pw "Household Sample Weight"
 	

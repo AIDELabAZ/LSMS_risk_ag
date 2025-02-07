@@ -24,7 +24,7 @@
 * define paths
 	global root 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_1"
 	global root2 	"$data/lsms_base/countries/ethiopia"
-	global export 	"$data/lsms_risk_ag_data/refined_data/ethiopia/wave_1"
+	global export 	"$data/lsms_risk_ag_data/merged_data/ethiopia/wave_1"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/ethiopia/logs"
 
 * open log 
