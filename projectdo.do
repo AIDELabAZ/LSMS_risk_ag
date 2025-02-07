@@ -25,7 +25,7 @@
 	global 			pack 	0
 		
 * Specify Stata version in use
-    global stataVersion 18.5    // set Stata version
+    global stataVersion 18    // set Stata version
     version $stataVersion
 
 ************************************************************************
