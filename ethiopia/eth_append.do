@@ -92,7 +92,7 @@
     isid hh_id_obs wave
 
 * merge in weather data
-	merge 1:1 		hh_id_obs wave using "$wth/eth_weather"
+	merge 1:1 		hh_id_obs wave using "$wth/weather"
 	/* 
     Result                      Number of obs
     -----------------------------------------

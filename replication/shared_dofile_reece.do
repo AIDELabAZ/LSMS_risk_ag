@@ -1,3 +1,59 @@
+* Project: lsms risk ag
+* Created on: feb 2025
+* Created by: reece
+* Edited on: 7 Feb 2025
+* Edited by: reece
+* Stata v.18
+
+* does
+	* loads multi country data set
+	* outputs results file for analysis
+
+* assumes
+	* cleaned, merged (weather), and appended (waves) data
+	* customsave.ado
+
+* TO DO:
+	*
+
+	
+* **********************************************************************
+* 0 - setup
+* **********************************************************************
+
+* define paths
+
+	global root 	"$data/lsms_risk_ag_data/regression_data/ethiopia"
+	global export 	"$data/lsms_risk_ag_data/results"
+	global logout 	"$data/lsms_risk_ag_data/regression_data/logs"
+
+* open log 
+	cap log close 
+	log using "$logout/regressions", append
+
+ 	
+* **********************************************************************
+* 1 - load data
+* **********************************************************************
+ 
+ 	use 		"$root/eth_complete", clear
+	
+* **********************************************************************
+* 2 - create variables we need for regression
+* **********************************************************************	
+* create log of yield, rain, fert rate, seed rate, fert * seed
+	gen 		lny=asinh(harvest_kg2/plot_area_GPS)
+	gen 		lnr=asinh(v05_rf1)
+	gen			lnf=asinh(nitrogen_kg2/plot_area_GPS)
+	gen			lns=asinh(seed_kg2/plot_area_GPS)
+	gen			lnf2=lnf^2
+	gen			lns2=lns^2
+	gen			lnfs=lnf*lns
+	
+* **********************************************************************
+* 3 - start of shared code
+* **********************************************************************
+		
  *############################################################################
  * GET INPUT ATTRIBUTES
  *____________________________________________________________________________*
@@ -10,24 +66,22 @@
  * dum_fertseed= interaction of improved seed and fertilizer
  * totharv, measure of total production (proxy for income)
 	***harvest_kg
- 
-cd "........"
-use "C:\Users\rbrnhm\Documents\GitHub\LSMS_risk_ag\replication\allrounds_final_year.dta", clear 
- 
+
+ /*
 *capture drop std_income
-egen std_income=std(harvest_kg)
+egen std_income=std(totcons_USD2)
 
 *capture drop improved
-egen improved2=std(improved)
+egen dum_binis=std(improved)
 * original code uses proportion of area for improved seed use, our data has improved seed use binary
 
 *capture drop dum_binis2
-gen dum_binis2= improved2^2
+gen dum_binis2= dum_binis2^2
 * does it make sense to use improved seed squared? leaving for now
 
 *capture drop dum_fertrate
-egen dum_fertrate=std(inorganic_fertilizer_value_USD)
-* original code used fertilizer application rate- ok to use fertilizer value? or should we go back and add fert application rate
+egen dum_fertrate=std(inorganic_fertilizer)
+* original code used fertilizer application rate- ok to use fertilizer dummy?
 
 *capture drop dum_fertrate2
 gen dum_fertrate2=dum_fertrate^2
@@ -35,12 +89,14 @@ gen dum_fertrate2=dum_fertrate^2
 *capture drop dum_fertseed
 gen dum_fertseed=dum_fertrate*improved2
 
-*capture drop log_rain_t
+* 
+
+capture drop log_rain_t
 *gen log_rain_t=ln(rain_t)
-* not sure how to incorporate weather data atp- will revisit
 
 *capture drop log_rain_t
 gen log_shock=ln(crop_shock)
+*/
 
 *##############################################################################
 * 				CALCULATING AP AND DS PARAMETERS
@@ -49,15 +105,11 @@ gen log_shock=ln(crop_shock)
 
 /////
 *xtivreg std_income primeage age drought_shock i.year (improved dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed= dist_agrodealer dist_fert extension rain_t_1), fe vce(cluster id)
-	*** don't have primeage(number of prime age adults), will replace dist_agrodealer and dist_fert and add extension access
-	*** need add rainfall (drought_shock for now)
+	* original reg
 	
 xtset hh_id_obs
-xtivreg harvest_value_USD age crop_shock i.year i.cc (dum_fertrate2  = hh_electricity_access dist_popcenter), fe vce(cluster hh_id_obs)
-
-	*** just messing around here
-	*** having issues with xtset
-
+xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 = hh_electricity_access dist_popcenter extension dist_weekly), fe vce(cluster hh_id_obs) first
+	* our reg
 
 capture drop u1
 predict u1, xb
