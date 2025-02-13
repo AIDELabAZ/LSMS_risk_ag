@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: feb 2025
 * Created by: reece
-* Edited on: 7 Feb 2025
+* Edited on: 13 Feb 2025
 * Edited by: reece
 * Stata v.18
 
@@ -49,6 +49,7 @@
 	gen			lnf2=lnf^2
 	gen			lns2=lns^2
 	gen			lnfs=lnf*lns
+	
 	
 * **********************************************************************
 * 3 - start of shared code
@@ -100,8 +101,8 @@ gen log_shock=ln(crop_shock)
 
 
 
-collapse (mean) seed_kg2, by(year)
- twoway (line seed_kg2 year), title()
+*collapse (mean) seed_kg2, by(year)
+ *twoway (line seed_kg2 year), title()
 
 
 
@@ -115,62 +116,95 @@ collapse (mean) seed_kg2, by(year)
 	* original reg
 	
 xtset hh_id_obs
-xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 = hh_electricity_access dist_popcenter extension dist_weekly), fe vce(cluster hh_id_obs) first
+xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 = hh_electricity_access dist_popcenter extension dist_weekly), fe vce(cluster hh_id_obs) 
 	* our reg
 
 capture drop u1
 predict u1, xb
+	*It generates the fitted values (u1), which will likely be used later to compute expected effects or residuals.
 
 capture matrix drop a
 matrix a=e(b)
+	*Store the estimated coefficients from the last regression into matrix 'a'.
 
 scalar u1_seed=a[1,1] //You are refering to the specific coefficients in the matric. e.g., this one is for dum_binis.
 scalar u1_fert=a[1,2]
+	* Extract the first coefficient from matrix 'a' and store it in the scalar 'u1_seed'.
+	*then, Extract the second coefficient from matrix 'a' and store it in the scalar 'u1_fert'.
 
 scalar u1_seed2=a[1,3]
 scalar u1_fert2=a[1,4]
+	* Extract the third coefficient from matrix 'a' and store it in the scalar 'u1_seed2' (likely the squared term for seed use).
+	* Extract the fourth coefficient from matrix 'a' and store it in the scalar 'u1_fert2' (likely the squared term for fertilizer use).	
 
 scalar u1_seedfert=a[1,5]
+	* Extract the fifth coefficient from matrix 'a' and store it in the scalar 'u1_seedfert' (likely the interaction term between seed and fertilizer use).
 
 capture drop mu1_seed mu1_fert
-gen mu1_seed = u1_seed+2*u1_seed2*dum_binis+u1_seedfert*dum_fertrate
-gen mu1_fert = u1_fert+2*u1_fert2*dum_fertrate+u1_seedfert*dum_binis
-
+gen mu1_seed = u1_seed+2*u1_seed2*lns+u1_seedfert*lnf
+	*Compute the marginal effect of seed use ('mu1_seed') by incorporating the ///
+	base effect (u1_seed), the squared term effect (2 * u1_seed2 * dum_binis), ///
+	and the interaction effect with fertilizer (u1_seedfert * dum_fertrate).
+gen mu1_fert = u1_fert+2*u1_fert2*lnf+u1_seedfert*lns
+	*Compute the marginal effect of fertilizer use ('mu1_fert') by ///
+	incorporating the base effect (u1_fert), the squared term effect ///
+	(2 * u1_fert2 * dum_fertrate), and the interaction effect with seed (u1_seedfert * dum_binis).
 
 
 /// Second Moment
 capture drop resid1
 predict resid1, e 
+	* Generate the residuals from the last regression and store them in 'resid1'.
 
 capture drop resid1_sq
 gen resid1_sq=resid1^2
+	* Compute the squared residuals and store them in 'resid1_sq'.
 
-reg resid1_sq dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed primeage age dist_agrodealer log_hh_income remitt i.year, vce(cluster id)
+reg resid1_sq lns lns2 lnf lnf2 lnfs /*primeage*/ /*age*/ dist_weekly lny /*remitt*/ i.year, vce(cluster hh_id_obs)
+	* Regress the squared residuals ('resid1_sq') on seed and fertilizer variables, household characteristics, and year fixed effects.
+// This is a heteroskedasticity test to see if error variance depends on these variables.
+// Clustered standard errors are used at the household level ('id') to account for within-household correlation.
 
 capture drop u2 
 predict u2
+	* Generate predicted values from the regression on squared residuals ('resid1_sq') and store them in 'u2'.
 
 capture matrix drop a2
 matrix a2=e(b)
-
+	* Store the estimated coefficients from the last regression (on squared residuals) into matrix 'a2'.
+	
 scalar u2_seed=a2[1,1]
+	* Extract the first coefficient from matrix 'a2' and store it in the scalar 'u2_seed' (variance effect of seed use).
 scalar u2_fert=a2[1,2]
+	* Extract the second coefficient from matrix 'a2' and store it in the scalar 'u2_fert' (variance effect of fertilizer use).
 
 scalar u2_seed2=a2[1,3]
+	* Extract the third coefficient from matrix 'a2' and store it in the scalar 'u2_seed2' (variance effect of the squared seed term).
 scalar u2_fert2=a2[1,4]
+	* Extract the fourth coefficient from matrix 'a2' and store it in the scalar 'u2_fert2' (variance effect of the squared fertilizer term).
 
 scalar u2_seedfert=a2[1,5]
+	* Extract the fifth coefficient from matrix 'a2' and store it in the scalar 'u2_seedfert' (variance effect of the interaction between seed and fertilizer).
 
 capture drop mu2_seed mu2_fert
-gen mu2_seed = u2_seed+2*u2_seed2*dum_binis+u2_seedfert*dum_fertrate
-gen mu2_fert = u2_fert+2*u2_fert2*dum_fertrate+u2_seedfert*dum_binis
-
+gen mu2_seed = u2_seed+2*u2_seed2*lns+u2_seedfert*lnf
+	/* Compute the variance effect of seed use ('mu2_seed') by incorporating:
+ - The base variance effect (u2_seed),
+ - The squared term effect (2 * u2_seed2 * dum_binis), accounting for nonlinear impact,
+ - The interaction effect with fertilizer (u2_seedfert * dum_fertrate). */
+ 
+gen mu2_fert = u2_fert+2*u2_fert2*lnf+u2_seedfert*lns
+	/* Compute the variance effect of fertilizer use ('mu2_fert') by incorporating:
+ - The base variance effect (u2_fert),
+ - The squared term effect (2 * u2_fert2 * dum_fertrate), accounting for nonlinear impact,
+ - The interaction effect with seed (u2_seedfert * dum_binis). */
+	
 //Third Moment
 
 capture drop resid3_sq
 gen resid3_sq=resid1^3
 
-reg resid3_sq dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed primeage age dist_agrodealer log_hh_income remitt i.year, vce(cluster id)
+reg resid3_sq lns lns2 lnf lnf2 lnfs /*primeage age */ dist_weekly lny /*remitt*/ i.year, vce(cluster hh_id_obs)
 
 capture drop u3
 predict u3
@@ -187,14 +221,17 @@ scalar u3_fert2=a3[1,4]
 scalar u3_seedfert=a3[1,5]
 
 capture drop mu3_fert mu3_seed
-gen mu3_seed = u3_seed+2*u3_seed2*dum_binis+u3_seedfert*dum_fertrate
-gen mu3_fert = u3_fert+2*u3_fert2*dum_fertrate+u3_seedfert*dum_binis
+gen mu3_seed = u3_seed+2*u3_seed2*lns+u3_seedfert*lnf
+gen mu3_fert = u3_fert+2*u3_fert2*lnf+u3_seedfert*lns
+
 
 *########### GENERATING INTERACTION OF MOEMENT AND DROUGHT
- gen mod_mu2_seed=mod_dr_anomaly_t_1*mu2_seed
- gen mod_mu3_seed=mod_dr_anomaly_t_1*mu3_seed
- gen mod_mu2_fert=mod_dr_anomaly_t_1*mu2_fert
- gen mod_mu3_fert=mod_dr_anomaly_t_1*mu3_fert
+ gen mod_mu2_seed=lnr*mu2_seed
+ gen mod_mu3_seed=lnr*mu3_seed
+ gen mod_mu2_fert=lnr*mu2_fert
+ gen mod_mu3_fert=lnr*mu3_fert
+	* drought anomalies*moments in original code
+	* just using lnr (log of total rainfall)
  
 
  * GENERATING CONSTRAINTS SO THAT THE COEFFICEN ON THE SEED AND FERT MOMENT ARE THS SAME
@@ -203,8 +240,9 @@ constraint 1 [mu1_seed]mu2_seed=[mu1_fert]mu2_fert
 constraint 2 [mu1_seed]mu3_seed=[mu1_fert]mu3_fert
 constraint 3 [mu1_seed]mod_mu2_seed=[mu1_fert]mod_mu2_fert
 constraint 4 [mu1_seed]mod_mu3_seed=[mu1_fert]mod_mu3_fert
-constraint 5 [mu1_seed]mod_dr_anomaly_t_1=[mu1_fert]mod_dr_anomaly_t_1
+constraint 5 [mu1_seed]lnr=[mu1_fert]lnr
 
+*** stopping here for now until sure about correct weather variable to use here
 
 **TABLE 3 in the paper
 
