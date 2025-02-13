@@ -98,6 +98,13 @@ capture drop log_rain_t
 gen log_shock=ln(crop_shock)
 */
 
+
+
+collapse (mean) seed_kg2, by(year)
+ twoway (line seed_kg2 year), title()
+
+
+
 *##############################################################################
 * 				CALCULATING AP AND DS PARAMETERS
 *____________________________________________________________________________* 
