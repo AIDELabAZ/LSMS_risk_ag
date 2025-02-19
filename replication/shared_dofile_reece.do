@@ -50,6 +50,42 @@
 	gen			lns2=lns^2
 	gen			lnfs=lnf*lns
 	
+* shock variables
+	gen 		lndevrd_t1=asinh(v09_rf6_t1)
+	gen 		lndevrd_t2=asinh(v09_rf6_t2)
+	gen 		lndevrd_t3=asinh(v09_rf6_t3)
+	* dev in rainy days
+	gen 		lndevnr_t1=asinh(v11_rf6_t1)		
+	gen 		lndevnr_t2=asinh(v11_rf6_t2)
+	gen 		lndevnr_t3=asinh(v11_rf6_t3)
+	* dev in no rain days
+	gen 		lndevrdp_t1=asinh(v13_rf6_t1)
+	gen 		lndevrdp_t2=asinh(v13_rf6_t2)
+	gen 		lndevrdp_t3=asinh(v13_rf6_t3)
+	* dev in % rainy days
+	gen 		lnlds_t1=asinh(v14_rf1_t1)
+	gen 		lnlds_t2=asinh(v14_rf1_t2)
+	gen 		lnlds_t3=asinh(v14_rf1_t3)
+	* longest dry spell
+	gen 		lnztr_t1=asinh(v07_rf2_t1)
+	gen 		lnztr_t2=asinh(v07_rf2_t2)
+	gen 		lnztr_t3=asinh(v07_rf2_t3)
+	* z score of total rainfall
+	
+* lagged rain
+	gen			lnr_t1=asinh(v05_rf1_t1)
+	* total rainfall
+	
+	label variable lny "log yield"
+	label variable lnr "log rain"
+	label variable lnf "log fertilizer"
+	label variable lns "log seed"
+	label variable lnf2 "log fertilizer^2"
+	label variable lns2 "log seed^2"
+	label variable lnfs "log fert x seed"
+	label variable lndevrd_t1 "log deviation in rainy days t-1"
+	label variable lndevrd_t2 "log deviation in rainy days t-2"
+	label variable lndevrd_t3 "log deviation in rainy days t-3"
 	
 * **********************************************************************
 * 3 - start of shared code
@@ -226,12 +262,12 @@ gen mu3_fert = u3_fert+2*u3_fert2*lnf+u3_seedfert*lns
 
 
 *########### GENERATING INTERACTION OF MOEMENT AND DROUGHT
- gen mod_mu2_seed=lnr*mu2_seed
- gen mod_mu3_seed=lnr*mu3_seed
- gen mod_mu2_fert=lnr*mu2_fert
- gen mod_mu3_fert=lnr*mu3_fert
+ gen mod_mu2_seed=lndevnr_t1*mu2_seed
+ gen mod_mu3_seed=lndevnr_t1*mu3_seed
+ gen mod_mu2_fert=lndevnr_t1*mu2_fert
+ gen mod_mu3_fert=lndevnr_t1*mu3_fert
 	* drought anomalies*moments in original code
-	* just using lnr (log of total rainfall)
+	* using deviation in no rain days t-1 
  
 
  * GENERATING CONSTRAINTS SO THAT THE COEFFICEN ON THE SEED AND FERT MOMENT ARE THS SAME
@@ -240,9 +276,8 @@ constraint 1 [mu1_seed]mu2_seed=[mu1_fert]mu2_fert
 constraint 2 [mu1_seed]mu3_seed=[mu1_fert]mu3_fert
 constraint 3 [mu1_seed]mod_mu2_seed=[mu1_fert]mod_mu2_fert
 constraint 4 [mu1_seed]mod_mu3_seed=[mu1_fert]mod_mu3_fert
-constraint 5 [mu1_seed]lnr=[mu1_fert]lnr
+constraint 5 [mu1_seed]lndevnr_t1=[mu1_fert]lndevnr_t1
 
-*** stopping here for now until sure about correct weather variable to use here
 
 **TABLE 3 in the paper
 
@@ -256,8 +291,8 @@ outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 1) replace
 
 
 bootstrap, reps(300) seed(2045): ///
-reg3 (mu1_seed mu2_seed mu3_seed mod_dr_anomaly_t_1 mod_mu2_seed mod_mu3_seed ) ///
-	(mu1_fert mu2_fert mu3_fert mod_dr_anomaly_t_1 mod_mu2_fert mod_mu3_fert), constraint(1 2 3 4 5)	nolog
+reg3 (mu1_seed mu2_seed mu3_seed lndevnr_t1 mod_mu2_seed mod_mu3_seed ) ///
+	(mu1_fert mu2_fert mu3_fert lndevnr_t1 mod_mu2_fert mod_mu3_fert), constraint(1 2 3 4 5)	nolog
 
 outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 2)
 
