@@ -171,14 +171,15 @@
 	save 			"`export'/w1_sect11_pcrop.dta", replace 
 	restore	
 
+**# Bookmark #1
 *** save prices for reece thesis ***
 
 	keep if crop_code == 2
 	*** keep only maize 
 	collapse (p50) price (first) household_id, by (ea woreda zone region) 
-	save 		"`export'/medianmaizeprice.dta", replace
 	gen country = "Ethiopia"
 	gen wave = 1 
+	save 		"`export'/medianmaizeprice.dta", replace
 	
 * close the log
 	log	close
