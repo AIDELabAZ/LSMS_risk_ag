@@ -23,13 +23,13 @@
 * **********************************************************************
 
 * define paths
-	global		root 		 	"$data/household_data/ethiopia/wave_5/raw"  
-	global		export 		 	"$data/household_data/ethiopia/wave_5/refined"
-	global		logout 		 	"$data/household_data/ethiopia/logs"
+	global root = "$data/raw_lsms_data/ethiopia/wave_5/raw/"
+	global export = "$data/lsms_risk_ag_data/refined_data/ethiopia/wave_5/"
+	global logout = "$data/lsms_risk_ag_data/refined_data/ethiopia/logs/"
 	
 * open log	
 	cap log 	close
-	log 		using			"$logout/wv5_PHSEC11", append
+	log 		using			"$logout/wv5_PHSEC11_PRICES", append
 
 
 * **********************************************************************
@@ -77,7 +77,7 @@
 	
 * create conversion key 
 	rename		s11q03a2 unit_cd
-	merge 		m:1 crop_code unit_cd using "$export/Crop_CF_Wave5.dta"
+	merge 		m:m crop_code unit_cd using "$export/crop_CF_Wave5.dta"
 	*** 1,192 not matched from master
 
 	tab 		_merge
@@ -297,26 +297,15 @@
 	merge 			m:1 crop_code region						using "$export/w5_sect11_pregion.dta", assert(3) nogenerate
 	merge 			m:1 crop_code 						        using "$export/w5_sect11_pcrop.dta", assert(3) nogenerate
 
-
 * ***********************************************************************
 * 4 - cleaning and keeping
 * ***********************************************************************
 
-* renaming some variables of interest
-	rename 		household_id hhid
-
-*	Restrict to variables of interest
-	keep  		holder_id- crop_code price crop_id p_ea- n_crop
-	order 		holder_id- crop_code price crop_id
-
-* final preparations to export
-	isid 		holder_id crop
-	compress
-	describe
-	summarize 
-	sort 		holder_id ea_id crop
-	
-	save		 "$export/PH_SEC11.dta", replace
-
+	keep if crop_code == 2
+	*** keep only maize 
+	collapse (p50) price (first) household_id, by (ea woreda zone region) 
+	gen country = "Ethiopia"
+	gen wave = 5
+	save 		"$export/medianmaizeprice.dta", replace
 * close the log
 	log	close

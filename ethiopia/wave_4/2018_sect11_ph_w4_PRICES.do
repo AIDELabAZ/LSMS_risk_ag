@@ -23,13 +23,13 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/raw_lsms_data/ethiopia/wave_4/raw/"
-	loc export = "$data/lsms_risk_ag_data/refined_data/ethiopia/wave_4/"
-	loc logout = "$data/lsms_risk_ag_data/refined_data/ethiopia/logs/"
+	global root = "$data/raw_lsms_data/ethiopia/wave_4/raw/"
+	global export = "$data/lsms_risk_ag_data/refined_data/ethiopia/wave_4/"
+	global logout = "$data/lsms_risk_ag_data/refined_data/ethiopia/logs/"
 	
 * open log	
 	cap log 	close
-	log 		using			"$logout/wv4_PHSEC11", append
+	log 		using			"$logout/wv4_PHSEC11_PRICES", append
 
 
 * **********************************************************************
@@ -77,7 +77,7 @@
 	
 * create conversion key 
 	rename		s11q03a2 unit_cd
-	merge 		m:1 crop_code unit_cd using "$export/Crop_CF_Wave4.dta"
+	merge 		m:m crop_code unit_cd using "$export/Crop_CF_Wave4.dta"
 	*** 386 not matched from master
 
 	tab 		_merge
@@ -299,7 +299,7 @@
 	collapse (p50) price (first) household_id, by (ea woreda zone region) 
 	gen country = "Ethiopia"
 	gen wave = 4 
-	save 		"`export'/medianmaizeprice.dta", replace
+	save 		"$export/medianmaizeprice.dta", replace
 
 * close the log
 	log	close
