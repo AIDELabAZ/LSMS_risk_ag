@@ -152,7 +152,7 @@ gen log_shock=ln(crop_shock)
 	* original reg
 	
 xtset hh_id_obs
-xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 = hh_electricity_access dist_popcenter extension dist_weekly), fe vce(cluster hh_id_obs) 
+xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 lnfs = hh_electricity_access dist_popcenter extension dist_weekly v05_rf1_t1), fe vce(cluster hh_id_obs) 
 	* our reg
 
 capture drop u1
@@ -286,7 +286,7 @@ bootstrap, reps(300) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert), constraint(1 2 3)	nolog
 
-outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 1) replace
+*outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 1) replace
 
 
 
@@ -294,7 +294,7 @@ bootstrap, reps(300) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed lndevnr_t1 mod_mu2_seed mod_mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert lndevnr_t1 mod_mu2_fert mod_mu3_fert), constraint(1 2 3 4 5)	nolog
 
-outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 2)
+*outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 2)
 
  
  
