@@ -25,8 +25,9 @@
 
 * open log
 	cap log close
-	*log using "`logout'/compile-prices", append
+	log using "$logout/compile-prices", append
 
+	
 * **********************************************************************
 * 1 - stack them up 
 * **********************************************************************

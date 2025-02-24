@@ -1,8 +1,8 @@
 * Project: lsms risk
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 7 Feb 2025
-* Edited by: reece
+* Edited on: 23 Feb 25
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -96,9 +96,9 @@
 	/* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        19,375
+    Not matched                       114,853
         from master                         2  (_merge==1)
-        from using                     19,373  (_merge==2)
+        from using                    114,851  (_merge==2)
 
     Matched                             6,242  (_merge==3)
     -----------------------------------------

@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: Feb 2025
 * Created by: reece
-* Edited on: 4 Feb 2025
-* Edited by: reece
+* Edited on: 23 Feb 25
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -39,7 +39,7 @@
 * load data- starting with extension
 	use 		"$root2/wave3_clean", clear
 	
-	isid wave hh_id_obs plot_id_obs crop_name
+	drop		_merge
 	
 * merge in clean com sec
 	merge m:1  manager_id_merge using "$root/wave3_rb_vars"
@@ -60,6 +60,10 @@
 * keep only merged
 	keep if			_merge == 3
 	drop			_merge
+	
+	drop if			crop_name == ""
+	
+	isid			wave hh_id_obs plot_id_obs crop_name
 	
 	save 		"$export/wave3_cleanrb", replace
 
