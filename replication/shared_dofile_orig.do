@@ -43,6 +43,7 @@ gen log_rain_t=ln(rain_t)
 /////
 xtivreg std_income primeage age rain_t i.year (dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed= dist_agrodealer dist_fert bin_extension avg_maize_price rain_t_1), fe vce(cluster id)
 
+
 capture drop u1
 predict u1, xb
 
@@ -134,7 +135,7 @@ constraint 5 [mu1_seed]mod_dr_anomaly_t_1=[mu1_fert]mod_dr_anomaly_t_1
 **TABLE 3 in the paper
 
 
-bootstrap, reps(300) seed(2045): ///
+bootstrap, reps(100) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert), constraint(1 2 3)	nolog
 
@@ -142,7 +143,7 @@ outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 1) replace
 
 
 
-bootstrap, reps(300) seed(2045): ///
+bootstrap, reps(100) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed mod_dr_anomaly_t_1 mod_mu2_seed mod_mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert mod_dr_anomaly_t_1 mod_mu2_fert mod_mu3_fert), constraint(1 2 3 4 5)	nolog
 
