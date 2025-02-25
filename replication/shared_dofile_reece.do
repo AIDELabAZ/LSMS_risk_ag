@@ -44,6 +44,7 @@
 * create log of yield, rain, fert rate, seed rate, fert * seed
 	gen 		lny=asinh(harvest_kg2/plot_area_GPS)
 	gen 		lnr=asinh(v05_rf1)
+	gen			lnrm=asinh(v01_rf1)
 	gen			lnf=asinh(nitrogen_kg2/plot_area_GPS)
 	gen			lns=asinh(seed_kg2/plot_area_GPS)
 	gen			lnf2=lnf^2
@@ -77,7 +78,8 @@
 	* total rainfall
 	
 	label variable lny "log yield"
-	label variable lnr "log rain"
+	label variable lnr "log total rain"
+	label variable lnr "log mean rain"
 	label variable lnf "log fertilizer"
 	label variable lns "log seed"
 	label variable lnf2 "log fertilizer^2"
@@ -296,8 +298,28 @@ reg3 (mu1_seed mu2_seed mu3_seed lndevnr_t1 mod_mu2_seed mod_mu3_seed ) ///
 
 *outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 2)
 
- 
- 
+
+
+********************************************************************************
+* weather loops
+********************************************************************************
+* create locals for mean and total daily rain
+	local			rain	v01_rf1 v05_rf1
+	
+* production regression
+		
+	xtset hh_id_obs
+	xtivreg 		lny hh_size `rain' improved i.year ///
+					(lnf lnf2 lns lns2 lnfs = hh_electricity_access ///
+					dist_popcenter extension dist_weekly v05_rf1_t1), ///
+					fe vce(cluster hh_id_obs) 
+
+	
+	
+
+
+	
+
 *#############################################################################
 * DETERMINE HOW LONG THESE SHOCKS MAKE PEOPLE  RISK-AVERSE
 *   we find they are temporal, get only up to t-3
