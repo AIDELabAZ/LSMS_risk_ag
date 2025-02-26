@@ -1,7 +1,7 @@
 * Project: lsms risk
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 23 Feb 25
+* Edited on: 26 Feb 25
 * Edited by: jdm
 * Stata v.18
 
@@ -76,21 +76,28 @@
 	keep if 		crop_name == "MAIZE"
 	*66,613 dropped
 	
+* generate seed vars
+	gen				isp = plot_area_GPS if improved == 1
+	replace			isp = 0 if isp == .
+	
 * collapse to plot level
 	collapse (sum)	plot_area_GPS total_labor_days2 nitrogen_kg2 ///
-					seed_kg2 harvest_kg2 ///
+					isp harvest_kg2 ///
 			 (max)	inorganic_fertilizer organic_fertilizer /// 
-			 irrigated used_pesticides improved extension ///
-			 crop_shock pests_shock rain_shock flood_shock livestock, ///
-						by(hh_asset_index hh_electricity_access /// 
-						dist_popcenter hh_shock totcons_USD2 /// 
-						soil_fertility_index hh_size year ///
-						country wave crop_name pw ea_id_merge ///
-						ea_id_obs strataid urban admin_1 admin_2 ///
-						hh_id_obs hh_id_merge admin_3 dist_weekly)
+					irrigated used_pesticides extension ///
+					crop_shock pests_shock rain_shock flood_shock livestock ///
+			 (mean) hh_asset_index hh_electricity_access /// 
+					dist_popcenter hh_shock totcons_USD2 /// 
+					soil_fertility_index hh_size, ///
+			  by(year hh_id_obs wave country pw ea_id_merge ///
+					ea_id_obs strataid urban admin_1 admin_2 ///
+					hh_id_merge admin_3 dist_weekly)
 							
     isid hh_id_obs wave
 
+* generate improved seed share
+	replace			isp = isp/plot_area_GPS
+	
 * merge in weather data
 	merge 1:1 		hh_id_obs wave using "$wth/weather"
 	/* 

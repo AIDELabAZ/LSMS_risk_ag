@@ -41,10 +41,14 @@
 * ******************************************************************************
 **#2 - create variables we need for regression
 * ******************************************************************************	
+
+* drop missing plot area
+	drop if 	plot_area_GPS == 0
+
 * create log of yield, fert rate, seed rate, fert * seed
-	gen 		lny=asinh(harvest_kg2/plot_area_GPS)
-	gen			lnf=asinh(nitrogen_kg2/plot_area_GPS)
-	gen			lns=asinh(seed_kg2/plot_area_GPS)
+	egen 		std_y = std(harvest_kg2/plot_area_GPS)
+	gen			std_f = std(nitrogen_kg2/plot_area_GPS)
+	gen			std_s = std(isp)
 	gen			lnf2=lnf^2
 	gen			lns2=lns^2
 	gen			lnfs=lnf*lns
