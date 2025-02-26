@@ -41,7 +41,7 @@
 * ******************************************************************************
 **#2 - create variables we need for regression
 * ******************************************************************************	
-* create log of yield, rain, fert rate, seed rate, fert * seed
+* create log of yield, fert rate, seed rate, fert * seed
 	gen 		lny=asinh(harvest_kg2/plot_area_GPS)
 	gen			lnf=asinh(nitrogen_kg2/plot_area_GPS)
 	gen			lns=asinh(seed_kg2/plot_area_GPS)
@@ -104,12 +104,11 @@
 		* generate residuals from the last regression
 	
 		capture drop resid1_sq
-		gen resid1_sq=resid1^2
+		gen resid1_sq=asinh(resid1^2)
 		* generate squared residuals
 	
 		reg resid1_sq hh_size lnr improved i.year lnf lnf2 lns lns2 lnfs ///
-							hh_electricity_access dist_popcenter extension ///
-							dist_weekly lnr_t1, vce(cluster hh_id_obs)
+							, vce(cluster hh_id_obs)
 							* regress on squared residuals
 							
 		capture drop u2 
@@ -150,11 +149,10 @@
 	
 ****Third Moment **************************************************************	
 		capture drop resid3_sq
-		gen resid3_sq=resid1^3
+		gen resid3_sq=asinh(resid1^3)
 	
 		reg resid3_sq hh_size lnr improved i.year lnf lnf2 lns lns2 lnfs ///
-							hh_electricity_access dist_popcenter extension ///
-							dist_weekly lnr_t1, vce(cluster hh_id_obs)
+							, vce(cluster hh_id_obs)
 
 		capture drop u3
 		predict u3

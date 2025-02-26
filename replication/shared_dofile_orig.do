@@ -43,6 +43,7 @@ gen log_rain_t=ln(rain_t)
 /////
 xtivreg std_income primeage age rain_t i.year (dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed= dist_agrodealer dist_fert bin_extension avg_maize_price rain_t_1), fe vce(cluster id)
 
+reg resid1_sq dum_binis dum_binis2 dum_fertrate dum_fertrate2 dum_fertseed primeage age dist_agrodealer log_hh_income remitt i.year, vce(cluster id)
 
 capture drop u1
 predict u1, xb
