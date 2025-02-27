@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: feb 2025
 * Created by: reece
-* Edited on: 25 Feb 2025
+* Edited on: 13 Feb 2025
 * Edited by: reece
 * Stata v.18
 
@@ -42,17 +42,13 @@
 * 2 - create variables we need for regression
 * **********************************************************************	
 * create log of yield, rain, fert rate, seed rate, fert * seed
-	gen			yield = (harvest_kg2/plot_area_GPS)
-	gen			fert = nitrogen_kg2/plot_area_GPS
 	gen 		lny=asinh(harvest_kg2/plot_area_GPS)
+	gen 		lnr=asinh(v05_rf1)
 	gen			lnf=asinh(nitrogen_kg2/plot_area_GPS)
-	gen			lns=asinh(isp)
+	gen			lns=asinh(seed_kg2/plot_area_GPS)
 	gen			lnf2=lnf^2
 	gen			lns2=lns^2
 	gen			lnfs=lnf*lns
-	gen			lnr=asinh(v05_rf1)
-	gen			lnr_t1=asinh(v05_rf1_t1)
-	
 	
 * shock variables
 	gen 		lndevrd_t1=asinh(v09_rf6_t1)
@@ -75,7 +71,13 @@
 	gen 		lnztr_t2=asinh(v07_rf2_t2)
 	gen 		lnztr_t3=asinh(v07_rf2_t3)
 	* z score of total rainfall
-
+	
+* lagged rain
+	gen			lnr_t1=asinh(v05_rf1_t1)
+	* total rainfall
+	
+	label variable lny "log yield"
+	label variable lnr "log rain"
 	label variable lnf "log fertilizer"
 	label variable lns "log seed"
 	label variable lnf2 "log fertilizer^2"
@@ -150,7 +152,7 @@ gen log_shock=ln(crop_shock)
 	* original reg
 	
 xtset hh_id_obs
-xtivreg lny hh_size v05_rf1 i.year (lnf lnf2 lns lns2 lnfs = hh_electricity_access dist_popcenter extension dist_weekly v05_rf1_t1), fe vce(cluster hh_id_obs) 
+xtivreg lny hh_size v05_rf1 improved i.year (lnf lnf2 lns lns2 lnfs = hh_electricity_access dist_popcenter extension dist_weekly v05_rf1_t1), fe vce(cluster hh_id_obs) 
 	* our reg
 
 capture drop u1
@@ -280,21 +282,22 @@ constraint 5 [mu1_seed]lndevnr_t1=[mu1_fert]lndevnr_t1
 **TABLE 3 in the paper
 
 
-bootstrap, reps(100) seed(2045): ///
+bootstrap, reps(300) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert), constraint(1 2 3)	nolog
 
-outreg2 using model1.tex, replace tex nosubstat
+*outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 1) replace
 
 
 
-
-bootstrap, reps(100) seed(2045): ///
+bootstrap, reps(300) seed(2045): ///
 reg3 (mu1_seed mu2_seed mu3_seed lndevnr_t1 mod_mu2_seed mod_mu3_seed ) ///
 	(mu1_fert mu2_fert mu3_fert lndevnr_t1 mod_mu2_fert mod_mu3_fert), constraint(1 2 3 4 5)	nolog
 
 *outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 2)
 
+ fdfd
+ 
 *#############################################################################
 * DETERMINE HOW LONG THESE SHOCKS MAKE PEOPLE  RISK-AVERSE
 *   we find they are temporal, get only up to t-3
@@ -403,16 +406,3 @@ reg3 (mu1_seed mu2_seed mu3_seed tot_shockd2 tot_shockd3 tot_shockd4 shock1_mu2_
 	(mu1_fert mu2_fert mu3_fert tot_shockd2 tot_shockd3 tot_shockd4 shock1_mu2_fert shock2_mu2_fert shock3_mu2_fert shock1_mu3_fert shock2_mu3_fert shock3_mu3_fert), constraint(1 2 3 4 5 6 7 8 9 10 11) nolog
 
 outreg2 using AP_DS_yield_compound, aster excel dec(5) ctitle(shock) replace
-
-
-
-* sloppy table code for my own reference
-* after model 1...
-outreg2 using model1.tex, replace tex addtext(Title, Model 1)
-
-* descriptive statistics 
-eststo clear
-estpost tabstat yield fert isp v11_rf1 v11_rf1_t1 v11_rf1_t2 v11_rf1_t3 hh_size extension, stat(mean sd) by(wave) columns(statistics)
-esttab using desc_stats.tex, replace cells("mean(fmt(2)) sd(fmt(2))") label collabels(none) nonotes nomtitle tex
-
-

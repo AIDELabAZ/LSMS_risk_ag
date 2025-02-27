@@ -82,7 +82,7 @@
 	
 * collapse to plot level
 	collapse (sum)	plot_area_GPS total_labor_days2 nitrogen_kg2 ///
-					isp harvest_kg2 ///
+					isp harvest_kg2 seed_kg2 ///
 			 (max)	inorganic_fertilizer organic_fertilizer /// 
 					irrigated used_pesticides extension ///
 					crop_shock pests_shock rain_shock flood_shock livestock ///
