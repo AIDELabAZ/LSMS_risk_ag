@@ -1,0 +1,28 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Effects of Input Use on Mean, Variance, and Skewness for Mean Rainfall}
+\begin{tabular}{l*{3}{c}}
+\toprule
+                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                &\multicolumn{1}{c}{Mean Effect}&\multicolumn{1}{c}{Variance Effect}&\multicolumn{1}{c}{Skewness Effect}\\
+                &     b/se         &     b/se         &     b/se         \\
+\midrule
+Standardized values of nitrogen\_kg2/plot\_area\_GPS&   -3.143         &    0.018         &   -0.808         \\
+                & (24.922)         &  (0.026)         &  (0.440)         \\
+std\_f2          &    0.550         &    0.000         &   -0.003         \\
+                &  (4.778)         &  (0.001)         &  (0.010)         \\
+Standardized values of isp&  -33.224         &    0.296\sym{***}&   17.542\sym{***}\\
+                &(324.053)         &  (0.064)         &  (0.271)         \\
+std\_s2          &   28.844         &   -0.194\sym{***}&  -16.058\sym{***}\\
+                &(285.097)         &  (0.047)         &  (0.217)         \\
+std\_fs          &   -2.833         &   -0.011\sym{**} &    0.211         \\
+                & (40.707)         &  (0.004)         &  (0.179)         \\
+(mean) hh\_size  &   -0.857         &    0.013         &    0.949\sym{***}\\
+                &  (7.537)         &  (0.012)         &  (0.039)         \\
+\midrule
+Observations    & 6092.000         & 6092.000         & 6092.000         \\
+Variance Effect (mu2\_s)&                  &    0.296         &                  \\
+Skewness Effect (mu3\_s)&                  &                  &   17.542         \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -2,7 +2,7 @@
 * Created on: feb 2025
 * Created by: reece
 * Edited on: 27 Feb 2025
-* Edited by: jdm
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -62,7 +62,147 @@
 	
 	
 ********************************************************************************
-**## 3.1 - create loop for production regressions
+**## 3.1 - Creating table 2: Production function with IVs for Total and Mean RF
+********************************************************************************
+
+* Clear previous stored results
+	eststo 			clear
+
+	local 			rain v01_rf1 v05_rf1
+	local 			lag v01_rf1_t1 v05_rf1_t1
+
+		foreach v in `rain' {
+			foreach t in `lag' {
+				if substr("`v'", 2, 2) == substr("`t'", 2, 2) {
+
+            *** Mean Effect Regression ***
+            xtivreg std_y hh_size `v' i.year ///
+                (std_f std_f2 std_s std_s2 std_fs = ///
+                hh_electricity_access dist_popcenter ///
+                extension dist_weekly `t'), ///
+                fe vce(cluster hh_id_obs)
+
+            * Store mean regression
+            eststo mean_`v'
+
+            *** Variance Effect Regression ***
+            * Drop residuals if they exist
+            capture drop resid1 resid2 resid3
+
+            * Generate residuals
+            predict resid1, e
+            gen resid2 = asinh(resid1^2)
+
+            xtreg resid2 std_f std_f2 std_s std_s2 std_fs ///
+                hh_size `v' i.year, fe vce(cluster hh_id_obs)
+
+            * Store variance regression
+            eststo var_`v'
+            estadd scalar mu2_s = _b[std_s]
+            estadd scalar mu2_f = _b[std_f]
+
+            *** Skewness Effect Regression ***
+            * Drop residuals before generating new ones
+            capture drop resid3
+
+            gen resid3 = asinh(resid1^3)
+
+            xtreg resid3 std_f std_f2 std_s std_s2 std_fs ///
+                hh_size `v' i.year, fe vce(cluster hh_id_obs)
+
+            * Store skewness regression
+            eststo skew_`v'
+            estadd scalar mu3_s = _b[std_s]
+            estadd scalar mu3_f = _b[std_f]
+        }
+    }
+}
+
+			* generate and store table
+			esttab 			mean_v01_rf1 var_v01_rf1 skew_v01_rf1 ///  
+							mean_v05_rf1 var_v05_rf1 skew_v05_rf1 ///  
+							using prod_combined.tex, replace ///  
+							cells(b(star fmt(3)) se(par fmt(3))) ///  
+							stats(N mu2_s mu3_s hh_size, ///  
+							labels("Observations" "Variance Effect (mu2_s)" "Skewness Effect (mu3_s)" "Household Size")) ///  
+							keep(std_f std_f2 std_s std_s2 std_fs hh_size) ///  
+							label booktabs compress ///  
+							title("Effects of Input Use on Mean, Variance, and Skewness for Total and Mean Rainfall") ///  
+							mtitles("Mean (Total)" "Variance (Total)" "Skewness (Total)" "Mean (Mean)" "Variance (Mean)" "Skewness (Mean)")
+							
+********************************************************************************
+**## 3.1 - Creating table 3: AP and DS risk aversion regressions
+********************************************************************************
+	eststo 			clear
+
+* Define rainfall and lag variables
+	local 			rain v01_rf1 v05_rf1
+	local 			lag v01_rf1_t1 v05_rf1_t1
+
+	foreach v in `rain' {
+		foreach t in `lag' {
+			if substr("`v'", 2, 2) == substr("`t'", 2, 2) {
+
+				* Production function with IV
+				xtivreg std_y hh_size `v' i.year ///
+					(std_f std_f2 std_s std_s2 std_fs = ///
+					hh_electricity_access dist_popcenter ///
+					extension dist_weekly `t'), ///
+					fe vce(cluster hh_id_obs)
+
+				* Generate residuals
+				capture drop resid1 resid2 resid3
+				predict resid1, e
+				gen resid2 = asinh(resid1^2)
+
+				* Variance regression
+				xtreg resid2 std_f std_f2 std_s std_s2 std_fs ///
+					hh_size `v' i.year, fe vce(cluster hh_id_obs)
+
+				* Store No Shock model only once
+				if "`v'" == "v01_rf1" & "`t'" == "v01_rf1_t1" {
+					eststo model_no_shock
+					estadd scalar mu2_s = _b[std_s]
+					estadd scalar mu3_s = _b[std_f]
+				}
+
+				* Skewness regression
+				gen resid3 = asinh(resid1^3)
+				xtreg resid3 std_f std_f2 std_s std_s2 std_fs ///
+					hh_size `v' i.year, fe vce(cluster hh_id_obs)
+
+				* Loop over shock variables
+				local shock v07_rf1_t1 v09_rf1_t1 v11_rf1_t1 v13_rf1_t1 v14_rf1_t1
+				foreach s in `shock' {
+
+					* Create interaction terms
+					gen mod_mu2_s = `s' * mu2_s
+					gen mod_mu3_s = `s' * mu3_s
+					gen mod_mu2_f = `s' * mu2_f
+					gen mod_mu3_f = `s' * mu3_f
+
+					* Model With Shock
+					bootstrap, reps(100) seed(2045): ///
+					reg3 (mu1_s mu2_s mu3_s `s' mod_mu2_s mod_mu3_s) ///
+						(mu1_f mu2_f mu3_f `s' mod_mu2_f mod_mu3_f), ///
+						constraint(1 2 3 4 5) nolog
+
+					* Store results for model with shock
+					eststo model_`s'
+					estadd scalar mu2_s = _b[mu2_s]
+					estadd scalar mu3_s = _b[mu3_s]
+
+                * Drop generated interaction variables
+					drop 			mod_mu2_s mod_mu3_s mod_mu2_f mod_mu3_f
+            }
+        }
+    }
+}
+
+	
+	
+********************************************************************************
+**## 3.1 - Creating table: Comparing No Shock vs v11_rf1_t1 for mu2_s and mu3_s
 ********************************************************************************
 
 * loop through rainfall in time t
@@ -82,6 +222,9 @@
 									hh_electricity_access dist_popcenter ///
 									extension dist_weekly `t'), ///
 									fe vce(cluster hh_id_obs) 
+									
+			* store mean regression for results- table 2
+				eststo 			mean_`v'_`t'
 
 ****First Moment****************************************************************
 
@@ -127,7 +270,10 @@
 				xtreg 			resid2 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
-					
+									
+			* store variance for results- table 2
+				eststo 			var_`v'_`t'
+				 		
 			* generate fitted values (u2)	
 				capture 		drop u2 
 				predict 		u2
@@ -166,6 +312,9 @@
 				xtreg 			resid3 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
+									
+			* store variance for results- table 2
+				eststo 			var_`v'_`t'
 
 			* generate fitted values (u3)	
 				capture 		drop u3
@@ -200,7 +349,7 @@
 ********************************************************************************	
 			
 			* generate loop for shock variables
-				local shock v07_rf1_t1 v09_rf1_t1 v11_rf1_t1 v13_rf1_t1 v14_rf1_t1
+				local shock /*v07_rf1_t1 v09_rf1_t1*/ v11_rf1_t1 /*v13_rf1_t1 v14_rf1_t1*/
 					foreach s in `shock' {
 						
 				* create interaction of moment and shock
@@ -223,12 +372,36 @@
 					reg3 			(mu1_s mu2_s mu3_s) ///
 									(mu1_f mu2_f mu3_f), ///
 									constraint(1 2) nolog
+									
+						** generate table for AP regression results- table 3
+						* store results from model 1, only keeping mu2_s and mu3_s ///
+							so we only have AP and DS results
+							eststo 			clear
+							eststo 			model1
+							estadd 			scalar mu2_s = _b[mu2_s]
+							estadd 			scalar mu3_s = _b[mu3_s]
 
 				* Model 2: AP regression with shock
 					bootstrap, 		reps(100) seed(2045): ///
 					reg3 			(mu1_s mu2_s mu3_s `s' mod_mu2_s mod_mu3_s) ///
 									(mu1_f mu2_f mu3_f `s' mod_mu2_f mod_mu3_f), ///
 									constraint(1 2 3 4 5) nolog
+									
+							* store results from model 2
+							eststo 			model2
+							estadd 			scalar mu2_s = _b[mu2_s]
+							estadd 			scalar mu3_s = _b[mu3_s]
+							
+				* generate table 3 (excluding model 3 for now)
+					esttab 			model1 model2 using table3.tex, replace ///
+									cells(b(star fmt(3)) se(par fmt(3))) ///
+									stats(N, labels("Observations")) ///
+									keep(mu2_s mu3_s) ///
+									label booktabs compress ///
+									title("Arrow Pratt and Downside Risk Aversion") ///
+									mtitles("Model 1" "Model 2") 
+									
+
 
 				* drop variables generated for AP regressions
 					drop 			mod_mu2_s mod_mu3_s mod_mu2_f mod_mu3_f
@@ -239,133 +412,3 @@
 		}
 	}
 }
-
-
-* ******************************************************************************
-**#4 - determine how long these shocks make people risk-averse
-* ******************************************************************************
-/*
-	gen mod_mu2_seed2=mod_dr_anomaly_t_2*mu2_seed
-	gen mod_mu3_seed2=mod_dr_anomaly_t_2*mu3_seed
-	gen mod_mu2_fert2=mod_dr_anomaly_t_2*mu2_fert
-	gen mod_mu3_fert2=mod_dr_anomaly_t_2*mu3_fert
-
-	gen mod_mu2_seed3=mod_dr_anomaly_t_3*mu2_seed
-	gen mod_mu3_seed3=mod_dr_anomaly_t_3*mu3_seed
-	gen mod_mu2_fert3=mod_dr_anomaly_t_3*mu2_fert
-	gen mod_mu3_fert3=mod_dr_anomaly_t_3*mu3_fert
-
-	gen mod_mu2_seed4=mod_dr_anomaly_t_4*mu2_seed
-	gen mod_mu3_seed4=mod_dr_anomaly_t_4*mu3_seed
-	gen mod_mu2_fert4=mod_dr_anomaly_t_4*mu2_fert
-	gen mod_mu3_fert4=mod_dr_anomaly_t_4*mu3_fert
-
-	gen mod_mu2_seed5=mod_dr_anomaly_t_5*mu2_seed
-	gen mod_mu3_seed5=mod_dr_anomaly_t_5*mu3_seed
-	gen mod_mu2_fert5=mod_dr_anomaly_t_5*mu2_fert
-	gen mod_mu3_fert5=mod_dr_anomaly_t_5*mu3_fert
-
-	constraint drop 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
-	constraint 1 [mu1_seed]mu2_seed=[mu1_fert]mu2_fert
-	constraint 2 [mu1_seed]mu3_seed=[mu1_fert]mu3_fert
-	constraint 3 [mu1_seed]mod_mu2_seed=[mu1_fert]mod_mu2_fert
-	constraint 4 [mu1_seed]mod_mu2_seed2=[mu1_fert]mod_mu2_fert2
-	constraint 5 [mu1_seed]mod_mu2_seed3=[mu1_fert]mod_mu2_fert3
-	constraint 6 [mu1_seed]mod_mu2_seed4=[mu1_fert]mod_mu2_fert4
-	constraint 7 [mu1_seed]mod_mu2_seed5=[mu1_fert]mod_mu2_fert5
-	constraint 8 [mu1_seed]mod_mu3_seed=[mu1_fert]mod_mu3_fert
-	constraint 9 [mu1_seed]mod_mu3_seed2=[mu1_fert]mod_mu3_fert2
-	constraint 10 [mu1_seed]mod_mu3_seed3=[mu1_fert]mod_mu3_fert3
-	constraint 11 [mu1_seed]mod_mu3_seed4=[mu1_fert]mod_mu3_fert4
-	constraint 12 [mu1_seed]mod_mu3_seed5=[mu1_fert]mod_mu3_fert5
-	constraint 13 [mu1_seed]mod_dr_anomaly_t_1=[mu1_fert]mod_dr_anomaly_t_1
-	constraint 14 [mu1_seed]mod_dr_anomaly_t_2=[mu1_fert]mod_dr_anomaly_t_2
-	constraint 15 [mu1_seed]mod_dr_anomaly_t_3=[mu1_fert]mod_dr_anomaly_t_3
-	constraint 16 [mu1_seed]mod_dr_anomaly_t_4=[mu1_fert]mod_dr_anomaly_t_4
-	constraint 17 [mu1_seed]mod_dr_anomaly_t_5=[mu1_fert]mod_dr_anomaly_t_5
-
-
-	**Table 4: Do lagged weather shocks affect risk attitudes?
-	
-	reg3 (mu1_seed mu2_seed mu3_seed  mod_dr_anomaly_t_1-mod_dr_anomaly_t_5 mod_mu2_see* 		mod_mu3_see* ) ///
-		(mu1_fert mu2_fert mu3_fert mod_dr_anomaly_t_1-mod_dr_anomaly_t_5 mod_mu2_fer* 			mod_mu3_fer*), constraint(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) nolog
-
-	*outreg2 using AP_DS_yield_lag, aster excel dec(5) ctitle(Model 3) replace
-
-* ******************************************************************************
-**#5 - determine the accumulated shock effects- do they compound the effect?
-* ******************************************************************************
-
-	capture drop tot_shockd2	
-	gen tot_shockd2=0
-	replace tot_shockd2=1 if mod_dr_anomaly_t_1
-
-	capture drop tot_shockd3
-	gen tot_shockd3=0
-	replace tot_shockd3=1 if mod_dr_anomaly_t_1==1 & mod_dr_anomaly_t_2==1
-
-	capture drop tot_shockd4
-	gen tot_shockd4=0
-	replace tot_shockd4=1 if mod_dr_anomaly_t_1==1 & mod_dr_anomaly_t_2==1 & 				mod_dr_anomaly_t_3==1
-
-	*drop shock*_mu2*
-	*drop shock*_mu3*
-	*** code stops here, need to mute these drops- reece
-
-	gen shock1_mu2_seed=tot_shockd2*mu2_seed
-	gen shock2_mu2_seed=tot_shockd3*mu2_seed
-	gen shock3_mu2_seed=tot_shockd4*mu2_seed
-
-	gen shock1_mu3_seed=tot_shockd2*mu3_seed
-	gen shock2_mu3_seed=tot_shockd3*mu3_seed
-	gen shock3_mu3_seed=tot_shockd4*mu3_seed
-
-	gen shock1_mu2_fert=tot_shockd2*mu2_fert
-	gen shock2_mu2_fert=tot_shockd3*mu2_fert
-	gen shock3_mu2_fert=tot_shockd4*mu2_fert
-
-	gen shock1_mu3_fert=tot_shockd2*mu3_fert
-	gen shock2_mu3_fert=tot_shockd3*mu3_fert
-	gen shock3_mu3_fert=tot_shockd4*mu3_fert
-
-
-	constraint drop 1 2 3 4 5 6 7 8 9 10 11 12 
-	constraint 1 [mu1_seed]mu2_seed=[mu1_fert]mu2_fert
-	constraint 2 [mu1_seed]mu3_seed=[mu1_fert]mu3_fert
-	constraint 3 [mu1_seed]shock1_mu2_seed=[mu1_fert]shock1_mu2_fert
-	constraint 4 [mu1_seed]shock2_mu2_seed=[mu1_fert]shock2_mu2_fert
-	constraint 5 [mu1_seed]shock3_mu2_seed=[mu1_fert]shock3_mu2_fert
-
-	constraint 6 [mu1_seed]shock1_mu3_seed=[mu1_fert]shock1_mu3_fert
-	constraint 7 [mu1_seed]shock2_mu3_seed=[mu1_fert]shock2_mu3_fert
-	constraint 8 [mu1_seed]shock3_mu3_seed=[mu1_fert]shock3_mu3_fert
-
-	constraint 9 [mu1_seed]tot_shockd2=[mu1_fert]tot_shockd2
-	constraint 10 [mu1_seed]tot_shockd3=[mu1_fert]tot_shockd3
-	constraint 11 [mu1_seed]tot_shockd4=[mu1_fert]tot_shockd4
-
-
-	*Table 4 in the document
-	reg3 (mu1_seed mu2_seed mu3_seed tot_shockd2 tot_shockd3 tot_shockd4 shock1_mu2_seed 		shock2_mu2_seed shock3_mu2_seed shock1_mu3_seed shock2_mu3_seed shock3_mu3_seed) ///
-		(mu1_fert mu2_fert mu3_fert tot_shockd2 tot_shockd3 tot_shockd4 shock1_mu2_fert 		shock2_mu2_fert shock3_mu2_fert shock1_mu3_fert shock2_mu3_fert shock3_mu3_fert), 		constraint(1 2 3 4 5 6 7 8 9 10 11) nolog
-
-	*outreg2 using AP_DS_yield_compound, aster excel dec(5) ctitle(shock) replace
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

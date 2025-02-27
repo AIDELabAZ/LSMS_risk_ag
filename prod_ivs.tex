@@ -1,0 +1,52 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{3}{c}}
+\toprule
+                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                &\multicolumn{1}{c}{Mean}&\multicolumn{1}{c}{Variance}&\multicolumn{1}{c}{Skewness}\\
+\midrule
+Standardized values of nitrogen\_kg2/plot\_area\_GPS&   -3.143         &   0.0182         &   -0.808\sym{*}  \\
+                &  (24.92)         & (0.0262)         &  (0.440)         \\
+\addlinespace
+std\_f2          &    0.550         &0.0000238         & -0.00315         \\
+                &  (4.778)         &(0.000547)         & (0.0101)         \\
+\addlinespace
+Standardized values of isp&   -33.22         &    0.296\sym{***}&    17.54\sym{***}\\
+                &  (324.1)         & (0.0645)         &  (0.271)         \\
+\addlinespace
+std\_s2          &    28.84         &   -0.194\sym{***}&   -16.06\sym{***}\\
+                &  (285.1)         & (0.0472)         &  (0.217)         \\
+\addlinespace
+std\_fs          &   -2.833         &  -0.0110\sym{***}&    0.211         \\
+                &  (40.71)         &(0.00394)         &  (0.179)         \\
+\addlinespace
+(mean) hh\_size  &   -0.857         &   0.0131         &    0.949\sym{***}\\
+                &  (7.537)         & (0.0120)         & (0.0388)         \\
+\addlinespace
+Mean Daily Rainfall&    1.474         &   0.0239         &   -1.527\sym{***}\\
+                &  (13.23)         & (0.0182)         & (0.0506)         \\
+\addlinespace
+year of survey- wv1 2011=2011&        0         &        0         &        0         \\
+                &      (.)         &      (.)         &      (.)         \\
+\addlinespace
+year of survey- wv1 2011=2013&   -1.157         &  -0.0358         &    1.617\sym{***}\\
+                &  (11.33)         & (0.0500)         & (0.0789)         \\
+\addlinespace
+year of survey- wv1 2011=2015&   -3.277         &   0.0269         &    3.694\sym{***}\\
+                &  (30.84)         & (0.0508)         & (0.0939)         \\
+\addlinespace
+year of survey- wv1 2011=2018&    2.779         &   0.0805\sym{**} &   -3.101\sym{***}\\
+                &  (26.78)         & (0.0410)         &  (0.153)         \\
+\addlinespace
+year of survey- wv1 2011=2021&        0         &        0         &        0         \\
+                &      (.)         &      (.)         &      (.)         \\
+\addlinespace
+Constant        &   -30.58         &    1.458\sym{***}&    16.97\sym{***}\\
+                &  (300.0)         &  (0.125)         &  (0.391)         \\
+\midrule
+Observations    &     6092         &     6092         &     6092         \\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+}
