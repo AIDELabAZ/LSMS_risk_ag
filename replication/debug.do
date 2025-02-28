@@ -122,10 +122,10 @@
 	
 			* generate squared residuals
 				capture 		drop resid2
-				gen 			resid2 = resid1^2
+				gen 			std_y2 = std_y^2
 	
 			* regress on squared residuals
-				xtreg 			resid2 std_f std_f2 std_s std_s2 std_fs /// 
+				xtreg 			std_y2 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
 					
@@ -161,10 +161,10 @@
 
 			* generate cubed residuals
 				capture 		drop resid3
-				gen 			resid3 = asinh(resid1^3)
+				gen 			std_y3 = std_y^3
 	
 			* regress on cubed residuals
-				xtreg 			resid3 std_f std_f2 std_s std_s2 std_fs /// 
+				xtreg 			std_y3 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
 
