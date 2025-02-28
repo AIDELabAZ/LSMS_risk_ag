@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: feb 2025
 * Created by: reece
-* Edited on: 27 Feb 2025
+* Edited on: 28 Feb 2025
 * Edited by: jdm
 * Stata v.18
 
@@ -46,6 +46,8 @@
 
 * create log of yield, fert rate, seed rate, fert * seed
 	egen 		std_y = std(harvest_kg2/plot_area_GPS)
+	gen			std_y2 = std_y^2
+	gen			std_y3 = std_y^3
 	egen		std_f = std(nitrogen_kg2/plot_area_GPS)
 	egen		std_s = std(isp)
 	gen			std_f2 = std_f^2
@@ -84,54 +86,40 @@
 									extension dist_weekly `t'), ///
 									fe vce(cluster hh_id_obs) 
 
-****First Moment****************************************************************
-
-			* generate fitted values (u1)			
-				capture 		drop u1							
-				predict 		u1, xb
+****First Moment***************************************************************
 	
 			* store estimated coefficients from last reg into matrix 'a'
 				capture 		matrix drop a
 				matrix 			a = e(b)
 	
 			* extract the fertilizer coefficients from matrix 'a'
-			* and store them as 'u1_f' and 'u1_f2'
-				scalar 			u1_f = a[1,1]
-				scalar 			u1_f2 = a[1,2]
+			* and store them as 'b1_f' and 'b1_f2'
+				scalar 			b1_f = a[1,1]
+				scalar 			b1_f2 = a[1,2]
 	
 			* extract the seed coefficients from matrix 'a'
-			* and store them as 'u1_s' and 'u1_s2'
-				scalar 			u1_s = a[1,3]
-				scalar 			u1_s2 = a[1,4]
+			* and store them as 'b1_s' and 'b1_s2'
+				scalar 			b1_s = a[1,3]
+				scalar 			b1_s2 = a[1,4]
 	
 			* extract the interaction coefficients from matrix 'a'
-			* and store it as 'u1_fs'
-				scalar 			u1_fs = a[1,5]
+			* and store it as 'b1_fs'
+				scalar 			b1_fs = a[1,5]
 	
 			* computing marginal effect of seed and fertilizer
 				capture 		drop mu1_s mu1_f
-				gen 			mu1_s = u1_s + 2*u1_s2 * std_s + u1_fs * std_f
-				gen 			mu1_f = u1_f + 2*u1_f2 * std_f + u1_fs * std_s
+				gen 			mu1_s = b1_s + 2*b1_s2 * std_s + b1_fs * std_f
+				gen 			mu1_f = b1_f + 2*b1_f2 * std_f + b1_fs * std_s
 	
 	
 ****Second Moment **************************************************************
-
-			* generate residuals from the last regression
-				capture 		drop resid1
-				predict 		resid1, e 
 	
-			* generate squared residuals
-				capture 		drop resid2
-				gen 			std_y2 = std_y^2
-	
-			* regress on squared residuals
-				xtreg 			std_y2 std_f std_f2 std_s std_s2 std_fs /// 
-									hh_size `v' i.year, fe ///
-									vce(cluster hh_id_obs)
-					
-			* generate fitted values (u2)	
-				capture 		drop u2 
-				predict 		u2
+			* regress on squared yield					
+				xtivreg 		std_y2 hh_size `v' i.year ///
+									(std_f std_f2 std_s std_s2 std_fs = ///
+									hh_electricity_access dist_popcenter ///
+									extension dist_weekly `t'), ///
+									fe vce(cluster hh_id_obs) 
 	
 			* store estimated coefficients from last reg into matrix 'a2'
 				capture 		matrix drop a2
@@ -139,38 +127,33 @@
 	
 			* extract the fertilizer coefficients from matrix 'a2'
 			* (variance effect of fertilizer use)
-				scalar 			u2_f = a2[1,1]
-				scalar 			u2_f2 = a2[1,2]
+				scalar 			b2_f = a2[1,1]
+				scalar 			b2_f2 = a2[1,2]
 	
 			* extract the seed coefficients from matrix 'a2'
 			* (variance effect of seed use)
-				scalar 			u2_s = a2[1,3]
-				scalar 			u2_s2 = a2[1,4]
+				scalar 			b2_s = a2[1,3]
+				scalar 			b2_s2 = a2[1,4]
 	
 			* extract the interaction coefficients from matrix 'a2'
 			* (variance effect of the seed and fertilizer interaction)
-				scalar 			u2_fs = a2[1,5]
+				scalar 			b2_fs = a2[1,5]
 	
 			* computing variance effect of seed and fertilizer
 				capture 		drop mu2_s mu2_f
-				gen 			mu2_s = u2_s + 2*u2_s2 * std_s + u2_fs * std_f
-				gen 			mu2_f = u2_f + 2*u2_f2 * std_f + u2_fs * std_s
+				gen 			mu2_s = b2_s + 2*b2_s2 * std_s + b2_fs * std_f
+				gen 			mu2_f = b2_f + 2*b2_f2 * std_f + b2_fs * std_s
 
 
 ****Third Moment ***************************************************************
 
-			* generate cubed residuals
-				capture 		drop resid3
-				gen 			std_y3 = std_y^3
-	
-			* regress on cubed residuals
-				xtreg 			std_y3 std_f std_f2 std_s std_s2 std_fs /// 
-									hh_size `v' i.year, fe ///
-									vce(cluster hh_id_obs)
-
-			* generate fitted values (u3)	
-				capture 		drop u3
-				predict 		u3
+			* regress on cubed yield
+				xtivreg 		std_y3 hh_size `v' i.year ///
+									(std_f std_f2 std_s std_s2 std_fs = ///
+									hh_electricity_access dist_popcenter ///
+									extension dist_weekly `t'), ///
+									fe vce(cluster hh_id_obs) 
+			
 	
 			* store estimated coefficients from last reg into matrix 'a3'
 				capture 		matrix drop a3
@@ -178,22 +161,22 @@
 	
 			* extract the fertilizer coefficients from matrix 'a2'
 			* (skew effect of fertilizer use)
-				scalar 			u3_f = a3[1,1]
-				scalar 			u3_f2 = a3[1,2]
+				scalar 			b3_f = a3[1,1]
+				scalar 			b3_f2 = a3[1,2]
 	
 			* extract the seed coefficients from matrix 'a2'
 			* (skew effect of seed use)
-				scalar 			u3_s = a3[1,3]
-				scalar 			u3_s2 = a3[1,4]
+				scalar 			b3_s = a3[1,3]
+				scalar 			b3_s2 = a3[1,4]
 	
 			* extract the interaction coefficients from matrix 'a2'
 			* (skew effect of the seed and fertilizer interaction)
-				scalar 			u3_fs = a3[1,5]
+				scalar 			b3_fs = a3[1,5]
 	
 			* computing skew effect of seed and fertilizer
 				capture 		drop mu3_s mu3_f
-				gen 			mu3_s = u3_s + 2*u3_s2 * std_s + u3_fs * std_f
-				gen 			mu3_f = u3_f + 2*u3_f2 * std_f + u3_fs * std_s
+				gen 			mu3_s = b3_s + 2*b3_s2 * std_s + b3_fs * std_f
+				gen 			mu3_f = b3_f + 2*b3_f2 * std_f + b3_fs * std_s
 
 				
 ********************************************************************************
@@ -241,8 +224,7 @@
 					}
 			}	
 			* drop variables generated in production regressions
-				drop			mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f ///
-									u1 u2 u3 resid1 resid2 resid3	
+				drop			mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
 		}
 	}
 }
