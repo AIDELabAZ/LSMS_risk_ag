@@ -64,6 +64,8 @@
 	rename 		household_id hh_id_merge
 	rename 		ea ea_id_merge
 	
+	drop if		hh_id_merge == ""
+	
 	save 		"$root/prices", replace
 
 * **********************************************************************

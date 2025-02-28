@@ -66,15 +66,16 @@
 ********************************************************************************
 
 * loop through rainfall in time t
-	local			rain	v01_rf1 v05_rf1
+	local			rain	v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
 	foreach v in `rain' {
 		
 	* loop through rainfall in time t-1
-		local			lag	v01_rf1_t1 v05_rf1_t1
+		local			lag	v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
 		foreach t in `lag' {
 			
 		* compare two rainfall variables and only use one from same source	
-			if substr("`v'", 2, 2) == substr("`t'", 2, 2) {
+			if substr("`v'", 2, 2) == substr("`t'", 2, 2) & ///
+			   substr("`v'", 7, 1) == substr("`t'", 7, 1) {
 				
 			* production function with IV
 				xtivreg 		std_y hh_size `v' i.year ///
@@ -121,10 +122,10 @@
 	
 			* generate squared residuals
 				capture 		drop resid2
-				gen 			resid2 = asinh(resid1^2)
+				gen 			std_y2 = std_y^2
 	
 			* regress on squared residuals
-				xtreg 			resid2 std_f std_f2 std_s std_s2 std_fs /// 
+				xtreg 			std_y2 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
 					
@@ -160,10 +161,10 @@
 
 			* generate cubed residuals
 				capture 		drop resid3
-				gen 			resid3 = asinh(resid1^3)
+				gen 			std_y3 = std_y^3
 	
 			* regress on cubed residuals
-				xtreg 			resid3 std_f std_f2 std_s std_s2 std_fs /// 
+				xtreg 			std_y3 std_f std_f2 std_s std_s2 std_fs /// 
 									hh_size `v' i.year, fe ///
 									vce(cluster hh_id_obs)
 
@@ -200,8 +201,13 @@
 ********************************************************************************	
 			
 			* generate loop for shock variables
-				local shock v07_rf1_t1 v09_rf1_t1 v11_rf1_t1 v13_rf1_t1 v14_rf1_t1
+				local shock v07_rf2_t1 v09_rf2_t1 v11_rf2_t1 v13_rf2_t1 v14_rf2_t1 ///
+							v07_rf3_t1 v09_rf3_t1 v11_rf3_t1 v13_rf3_t1 v14_rf3_t1 ///
+							v07_rf4_t1 v09_rf4_t1 v11_rf4_t1 v13_rf4_t1 v14_rf4_t1
 					foreach s in `shock' {
+						
+				* compare two rainfall variables and only use one from same source	
+					if substr("`v'", 7, 1) == substr("`s'", 7, 1) {
 						
 				* create interaction of moment and shock
 					gen 			mod_mu2_s = `s' * mu2_s
@@ -232,6 +238,7 @@
 
 				* drop variables generated for AP regressions
 					drop 			mod_mu2_s mod_mu3_s mod_mu2_f mod_mu3_f
+					}
 			}	
 			* drop variables generated in production regressions
 				drop			mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f ///
