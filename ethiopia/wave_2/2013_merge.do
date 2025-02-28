@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: Feb 2025
 * Created by: reece
-* Edited on: 23 Feb 25
+* Edited on: 28 Feb 25
 * Edited by: jdm
 * Stata v.18
 
@@ -45,16 +45,14 @@
 	merge m:1 manager_id_merge using "$root/wave2_rb_vars"
 
 /*
-
     Result                      Number of obs
     -----------------------------------------
-    Not matched                         2,291
-        from master                     1,559  (_merge==1)
+    Not matched                         4,417
+        from master                     3,685  (_merge==1)
         from using                        732  (_merge==2)
 
-    Matched                            23,708  (_merge==3)
+    Matched                            23,723  (_merge==3)
     -----------------------------------------
-
 */
 
 * keep only merged
@@ -62,7 +60,58 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
+	*** one obs dropped
 	
+	drop if			harv_missing == 1
+	*** 1,746 obs dropped
+	
+	
+***********************************************************************
+**# 2 - impute value of harvest
+***********************************************************************
+
+* replace outliers at top 5 percent
+	gen				yield = harvest_value_USD/plot_area_GPS
+	sum 			harvest_value_USD
+	*** mean 72, sd 457, max 30,958
+	
+	sum				yield, detail
+	*** mean 6,250, sd 429,935, max 6.11e+07
+	
+	replace			harvest_value_USD = . if yield > `r(p95)' 
+	* 1,539 changes made
+	
+* impute 
+	mi set 			wide 	// declare the data to be wide.
+	mi xtset		, clear 	// clear any xtset that may have had in place previously
+	
+	mi register			imputed harvest_value_USD // identify harv vle variable to be imputed
+	sort				hh_id_obs plot_id_obs parcel_id_obs cropid, stable // sort to ensure reproducability of results
+	mi impute 			pmm harvest_value_USD i.admin_2 plot_area_GPS i.cropid, add(1) rseed(245780) ///
+								noisily dots force knn(5) bootstrap					
+**# Bookmark #1
+	mi 				unset	
+	
+* inspect imputation 
+	sum 			harvest_value_USD_1_
+	*** mean 55, sd 155, max 7,144
+	
+	drop			yield
+	gen				yield = harvest_value_USD/plot_area_GPS
+	sum				yield
+	*** mean 547, sd 724, max 4,586
+	
+* replace the imputated variable
+	replace 			harvest_value_USD = harvest_value_USD_1_
+	*** 1,356 changes
+	
+	drop 				mi_miss harvest_value_USD_1_ yield
+	
+	
+***********************************************************************
+**# 3 - end matter
+***********************************************************************
+
 	isid			wave hh_id_obs plot_id_obs crop_name
 	
 	save 		"$export/wave2_cleanrb", replace

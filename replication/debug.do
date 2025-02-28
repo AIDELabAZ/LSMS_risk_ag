@@ -21,7 +21,6 @@
 ********************************************************************************
 
 * define paths
-
 	global root 	"$data/lsms_risk_ag_data/regression_data/ethiopia"
 	global export 	"$data/lsms_risk_ag_data/results"
 	global logout 	"$data/lsms_risk_ag_data/regression_data/logs"
@@ -41,11 +40,17 @@
 **# 2 - create variables we need for regression
 * ******************************************************************************	
 
-* drop missing plot area
-	drop if 	plot_area_GPS == 0
-
 * create log of yield, fert rate, seed rate, fert * seed
-	egen 		std_y = std(harvest_kg2/plot_area_GPS)
+	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
+	
+* summarize variable
+	sum			std_y
+	*** 3 wild outliers. drop them then redo std_y calc
+	
+	drop if		std_y > 20
+	drop		std_y
+	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
+	
 	gen			std_y2 = std_y^2
 	gen			std_y3 = std_y^3
 	egen		std_f = std(nitrogen_kg2/plot_area_GPS)

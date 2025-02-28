@@ -1,7 +1,7 @@
 * Project: lsms risk
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 26 Feb 25
+* Edited on: 28 Feb 25
 * Edited by: jdm
 * Stata v.18
 
@@ -54,35 +54,32 @@
 	
 * check the number of observations again
 	count
-	*** 77,552 observations 
+	*** 70,369 observations 
 	count if 		year == 2011
-	*** wave 1 has 6,988
+	*** wave 1 has 4,001
 	count if 		year == 2013
-	*** wave 2 has 23,708
+	*** wave 2 has 21,962
 	count if 		year == 2015
-	*** wave 3 has 24,023
+	*** wave 3 has 22,487
 	count if 		year == 2018
-	*** wave 4 has 12,815
+	*** wave 4 has 11,901
 	count if 		year == 2021
 	*** wave 5 has 10,018
 	
 	isid			wave hh_id_obs plot_id_obs crop_name
 	
 * **********************************************************************
-* 2- collapse to hh
+* 2- clean harvest value
 * **********************************************************************
-
-* drop all non-maize crops
-	keep if 		crop_name == "MAIZE"
-	*66,613 dropped
 	
+
 * generate seed vars
 	gen				isp = plot_area_GPS if improved == 1
 	replace			isp = 0 if isp == .
-	
-* collapse to plot level
+			
+* collapse to household level
 	collapse (sum)	plot_area_GPS total_labor_days2 nitrogen_kg2 ///
-					isp harvest_kg2 seed_kg2 ///
+					isp harvest_value_USD seed_kg2 harvest_kg ///
 			 (max)	inorganic_fertilizer organic_fertilizer /// 
 					irrigated used_pesticides extension ///
 					crop_shock pests_shock rain_shock flood_shock livestock ///
@@ -100,19 +97,27 @@
 	
 * merge in weather data
 	merge 1:1 		hh_id_obs wave using "$wth/weather"
-	/* 
-    Result                      Number of obs
+/* 
+   Result                      Number of obs
     -----------------------------------------
-    Not matched                       114,853
-        from master                         2  (_merge==1)
-        from using                    114,851  (_merge==2)
+    Not matched                       110,317
+        from master                         6  (_merge==1)
+        from using                    110,311  (_merge==2)
 
-    Matched                             6,242  (_merge==3)
+    Matched                            10,782  (_merge==3)
     -----------------------------------------
 */ 
 	keep if 	_merge == 3
 	drop 		_merge
 
+* drop missing plot area and households that only appear once
+	drop if 	plot_area_GPS == 0
+	
+	duplicates 	tag hh_id_obs, generate(dup)
+	drop if		dup == 0
+	drop		dup
+	*** dropped 1,430 non-panel households
+	
 
 * **********************************************************************
 * 4 - end matter

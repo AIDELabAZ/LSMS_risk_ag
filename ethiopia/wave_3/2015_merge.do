@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: Feb 2025
 * Created by: reece
-* Edited on: 23 Feb 25
+* Edited on: 28 Feb 25
 * Edited by: jdm
 * Stata v.18
 
@@ -62,7 +62,58 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
+	*** one obs dropped
 	
+	drop if			harv_missing == 1
+	*** 1,536 obs dropped
+	
+	
+***********************************************************************
+**# 2 - impute value of harvest
+***********************************************************************
+
+* replace outliers at top 5 percent
+	gen				yield = harvest_value_USD/plot_area_GPS
+	sum 			harvest_value_USD
+	*** mean 146, sd 1,635, max 211,917
+	
+	sum				yield, detail
+	*** mean 19,783, sd 658,394, max 9.13e+07
+	
+	replace			harvest_value_USD = . if yield > `r(p95)' 
+	* 1,462 changes made
+	
+* impute 
+	mi set 			wide 	// declare the data to be wide.
+	mi xtset		, clear 	// clear any xtset that may have had in place previously
+	
+	mi register			imputed harvest_value_USD // identify harv vle variable to be imputed
+	sort				hh_id_obs plot_id_obs parcel_id_obs cropid, stable // sort to ensure reproducability of results
+	mi impute 			pmm harvest_value_USD i.admin_2 plot_area_GPS i.cropid, add(1) rseed(245780) ///
+								noisily dots force knn(5) bootstrap					
+**# Bookmark #1
+	mi 				unset	
+	
+* inspect imputation 
+	sum 			harvest_value_USD_1_
+	*** mean 94, sd 296, max 10,187
+	
+	drop			yield
+	gen				yield = harvest_value_USD/plot_area_GPS
+	sum				yield
+	*** mean 2,224, sd 5,323, max 35,748
+	
+* replace the imputated variable
+	replace 			harvest_value_USD = harvest_value_USD_1_
+	*** 1,370 changes
+	
+	drop 				mi_miss harvest_value_USD_1_ yield
+	
+	
+***********************************************************************
+**# 3 - end matter
+***********************************************************************
+
 	isid			wave hh_id_obs plot_id_obs crop_name
 	
 	save 		"$export/wave3_cleanrb", replace
