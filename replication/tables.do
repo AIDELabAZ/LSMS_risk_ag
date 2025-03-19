@@ -35,7 +35,7 @@
 **# 1 - load data
 ********************************************************************************
  
- 	use 		"$root/eth_complete", clear
+ 	use 		"$root/eth_complete_p", clear
 	
 * ******************************************************************************
 **# 2 - create variables we need for regression
@@ -45,12 +45,24 @@
 	drop if 	plot_area_GPS == 0
 
 * create log of yield, fert rate, seed rate, fert * seed
-	egen 		std_y = std(harvest_kg2/plot_area_GPS)
+	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
+	
+* summarize variable
+	sum			std_y
+	*** 3 wild outliers. drop them then redo std_y calc
+	
+	drop if		std_y > 20
+	drop		std_y
+	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
+	
+	gen			std_y2 = std_y^2
+	gen			std_y3 = std_y^3
 	egen		std_f = std(nitrogen_kg2/plot_area_GPS)
 	egen		std_s = std(isp)
 	gen			std_f2 = std_f^2
 	gen			std_s2 = std_s^2
 	gen			std_fs = std_f*std_s
+	
 	
 	
 ********************************************************************************
@@ -79,7 +91,7 @@
             xtivreg std_y hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access dist_popcenter ///
-                extension dist_weekly `t'), ///
+                extension dist_weekly maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
 
             * Store mean regression

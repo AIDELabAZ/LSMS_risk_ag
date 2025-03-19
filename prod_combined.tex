@@ -1,0 +1,29 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Effects of Input Use on Mean, Variance, and Skewness for Total and Mean Rainfall}
+\begin{tabular}{l*{6}{c}}
+\toprule
+                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                &\multicolumn{1}{c}{Mean (Total)}&\multicolumn{1}{c}{Variance (Total)}&\multicolumn{1}{c}{Skewness (Total)}&\multicolumn{1}{c}{Mean (Mean)}&\multicolumn{1}{c}{Variance (Mean)}&\multicolumn{1}{c}{Skewness (Mean)}\\
+                &     b/se         &     b/se         &     b/se         &     b/se         &     b/se         &     b/se         \\
+\midrule
+Standardized values of nitrogen\_kg2/plot\_area\_GPS&    0.015         &   -0.002         &    0.025\sym{**} &    0.014         &   -0.002         &    0.026\sym{**} \\
+                &  (0.229)         &  (0.008)         &  (0.009)         &  (0.231)         &  (0.008)         &  (0.009)         \\
+std\_f2          &    0.001         &    0.000         &   -0.003\sym{***}&    0.001         &    0.000         &   -0.003\sym{***}\\
+                &  (0.004)         &  (0.000)         &  (0.000)         &  (0.004)         &  (0.000)         &  (0.000)         \\
+Standardized values of isp&   -0.003         &    0.000         &   -0.005         &   -0.002         &    0.000         &   -0.005         \\
+                &  (0.072)         &  (0.002)         &  (0.003)         &  (0.072)         &  (0.002)         &  (0.003)         \\
+std\_s2          &    0.013         &    0.000         &   -0.004         &    0.013         &    0.000         &   -0.004         \\
+                &  (0.034)         &  (0.001)         &  (0.003)         &  (0.034)         &  (0.001)         &  (0.003)         \\
+std\_fs          &   -0.145         &    0.007         &    0.086\sym{**} &   -0.144         &    0.007         &    0.085\sym{**} \\
+                &  (0.133)         &  (0.006)         &  (0.027)         &  (0.133)         &  (0.006)         &  (0.027)         \\
+(mean) hh\_size  &   -0.004         &   -0.001         &   -0.000         &   -0.004         &   -0.001         &   -0.000         \\
+                &  (0.007)         &  (0.001)         &  (0.002)         &  (0.007)         &  (0.001)         &  (0.002)         \\
+\midrule
+Observations    &68592.000         &68592.000         &68592.000         &68592.000         &68592.000         &68592.000         \\
+Variance Effect (mu2\_s)&                  &    0.000         &                  &                  &    0.000         &                  \\
+Skewness Effect (mu3\_s)&                  &                  &   -0.005         &                  &                  &   -0.005         \\
+Household Size  &                  &                  &                  &                  &                  &                  \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: feb 2025
 * Created by: reece
-* Edited on: 28 Feb 2025
-* Edited by: jdm
+* Edited on: 18 Mar 2025
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -21,7 +21,7 @@
 ********************************************************************************
 
 * define paths
-	global root 	"$data/lsms_risk_ag_data/regression_data/ethiopia"
+	global root 	"$data/lsms_risk_ag_data/regression_data/malawi"
 	global export 	"$data/lsms_risk_ag_data/results"
 	global logout 	"$data/lsms_risk_ag_data/regression_data/logs"
 
@@ -34,7 +34,7 @@
 **# 1 - load data
 ********************************************************************************
  
- 	use 		"$root/eth_complete_p", clear
+ 	use 		"$root/mwi_complete_p", clear
 	
 * ******************************************************************************
 **# 2 - create variables we need for regression
@@ -42,6 +42,10 @@
 
 * create log of yield, fert rate, seed rate, fert * seed
 	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
+	
+* generate seed vars
+	gen				isp = plot_area_GPS if improved == 1
+	replace			isp = 0 if isp == .
 	
 * summarize variable
 	sum			std_y
