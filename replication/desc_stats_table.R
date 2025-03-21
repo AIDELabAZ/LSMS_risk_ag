@@ -1,5 +1,6 @@
 # Load required libraries
-install.packages(c("tidyverse", "haven", "xtable"))  # Only run if not installed
+# Uncomment the next line if packages are not installed
+# install.packages(c("tidyverse", "haven", "xtable"))
 
 library(tidyverse)
 library(haven)
@@ -11,12 +12,12 @@ data <- read_dta("C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_a
 # Step 2: Check structure of data
 glimpse(data)
 
-# Step 3: Standardize relevant variables
+# Step 3: Create relevant variables
 data <- data %>%
   mutate(
-    std_y = scale(harvest_value_USD / plot_area_GPS)[,1],
-    std_f = scale(nitrogen_kg2 / plot_area_GPS)[,1],
-    std_s = scale(isp)[,1],
+    std_y = harvest_value_USD / plot_area_GPS,
+    std_f = nitrogen_kg2 / plot_area_GPS,
+    std_s = isp,
     std_y2 = std_y^2,
     std_y3 = std_y^3,
     std_f2 = std_f^2,
@@ -46,10 +47,10 @@ summary_table <- data %>%
     v11_rf1_t2_sd = sd(v11_rf1_t2, na.rm = TRUE),
     v11_rf1_t3_mean = mean(v11_rf1_t3, na.rm = TRUE),
     v11_rf1_t3_sd = sd(v11_rf1_t3, na.rm = TRUE),
-    v05_rf1_mean = mean(v05_rf1, na.rm = TRUE),      # New variable added
-    v05_rf1_sd = sd(v05_rf1, na.rm = TRUE),          # New variable added
-    v05_rf1_t1_mean = mean(v05_rf1_t1, na.rm = TRUE), # New variable added
-    v05_rf1_t1_sd = sd(v05_rf1_t1, na.rm = TRUE),    # New variable added
+    v05_rf1_mean = mean(v05_rf1, na.rm = TRUE),
+    v05_rf1_sd = sd(v05_rf1, na.rm = TRUE),
+    v05_rf1_t1_mean = mean(v05_rf1_t1, na.rm = TRUE),
+    v05_rf1_t1_sd = sd(v05_rf1_t1, na.rm = TRUE),
     hh_electricity_access_mean = mean(hh_electricity_access, na.rm = TRUE),
     hh_electricity_access_sd = sd(hh_electricity_access, na.rm = TRUE),
     dist_popcenter_mean = mean(dist_popcenter, na.rm = TRUE),
@@ -67,11 +68,20 @@ summary_table_long <- summary_table %>%
   pivot_longer(-wave, names_to = "Variable", values_to = "Value") %>%
   pivot_wider(names_from = "wave", values_from = "Value")
 
+# Optional: Rename wave columns to include "Wave"
+names(summary_table_long)[-1] <- paste0("Wave ", names(summary_table_long)[-1])
+
 # Step 6: Convert to LaTeX format and export
 latex_table <- xtable(summary_table_long, caption = "Descriptive Statistics Across Waves")
 
 # Save LaTeX table
-print(latex_table, file = "descriptive_statistics.tex", include.rownames = FALSE)
+print(latex_table,
+      file = "descriptive_statistics.tex",
+      include.rownames = FALSE,
+      caption.placement = "top",
+      tabular.environment = "tabular",
+      floating = TRUE,
+      sanitize.text.function = identity)
 
-# Step 7: Check exported file
+# Step 7: Check exported file (optional)
 file.show("descriptive_statistics.tex")
