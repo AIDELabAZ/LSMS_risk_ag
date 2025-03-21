@@ -25,6 +25,10 @@ data <- data %>%
     std_fs = std_f * std_s
   )
 
+# Step 3.5: Drop outliers where std_y > 700000
+data <- data %>%
+  filter(std_y <= 700000 | is.na(std_y))
+
 # Step 4: Compute mean and standard deviation for selected variables across waves
 summary_table <- data %>%
   group_by(wave) %>%
