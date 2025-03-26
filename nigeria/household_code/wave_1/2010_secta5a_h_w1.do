@@ -27,31 +27,34 @@
 
 * open log 
 	cap log close 
-	log using "$logout/2011_hh_geovars", append
+	log using "$logout/2010_secta5a_harvestw1", append
 
 	
 * ***********************************************************************
-**#1 - prepare ethiopia 2011 (Wave 1) - Community Section 4
+**#1 - prepare nigeria 2010 secta5a_harvestw1
 * ***********************************************************************
 
 * load data
-	use 		"$root/NGA_HouseholdGeovariables_Y1", clear
+	use 		"$root/secta5a_harvestw1", clear
 	
-	keep zone state lga sector ea hhid lat_dd_mod lon_dd_mod qa_type dist_road dist_popcenter dist_market
+	
+* ***********************************************************************
+**#2 - extension access
+* ***********************************************************************
 
-* generate year
-	gen year = 2011
-	lab var year "year of survey- wv1 2011"
-
-
-	secta5a_harvestw1
-	* file for extension to merge in later
+* did respondant participate in extension program
+	gen 		extension = 0
+	replace		extension = 1 if sa5aq2a == 1 | sa5aq2a == 2 | sa5aq2a == 5	
+	
+	collapse (sum) topic_cd (max) extension , by(zone state lga sector ea hhid)
+	
+	isid				zone state lga sector ea hhid 
 	
 * prepare for export
-	isid			region zone woreda kebele ea
+	isid			zone state lga sector ea hhid
 	describe
 	summarize 
-	save 			"$export/com_sect4.dta", replace
+	save 			"$export/2010_secta5a_harvestw1", replace
 	
 
 
@@ -59,4 +62,21 @@
 	log	close
 
 /* END */
+	
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	

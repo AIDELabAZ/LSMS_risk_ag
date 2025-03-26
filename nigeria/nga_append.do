@@ -1,15 +1,14 @@
 * Project: lsms risk
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 25 Mar 2025
+* Edited on: 26 Mar 2025
 * Edited by: reece
 * Stata v.18
 
 * does
 	* reads in merged data sets
 	* appends merged data sets
-	* outputs appended malawi panel with all four waves
-
+	* outputs appended nigeria panel with all five waves
 
 * assumes
 	* xfill.ado
@@ -23,14 +22,14 @@
 * **********************************************************************
 	
 * define paths
-	global root 	"$data/lsms_risk_ag_data/merged_data/malawi"
+	global root 	"$data/lsms_risk_ag_data/merged_data/nigeria"
 	global wth		"$data/lsms_base/weather"
-	global export 	"$data/lsms_risk_ag_data/regression_data/malawi"
-	global logout 	"$data/lsms_risk_ag_data/merged_data/malawi/logs"
+	global export 	"$data/lsms_risk_ag_data/regression_data/nigeria"
+	global logout 	"$data/lsms_risk_ag_data/merged_data/nigeria/logs"
 
 * open log 
 	cap log close 
-	log using 		"$logout/mwi_append_build", append
+	log using 		"$logout/nga_append_build", append
 
 	
 * **********************************************************************
@@ -49,21 +48,17 @@
 * append wave 4 dataset
 	append		using "$root/wave_4/wave4_cleanrb", force	
 	
-	
 * check the number of observations again
 	count
-	*** 44,422 observations 
-	count if 		year == 2010
-	*** wave 1 has 9,992
-	count if 		year == 2013
-	*** wave 2 has 13,562
-	count if 		year == 2016
-	*** wave 3 has 909
-	count if 		year == 2019
-	*** wave 4 has 12,240
-	
-	drop if 		wave  == . | hh_id_obs == . | plot_id_obs == . | crop_name == ""
-	* 4,224 observations dropped
+	*** 44,204 observations 
+	count if 		year == 2011
+	*** wave 1 has 10,167
+	count if 		year == 2012
+	*** wave 2 has 10,411
+	count if 		year == 2015
+	*** wave 3 has 8,944
+	count if 		year == 2018
+	*** wave 4 has 14,682
 	
 	isid			wave hh_id_obs plot_id_obs crop_name
 	
@@ -83,29 +78,27 @@
 					irrigated used_pesticides extension ///
 					crop_shock pests_shock rain_shock flood_shock livestock ///
 			 (mean) hh_asset_index hh_electricity_access /// 
-					dist_popcenter hh_shock totcons_USD2 /// 
+					dist_popcenter dist_road dist_market hh_shock totcons_USD2 /// 
 					soil_fertility_index hh_size, ///
 			  by(year hh_id_obs wave country pw ea_id_merge ///
 					ea_id_obs strataid urban admin_1 admin_2 ///
-					hh_id_merge admin_3 dist_weekly dist_daily out_supply)
+					hh_id_merge admin_3)
 							
     isid hh_id_obs wave
 
 * generate improved seed share
 	replace			isp = isp/plot_area_GPS
 	
-
-	
 * merge in weather data
 	merge 1:1 		hh_id_obs wave using "$wth/weather"
 /* 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                       111,002
-        from master                         2  (_merge==1)
-        from using                    111,000  (_merge==2)
+    Not matched                       109,274
+        from master                         0  (_merge==1)
+        from using                    109,274  (_merge==2)
 
-    Matched                            10,093  (_merge==3)
+    Matched                            11,819  (_merge==3)
     -----------------------------------------
 
 */ 
@@ -118,7 +111,7 @@
 	duplicates 	tag hh_id_obs, generate(dup)
 	drop if		dup == 0
 	drop		dup
-	*** dropped 1,411 non-panel households
+	*** dropped 2,915 non-panel households
 	
 
 * **********************************************************************
@@ -127,7 +120,7 @@
 
 * save file
 	qui: compress
-	save 				"$export/mwi_complete.dta", replace
+	save 				"$export/nga_complete.dta", replace
 	
 * close the log
 	log	close

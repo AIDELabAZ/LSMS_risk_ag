@@ -1,12 +1,12 @@
 * Project: lsms risk ag
 * Created on: January 2025
 * Created by: reece
-* Edited on: 29 Jan 2025
+* Edited on: 26 Mar 2025
 * Edited by: reece
 * Stata v.18
 
 * does
-	* merges community vars with lsms_base 
+	* merges IVs with lsms_base 
 	
 * assumes
 	* access to all raw data
@@ -14,39 +14,45 @@
 	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
+	
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
 
 * define paths
-	global root 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_2"
-	global root2 	"$data/lsms_base/countries/malawi"
-	global export 	"$data/lsms_risk_ag_data/merged_data/malawi/wave_2"
-	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
+	global root 	"$data/lsms_risk_ag_data/refined_data/nigeria/wave_4"
+	global root2 	"$data/lsms_base/countries/nigeria"
+	global export 	"$data/lsms_risk_ag_data/merged_data/nigeria/wave_4"
+	global logout 	"$data/lsms_risk_ag_data/refined_data/nigeria/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wave2_rb_vars", append
+	log using "$logout/wave4_cleanrb", append
 
 	
 * ***********************************************************************
-**#1 - load agsec12a and merge cmsec 
+**#1 - load lsms_base then merge community vars
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave2_clean", clear
+	use 		"$root2/wave4_clean", clear
 	
+	drop		_merge
 	
-* merge in clean malawi data
-	drop _merge
-	merge m:1 ea_id_merge using "$root/com_sec
+* merge in clean com sec
+	merge m:1  hh_id_merge using "$root/wave4_rb_vars"
 
-/* 
+/*
+
     Result                      Number of obs
     -----------------------------------------
-    Not matched                             0
-    Matched                            13,562  (_merge==3)
+    Not matched                           147
+        from master                       147  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                            16,918  (_merge==3)
     -----------------------------------------
 
 */
@@ -56,11 +62,10 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 902 obs dropped
+	*** 1,659 obs dropped
 	
 	drop if			harv_missing == 1
-	*** 944 obs dropped
-	
+	*** 577 obs dropped
 	
 ***********************************************************************
 **# 2 - impute value of harvest
@@ -69,13 +74,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 115, sd 580, max 28,054
+	*** mean 1709, sd 180,893, max 2.14e+07
 	
 	sum				yield, detail
-	*** mean 479, sd 2382, max 89,737
+	*** mean 4385, sd 387,232, max 4.58e+07
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 1,191 changes made
+	* 700 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -90,28 +95,28 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 79, sd 151, max 3181
+	*** mean 140, sd 280, max 9648
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 247, sd 315, max 1524
+	*** mean 518, sd 674, max 3695
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 923 changes
+	*** 1,371 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
+	
 	
 ***********************************************************************
 **# 3 - end matter
 ***********************************************************************
-	isid		wave hh_id_obs plot_id_obs crop_name	
+	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name
 	
-	save 		"$export/wave2_cleanrb", replace
+	save 		"$export/wave4_cleanrb", replace
 	
 * close the log
 	log	close
 
 /* END */
-

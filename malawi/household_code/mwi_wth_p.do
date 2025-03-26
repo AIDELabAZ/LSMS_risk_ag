@@ -8,9 +8,6 @@
 * does
 	* adds weather data to mwi_complete_p
 
-* assumes
-	* xfill.ado
-
 * TO DO:
 	* complete
 
@@ -82,7 +79,6 @@
 
     Matched                             8,141  (_merge==3)
     -----------------------------------------
-
 
 */ 
 	keep if 	_merge == 3
