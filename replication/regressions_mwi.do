@@ -34,7 +34,7 @@
 **# 1 - load data
 ********************************************************************************
  
- 	use 		"$root/mwi_complete_p", clear
+ 	use 		"$root/mwi_complete_p_wth", clear
 	
 * ******************************************************************************
 **# 2 - create variables we need for regression
@@ -42,10 +42,6 @@
 
 * create log of yield, fert rate, seed rate, fert * seed
 	egen 		std_y = std(harvest_value_USD/plot_area_GPS)
-	
-* generate seed vars
-	gen				isp = plot_area_GPS if improved == 1
-	replace			isp = 0 if isp == .
 	
 * summarize variable
 	sum			std_y
@@ -92,7 +88,7 @@
 				xtivreg 		std_y hh_size `v' i.year ///
 									(std_f std_f2 std_s std_s2 std_fs = ///
 									hh_electricity_access dist_popcenter ///
-									extension dist_weekly maize_ea_p `t'), ///
+									extension dist_weekly dist_daily out_supply maize_ea_p `t'), ///
 									fe vce(cluster hh_id_obs) 
 
 ****First Moment***************************************************************
@@ -127,7 +123,7 @@
 				xtivreg 		std_y2 hh_size `v' i.year ///
 									(std_f std_f2 std_s std_s2 std_fs = ///
 									hh_electricity_access dist_popcenter ///
-									extension dist_weekly `t'), ///
+									extension dist_weekly dist_daily out_supply maize_ea_p `t'), ///
 									fe vce(cluster hh_id_obs) 
 	
 			* store estimated coefficients from last reg into matrix 'a2'
@@ -160,7 +156,7 @@
 				xtivreg 		std_y3 hh_size `v' i.year ///
 									(std_f std_f2 std_s std_s2 std_fs = ///
 									hh_electricity_access dist_popcenter ///
-									extension dist_weekly `t'), ///
+									extension dist_weekly dist_daily out_supply maize_ea_p `t'), ///
 									fe vce(cluster hh_id_obs) 
 			
 	

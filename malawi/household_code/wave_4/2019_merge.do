@@ -22,7 +22,7 @@
 * define paths
 	global root 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_6"
 	global root2 	"$data/lsms_base/countries/malawi"
-	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_4"
+	global export 	"$data/lsms_risk_ag_data/merged_data/malawi/wave_4"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
 
 * open log 
@@ -54,4 +54,4 @@
 
 */ 
 
-	save 		"$root2/wave4_cleanrb", replace
+	save 		"$export/wave4_cleanrb", replace

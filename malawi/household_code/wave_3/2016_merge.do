@@ -22,7 +22,7 @@
 * define paths
 	global root 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_3"
 	global root2 	"$data/lsms_base/countries/malawi"
-	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_3"
+	global export 	"$data/lsms_risk_ag_data/merged_data/malawi/wave_3"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
 
 * open log 
@@ -50,7 +50,8 @@
 
     Matched                               155  (_merge==3)
     -----------------------------------------
-noooooooo
+
 . 
 
-/*
+*/
+	save 		"$export/wave3_cleanrb", replace
