@@ -50,12 +50,13 @@
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                           147
-        from master                       147  (_merge==1)
-        from using                          0  (_merge==2)
+    Not matched                         1,659
+        from master                         0  (_merge==1)
+        from using                      1,659  (_merge==2)
 
-    Matched                            16,918  (_merge==3)
+    Matched                            15,259  (_merge==3)
     -----------------------------------------
+
 
 */
 
@@ -64,7 +65,7 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 1,659 obs dropped
+	*** 0 obs dropped
 	
 	drop if			harv_missing == 1
 	*** 577 obs dropped
@@ -76,13 +77,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 1709, sd 180,893, max 2.14e+07
+	*** mean 109, sd 128, max 646
 	
 	sum				yield, detail
-	*** mean 4385, sd 387,232, max 4.58e+07
+	*** mean 837, sd 4118, max 357,276
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 700 changes made
+	* 734 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -97,16 +98,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 140, sd 280, max 9648
+	*** mean 103, sd 125, max 646
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 518, sd 674, max 3695
+	*** mean 467, sd 581, max 3040
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 1,371 changes
+	*** 743 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	
@@ -114,6 +115,12 @@
 ***********************************************************************
 **# 3 - end matter
 ***********************************************************************
+	bysort 			wave hh_id_obs ea_id_merge plot_id_obs crop_name: gen dup_check = _N
+	tab 			dup_check
+	list 			wave hh_id_obs ea_id_merge plot_id_obs crop_name if dup_check > 1
+	duplicates drop wave hh_id_obs ea_id_merge plot_id_obs crop_name, force
+	* 4 observations deleted
+	
 	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name 
 	
 	save 		"$export/wave4_cleanrb", replace

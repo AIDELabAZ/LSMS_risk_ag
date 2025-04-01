@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-	* creates output tables for all Nigeria results (model 1-3) in .txt file
+	* creates output tables for all Malawi results (model 1-3) in .txt file
 
 * assumes
 	* cleaned, merged (weather), and appended (waves) data
@@ -14,14 +14,14 @@
 ********************************************************************************
 **#0 - setup
 ********************************************************************************
-	global root   "$data/lsms_risk_ag_data/regression_data/nigeria"
+	global root   "$data/lsms_risk_ag_data/regression_data/malawi"
 	global export "$data/lsms_risk_ag_data/results"
 	global logout "$data/lsms_risk_ag_data/regression_data/logs"
 
 	cap log close
-	log using "$logout/model_comparisons_nga_v09", replace
+	log using "$logout/model_comparisons_mwi_v09", replace
 
-	use "$root/nga_complete", clear
+	use "$root/mwi_complete", clear
 	xtset hh_id_obs
 
 ********************************************************************************
@@ -48,7 +48,7 @@
 	local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
 	local lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
 
-	cap erase "$export/model_comparisons_nga_v09.txt"
+	cap erase "$export/model_comparisons_mwi_v09.txt"
 
 	foreach v in `rain' {
 		foreach t in `lag' {
@@ -57,7 +57,7 @@
             * Production function: moments
             xtivreg std_y hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
             matrix 		a = e(b)
             scalar 		b1_f = a[1,1]
@@ -70,7 +70,7 @@
 
             xtivreg std_y2 hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
             matrix 		a2 = e(b)
             scalar 		b2_f = a2[1,1]
@@ -83,7 +83,7 @@
 
             xtivreg std_y3 hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
 				
             matrix 		a3 = e(b)
@@ -156,10 +156,10 @@
                  constraint(1 2 3 4 5 6 7 8) nolog
             eststo model3
 
-            esttab model1 model2 model3 using "$export/model_comparisons_nga_v09.txt", append ///
+            esttab model1 model2 model3 using "$export/model_comparisons_mwi_v09.txt", append ///
                 se star(* 0.1 ** 0.05 *** 0.01) ///
                 label compress nomtitle nogaps ///
-                title("Nigeria | Rain: `v' | Lag: `t' | Shock: v09")
+                title("Malawi | Rain: `v' | Lag: `t' | Shock: v09")
 
             drop mod_mu* shock*_mu* tot_shockd* mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
         }

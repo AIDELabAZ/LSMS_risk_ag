@@ -50,8 +50,11 @@
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                             0
-    Matched                            14,661  (_merge==3)
+    Not matched                         1,964
+        from master                         0  (_merge==1)
+        from using                      1,964  (_merge==2)
+
+    Matched                            12,646  (_merge==3)
     -----------------------------------------
 
 */
@@ -61,10 +64,10 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 2,015 obs dropped
+	*** 1964 obs dropped
 	
 	drop if			harv_missing == 1
-	*** 2,478 obs dropped
+	*** 0 obs dropped
 	
 ***********************************************************************
 **# 2 - impute value of harvest
@@ -73,13 +76,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 384, sd 2577, max 167,494
+	*** mean 204, sd 236, max 1156
 	
 	sum				yield, detail
-	*** mean 46,072, sd 2,533,997, max 2.24e+08
+	*** mean 8649, sd 398154, max  3.83e+07   
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 860 changes made
+	* 847 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -94,16 +97,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 263, sd 496, max 11,724
+	*** mean 185, sd 222, max 1156
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 1,158, sd 2,036, max 12,936
+	*** mean 912, sd 1434 max 8527
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 500 changes
+	*** 2,777 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	
@@ -115,7 +118,7 @@
 	tab 			dup_check
 	list 			wave hh_id_obs ea_id_merge plot_id_obs crop_name if dup_check > 1
 	duplicates drop wave hh_id_obs ea_id_merge plot_id_obs crop_name, force
-	* 1 observation deleted
+	* 21 observation deleted
 	
 	isid			wave hh_id_obs ea_id_merge plot_id_merge crop_name
 	

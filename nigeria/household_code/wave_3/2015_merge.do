@@ -47,14 +47,16 @@
 	merge m:1  ea_id_merge hh_id_merge using "$root/wave3_rb_vars"
 
 /*
+
     Result                      Number of obs
     -----------------------------------------
-    Not matched                           998
-        from master                       659  (_merge==1)
-        from using                        339  (_merge==2)
+    Not matched                         2,168
+        from master                       314  (_merge==1)
+        from using                      1,854  (_merge==2)
 
-    Matched                            13,133  (_merge==3)
+    Matched                            11,564  (_merge==3)
     -----------------------------------------
+
 */
 
 * keep only merged
@@ -62,7 +64,7 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 1,569 obs dropped
+	*** 2,168 obs dropped
 	
 	drop if			harv_missing == 1
 	*** 2,545 obs dropped
@@ -74,13 +76,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 369, sd 1507, max 113,127
+	*** mean 224, sd 254, max 1244
 	
 	sum				yield, detail
-	*** mean 2991, sd 22,173, max 901,617
+	*** mean 2165, sd 14258, max 497797
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 511 changes made
+	* 508 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -95,16 +97,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 275, sd 485, max 8908
+	*** mean 209, sd 239, max 1244
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 968, sd 1392, max 8064
+	*** mean 804, sd 1049, max 5971
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 543 changes
+	*** 477 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	
@@ -116,7 +118,7 @@
 	tab 			dup_check
 	list 			wave hh_id_obs ea_id_merge plot_id_obs crop_name if dup_check > 1
 	duplicates drop wave hh_id_obs ea_id_merge plot_id_obs crop_name, force
-	* 75 observations dropped
+	* 86 observations dropped
 	
 	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name
 	

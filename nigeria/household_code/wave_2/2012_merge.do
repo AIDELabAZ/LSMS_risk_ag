@@ -47,16 +47,14 @@
 	merge m:1  ea_id_merge hh_id_merge using "$root/wave2_rb_vars"
 
 /*
-
     Result                      Number of obs
     -----------------------------------------
-    Not matched                           581
-        from master                       378  (_merge==1)
-        from using                        203  (_merge==2)
+    Not matched                         1,899
+        from master                        49  (_merge==1)
+        from using                      1,850  (_merge==2)
 
-    Matched                            13,941  (_merge==3)
+    Matched                            12,292  (_merge==3)
     -----------------------------------------
-
 */
 
 * keep only merged
@@ -64,10 +62,10 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 1,649 obs dropped
+	*** 1,899 obs dropped
 	
 	drop if			harv_missing == 1
-	*** 1,881 obs dropped
+	*** 0 obs dropped
 	
 ***********************************************************************
 **# 2 - impute value of harvest
@@ -76,13 +74,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 432, sd 6458, max 463,300
+	*** mean 205, sd 247, max 1214
 	
 	sum				yield, detail
-	*** mean 1717, sd 15,165, max 1,324,236
+	*** mean 1048, sd 2477, max 56,045
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 740 changes made
+	* 736 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -97,16 +95,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 256, sd 483, max 9108
+	*** mean 180, sd 228, max 1214
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 736, sd 961, max 5454
+	*** mean 621, sd 746, max 3858
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 521 changes
+	*** 2,173 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	

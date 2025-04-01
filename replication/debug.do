@@ -34,7 +34,7 @@
 **# 1 - load data
 ********************************************************************************
  
- 	use 		"$root/eth_complete_p", clear
+ 	use 		"$root/eth_complete", clear
 	
 * ******************************************************************************
 **# 2 - create variables we need for regression
@@ -53,7 +53,7 @@
 	
 	gen			std_y2 = std_y^2
 	gen			std_y3 = std_y^3
-	egen		std_f = std(nitrogen_kg2/plot_area_GPS)
+	egen		std_f = std(fert_kg/plot_area_GPS)
 	egen		std_s = std(isp)
 	gen			std_f2 = std_f^2
 	gen			std_s2 = std_s^2
@@ -237,7 +237,7 @@
 ********************************************************************************
 **## 4 - create model 3 for repeated shocks 
 ********************************************************************************
-
+/*
 	local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
 	local lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
 
@@ -331,3 +331,4 @@
         }
     }
 }
+*/

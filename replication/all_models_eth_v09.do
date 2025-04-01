@@ -21,7 +21,7 @@
 	cap log close
 	log using "$logout/model_comparisons_eth_v09", replace
 
-	use "$root/eth_complete_p", clear
+	use "$root/eth_complete", clear
 	xtset hh_id_obs
 
 ********************************************************************************
@@ -35,7 +35,7 @@
 
 	gen 		std_y2 = std_y^2
 	gen 		std_y3 = std_y^3
-	egen 		std_f = std(nitrogen_kg2 / plot_area_GPS)
+	egen 		std_f = std(fert_kg / plot_area_GPS)
 	egen 		std_s = std(isp)
 	gen 		std_f2 = std_f^2
 	gen 		std_s2 = std_s^2
@@ -145,6 +145,7 @@ foreach v in `rain' {
                  (mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
             constraint(1 2 9 10 11) nolog
             eststo model2
+	
 
             * Model 3
             bootstrap, reps(100) seed(2045): ///
@@ -155,7 +156,7 @@ foreach v in `rain' {
                  constraint(1 2 3 4 5 6 7 8) nolog
             eststo model3
 
-            esttab model1 model2 model3 using "$export/model_comparisons_eth_v09.txt", append ///
+            esttab model1 model3 using "$export/model_comparisons_eth_v09.txt", append ///
                 se star(* 0.1 ** 0.05 *** 0.01) ///
                 label compress nomtitle nogaps ///
                 title("Ethiopia | Rain: `v' | Lag: `t' | Shock: v09")
