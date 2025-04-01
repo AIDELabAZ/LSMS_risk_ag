@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-	* loads multi country data set
+	* loads ethiopia data set
 	* outputs results file for analysis
 
 * assumes
@@ -230,6 +230,93 @@
 			}	
 			* drop variables generated in production regressions
 				drop			mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
+		}
+	}
+}
+
+********************************************************************************
+**## 4 - create model 3 for repeated shocks 
+********************************************************************************
+
+* loop through rainfall in time t
+local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
+foreach v in `rain' {
+
+	* loop through rainfall in time t-1
+	local lag v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
+	foreach t in `lag' {
+
+		* compare two rainfall variables and only use one from same source	
+		if substr("`v'", 2, 2) == substr("`t'", 2, 2) & ///
+		   substr("`v'", 7, 1) == substr("`t'", 7, 1) {
+
+			* loop through shock variables
+			local shock v07_rf2 v09_rf2 v11_rf2 v13_rf2 v14_rf2 ///
+						v07_rf3 v09_rf3 v11_rf3 v13_rf3 v14_rf3 ///
+						v07_rf4 v09_rf4 v11_rf4 v13_rf4 v14_rf4
+
+			foreach s in `shock' {
+
+				* match rainfall source to shock source
+				if substr("`v'", 7, 1) == substr("`s'", 7, 1) {
+
+					* define lagged shocks
+					local s1 = `s'_t1
+					local s2 = `s'_t2
+					local s3 = `s'_t3
+
+					* drop and generate repeated shock indicators
+					capture drop tot_shockd2 tot_shockd3 tot_shockd4
+					gen tot_shockd2 = (`s1' == 1 & `s2' == 1)
+					gen tot_shockd3 = (`s1' == 1 & `s2' == 1 & `s3' == 1)
+					* optionally add d4 if you have _t4
+					* gen tot_shockd4 = (`s1' == 1 & `s2' == 1 & `s3' == 1 & `s4' == 1)
+
+					* generate interactions
+					gen shock1_mu2_s = tot_shockd2 * mu2_s
+					gen shock2_mu2_s = tot_shockd3 * mu2_s
+
+					gen shock1_mu3_s = tot_shockd2 * mu3_s
+					gen shock2_mu3_s = tot_shockd3 * mu3_s
+
+					gen shock1_mu2_f = tot_shockd2 * mu2_f
+					gen shock2_mu2_f = tot_shockd3 * mu2_f
+
+					gen shock1_mu3_f = tot_shockd2 * mu3_f
+					gen shock2_mu3_f = tot_shockd3 * mu3_f
+
+					* drop existing constraints
+					constraint drop 1/20
+
+					* define constraints
+					constraint 1  [mu1_s]mu2_s = [mu1_f]mu2_f
+					constraint 2  [mu1_s]mu3_s = [mu1_f]mu3_f
+					constraint 3  [mu1_s]shock1_mu2_s = [mu1_f]shock1_mu2_f
+					constraint 4  [mu1_s]shock2_mu2_s = [mu1_f]shock2_mu2_f
+					constraint 5  [mu1_s]shock1_mu3_s = [mu1_f]shock1_mu3_f
+					constraint 6  [mu1_s]shock2_mu3_s = [mu1_f]shock2_mu3_f
+					constraint 7  [mu1_s]tot_shockd2 = [mu1_f]tot_shockd2
+					constraint 8  [mu1_s]tot_shockd3 = [mu1_f]tot_shockd3
+
+					* run regression
+					bootstrap, reps(100) seed(2045): ///
+					reg3 (mu1_s mu2_s mu3_s tot_shockd2 tot_shockd3 ///
+						  shock1_mu2_s shock2_mu2_s ///
+						  shock1_mu3_s shock2_mu3_s) ///
+						 (mu1_f mu2_f mu3_f tot_shockd2 tot_shockd3 ///
+						  shock1_mu2_f shock2_mu2_f ///
+						  shock1_mu3_f shock2_mu3_f), ///
+						 constraint(1 2 3 4 5 6 7 8) nolog
+
+					* drop variables generated in loop
+					drop shock1_mu2_s shock2_mu2_s shock1_mu3_s shock2_mu3_s ///
+						 shock1_mu2_f shock2_mu2_f shock1_mu3_f shock2_mu3_f ///
+						 tot_shockd2 tot_shockd3
+				}
+			}
+
+			* drop moment variables
+			drop mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
 		}
 	}
 }
