@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: 31 Mar 2025
 * Created by: reece
-* Edited on: 31 Mar 2025
-* Edited by: reece
+* Edited on: 1 Apr 2025
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -11,15 +11,17 @@
 * assumes
 	* cleaned, merged (weather), and appended (waves) data
 
+	
 ********************************************************************************
 **#0 - setup
 ********************************************************************************
-	global root   "$data/lsms_risk_ag_data/regression_data/ethiopia"
-	global export "$data/lsms_risk_ag_data/results"
-	global logout "$data/lsms_risk_ag_data/regression_data/logs"
 
-	cap log close
-	log using "$logout/model_comparisons_eth_v09", replace
+	global root   	"$data/lsms_risk_ag_data/regression_data/ethiopia"
+	global export 	"$data/lsms_risk_ag_data/results"
+	global logout 	"$data/lsms_risk_ag_data/regression_data/logs"
+
+	cap 	log 	close
+	log 	using 	"$logout/model_comparisons_eth_v09", replace
 
 	use "$root/eth_complete", clear
 	xtset hh_id_obs
@@ -28,6 +30,10 @@
 **# Variable creation
 ********************************************************************************
 
+	use 		"$root/eth_complete_p", clear
+	
+	xtset 		hh_id_obs
+	
 	egen 		std_y = std(harvest_value_USD / plot_area_GPS)
 	drop if 	std_y > 20
 	drop 		std_y
@@ -41,14 +47,15 @@
 	gen 		std_s2 = std_s^2
 	gen 		std_fs = std_f * std_s
 
+	
 ********************************************************************************
 **# Regressions using v09 only across rainfall metrics and weather sources
 ********************************************************************************
 
-local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
-local lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
+	local 		rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
+	local 		lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
 
-cap erase "$export/model_comparisons_eth_v09.txt"
+	cap 		erase "$export/model_comparisons_eth_v09.txt"
 
 foreach v in `rain' {
     foreach t in `lag' {
@@ -59,6 +66,7 @@ foreach v in `rain' {
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
+				
             matrix 		a = e(b)
             scalar 		b1_f = a[1,1]
             scalar 		b1_f2 = a[1,2]
@@ -72,6 +80,7 @@ foreach v in `rain' {
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access dist_popcenter extension dist_weekly `t'), ///
                 fe vce(cluster hh_id_obs)
+				
             matrix 		a2 = e(b)
             scalar 		b2_f = a2[1,1]
             scalar 		b2_f2 = a2[1,2]
@@ -85,6 +94,7 @@ foreach v in `rain' {
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access dist_popcenter extension dist_weekly `t'), ///
                 fe vce(cluster hh_id_obs)
+				
             matrix 		a3 = e(b)
             scalar 		b3_f = a3[1,1]
             scalar 		b3_f2 = a3[1,2]
