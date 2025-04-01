@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: feb 2025
 * Created by: reece
-* Edited on: 28 Feb 2025
-* Edited by: jdm
+* Edited on: 31 Mar 2025
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -238,85 +238,96 @@
 **## 4 - create model 3 for repeated shocks 
 ********************************************************************************
 
-* loop through rainfall in time t
-local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
-foreach v in `rain' {
+	local rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
+	local lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
 
-	* loop through rainfall in time t-1
-	local lag v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
-	foreach t in `lag' {
+	foreach v in `rain' {
+		foreach t in `lag' {
+			if substr("`v'", 2, 2) == substr("`t'", 2, 2) & substr("`v'", 7, 1) == substr("`t'", 7, 1) {
 
-		* compare two rainfall variables and only use one from same source	
-		if substr("`v'", 2, 2) == substr("`t'", 2, 2) & ///
-		   substr("`v'", 7, 1) == substr("`t'", 7, 1) {
+            * Generate moment variables (mu1, mu2, mu3)
+				xtivreg std_y hh_size `v' i.year ///
+					(std_f std_f2 std_s std_s2 std_fs = ///
+					hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p `t'), ///
+					fe vce(cluster hh_id_obs)
+				matrix 		b1 = e(b)
+				scalar 		b1_f  = b1[1,1]
+				scalar 		b1_f2 = b1[1,2]
+				scalar		b1_s  = b1[1,3]
+				scalar		b1_s2 = b1[1,4]
+				scalar 		b1_fs = b1[1,5]
+				gen 		mu1_s = b1_s + 2*b1_s2*std_s + b1_fs*std_f
+				gen 		mu1_f = b1_f + 2*b1_f2*std_f + b1_fs*std_s
 
-			* loop through shock variables
-			local shock v07_rf2 v09_rf2 v11_rf2 v13_rf2 v14_rf2 ///
-						v07_rf3 v09_rf3 v11_rf3 v13_rf3 v14_rf3 ///
-						v07_rf4 v09_rf4 v11_rf4 v13_rf4 v14_rf4
+				xtivreg std_y2 hh_size `v' i.year ///
+					(std_f std_f2 std_s std_s2 std_fs = ///
+					hh_electricity_access dist_popcenter extension dist_weekly `t'), ///
+					fe vce(cluster hh_id_obs)
+				matrix 		b2 = e(b)
+				scalar 		b2_f  = b2[1,1]
+				scalar 		b2_f2 = b2[1,2]
+				scalar 		b2_s  = b2[1,3]
+				scalar 		b2_s2 = b2[1,4]
+				scalar 		b2_fs = b2[1,5]
+				gen 		mu2_s = b2_s + 2*b2_s2*std_s + b2_fs*std_f
+				gen 		mu2_f = b2_f + 2*b2_f2*std_f + b2_fs*std_s
 
-			foreach s in `shock' {
+				xtivreg std_y3 hh_size `v' i.year ///
+					(std_f std_f2 std_s std_s2 std_fs = ///
+					hh_electricity_access dist_popcenter extension dist_weekly `t'), ///
+					fe vce(cluster hh_id_obs)
+				matrix 		b3 = e(b)
+				scalar 		b3_f  = b3[1,1]
+				scalar 		b3_f2 = b3[1,2]
+				scalar 		b3_s  = b3[1,3]
+				scalar 		b3_s2 = b3[1,4]
+				scalar 		b3_fs = b3[1,5]
+				gen 		mu3_s = b3_s + 2*b3_s2*std_s + b3_fs*std_f
+				gen 		mu3_f = b3_f + 2*b3_f2*std_f + b3_fs*std_s
 
-				* match rainfall source to shock source
-				if substr("`v'", 7, 1) == substr("`s'", 7, 1) {
+            * Define lagged shocks for v09 from same source
+				local suffix = substr("`v'", 7, 1)
+				local 		s1 = v09_rf`suffix'_t1
+				local 		s2 = v09_rf`suffix'_t2
+				local 		s3 = v09_rf`suffix'_t3
 
-					* define lagged shocks
-					local s1 = `s'_t1
-					local s2 = `s'_t2
-					local s3 = `s'_t3
+            * Define repeated deviation shocks
+				gen 		tot_shockd2 = (`s1' < 0 & `s2' < 0)
+				gen 		tot_shockd3 = (`s1' < 0 & `s2' < 0 & `s3' < 0)
 
-					* drop and generate repeated shock indicators
-					capture drop tot_shockd2 tot_shockd3 tot_shockd4
-					gen tot_shockd2 = (`s1' == 1 & `s2' == 1)
-					gen tot_shockd3 = (`s1' == 1 & `s2' == 1 & `s3' == 1)
-					* optionally add d4 if you have _t4
-					* gen tot_shockd4 = (`s1' == 1 & `s2' == 1 & `s3' == 1 & `s4' == 1)
+            * Interactions with moments
+				gen 		shock1_mu2_s = tot_shockd2 * mu2_s
+				gen 		shock2_mu2_s = tot_shockd3 * mu2_s
+				gen 		shock1_mu3_s = tot_shockd2 * mu3_s
+				gen 		shock2_mu3_s = tot_shockd3 * mu3_s
+				gen 		shock1_mu2_f = tot_shockd2 * mu2_f
+				gen 		shock2_mu2_f = tot_shockd3 * mu2_f
+				gen 		shock1_mu3_f = tot_shockd2 * mu3_f
+				gen 		shock2_mu3_f = tot_shockd3 * mu3_f
 
-					* generate interactions
-					gen shock1_mu2_s = tot_shockd2 * mu2_s
-					gen shock2_mu2_s = tot_shockd3 * mu2_s
+            * Define constraints
+				constraint drop 1/20
+				constraint 1  		[mu1_s]mu2_s = [mu1_f]mu2_f
+				constraint 2  		[mu1_s]mu3_s = [mu1_f]mu3_f
+				constraint 3  		[mu1_s]shock1_mu2_s = [mu1_f]shock1_mu2_f
+				constraint 4  		[mu1_s]shock2_mu2_s = [mu1_f]shock2_mu2_f
+				constraint 5  		[mu1_s]shock1_mu3_s = [mu1_f]shock1_mu3_f
+				constraint 6  		[mu1_s]shock2_mu3_s = [mu1_f]shock2_mu3_f
+				constraint 7  		[mu1_s]tot_shockd2 = [mu1_f]tot_shockd2
+				constraint 8  		[mu1_s]tot_shockd3 = [mu1_f]tot_shockd3
 
-					gen shock1_mu3_s = tot_shockd2 * mu3_s
-					gen shock2_mu3_s = tot_shockd3 * mu3_s
+            * Run Model 3
+				bootstrap, reps(100) seed(2045): ///
+				reg3 (mu1_s mu2_s mu3_s tot_shockd2 tot_shockd3 ///
+					shock1_mu2_s shock2_mu2_s shock1_mu3_s shock2_mu3_s) ///
+					(mu1_f mu2_f mu3_f tot_shockd2 tot_shockd3 ///
+					shock1_mu2_f shock2_mu2_f shock1_mu3_f shock2_mu3_f), ///
+					constraint(1 2 3 4 5 6 7 8) nolog
 
-					gen shock1_mu2_f = tot_shockd2 * mu2_f
-					gen shock2_mu2_f = tot_shockd3 * mu2_f
-
-					gen shock1_mu3_f = tot_shockd2 * mu3_f
-					gen shock2_mu3_f = tot_shockd3 * mu3_f
-
-					* drop existing constraints
-					constraint drop 1/20
-
-					* define constraints
-					constraint 1  [mu1_s]mu2_s = [mu1_f]mu2_f
-					constraint 2  [mu1_s]mu3_s = [mu1_f]mu3_f
-					constraint 3  [mu1_s]shock1_mu2_s = [mu1_f]shock1_mu2_f
-					constraint 4  [mu1_s]shock2_mu2_s = [mu1_f]shock2_mu2_f
-					constraint 5  [mu1_s]shock1_mu3_s = [mu1_f]shock1_mu3_f
-					constraint 6  [mu1_s]shock2_mu3_s = [mu1_f]shock2_mu3_f
-					constraint 7  [mu1_s]tot_shockd2 = [mu1_f]tot_shockd2
-					constraint 8  [mu1_s]tot_shockd3 = [mu1_f]tot_shockd3
-
-					* run regression
-					bootstrap, reps(100) seed(2045): ///
-					reg3 (mu1_s mu2_s mu3_s tot_shockd2 tot_shockd3 ///
-						  shock1_mu2_s shock2_mu2_s ///
-						  shock1_mu3_s shock2_mu3_s) ///
-						 (mu1_f mu2_f mu3_f tot_shockd2 tot_shockd3 ///
-						  shock1_mu2_f shock2_mu2_f ///
-						  shock1_mu3_f shock2_mu3_f), ///
-						 constraint(1 2 3 4 5 6 7 8) nolog
-
-					* drop variables generated in loop
-					drop shock1_mu2_s shock2_mu2_s shock1_mu3_s shock2_mu3_s ///
-						 shock1_mu2_f shock2_mu2_f shock1_mu3_f shock2_mu3_f ///
-						 tot_shockd2 tot_shockd3
-				}
-			}
-
-			* drop moment variables
-			drop mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
-		}
-	}
+            * Drop temp vars
+            drop mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
+            drop tot_shockd2 tot_shockd3
+            drop shock*_mu*
+        }
+    }
 }
