@@ -35,7 +35,9 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave2_clean", clear
+	use 		"$root2/mwi_allrounds_final_cprb_w", clear
+	
+	keep if wave == 2
 	
 	
 * merge in clean malawi data

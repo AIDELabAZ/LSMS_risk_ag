@@ -37,9 +37,11 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave2_clean", clear
+	use 		"$root2/nga_allrounds_final_cprb_w", clear
 	
 	drop		_merge
+	
+	keep if wave == 2
 	
 * merge in clean com sec
 	merge m:1  ea_id_merge hh_id_merge using "$root/wave2_rb_vars"

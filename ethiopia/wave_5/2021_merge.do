@@ -37,9 +37,11 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave5_clean", clear
+	use 		"$root2/eth_allrounds_final_cprb_w", clear
 	
 	drop		_merge
+	
+	keep if wave == 5
 	
 * merge in clean com sec
 	merge m:1  manager_id_merge using "$root/wave5_rb_vars"

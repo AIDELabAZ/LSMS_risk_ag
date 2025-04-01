@@ -34,7 +34,9 @@
 **#1 -  load lsms_base then merge community vars
 * ***********************************************************************
 
-	use 		"$root2/wave3_clean", clear
+	use 		"$root2/mwi_allrounds_final_cprb_w", clear
+	
+	keep if wave == 3
 	
 	
 * merge in community variables

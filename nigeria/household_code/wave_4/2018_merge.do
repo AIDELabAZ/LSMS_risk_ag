@@ -37,9 +37,11 @@
 * ***********************************************************************
 
 * load data- starting with extension
-	use 		"$root2/wave4_clean", clear
+	use 		"$root2/nga_allrounds_final_cprb_w", clear
 	
 	drop		_merge
+	
+	keep if wave == 4
 	
 * merge in clean com sec
 	merge m:1  hh_id_merge using "$root/wave4_rb_vars"
@@ -112,7 +114,7 @@
 ***********************************************************************
 **# 3 - end matter
 ***********************************************************************
-	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name
+	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name 
 	
 	save 		"$export/wave4_cleanrb", replace
 	
