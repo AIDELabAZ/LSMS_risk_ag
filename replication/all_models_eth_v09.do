@@ -1,7 +1,7 @@
 * Project: lsms risk ag
 * Created on: 31 Mar 2025
 * Created by: reece
-* Edited on: 1 Apr 2025
+* Edited on: 2 Apr 2025
 * Edited by: jdm
 * Stata v.18
 
@@ -28,7 +28,7 @@
 **# Variable creation
 ********************************************************************************
 
-	use 		"$root/eth_complete_p", clear
+	use 		"$root/eth_complete", clear
 	
 	xtset 		hh_id_obs
 	
@@ -37,9 +37,7 @@
 	drop 		std_y
 	egen 		std_y = std(harvest_value_USD / plot_area_GPS)
 
-	gen 		std_y2 = std_y^2
-	gen 		std_y3 = std_y^3
-	egen 		std_f = std(nitrogen_kg2 / plot_area_GPS)
+	egen 		std_f = std(inorganic_fertilizer / plot_area_GPS)
 	egen 		std_s = std(isp)
 	gen 		std_f2 = std_f^2
 	gen 		std_s2 = std_s^2
