@@ -85,23 +85,26 @@
 					crop_shock pests_shock rain_shock flood_shock livestock ///
 			 (mean) hh_asset_index hh_electricity_access /// 
 					dist_popcenter hh_shock totcons_USD /// 
-					soil_fertility_index hh_size v01_rf2 v01_rf2_t1 v02_rf2 /// 
-					v03_rf2 v04_rf2 v05_rf2 v05_rf2_t1 v06_rf2 v07_rf2 /// 
-					v07_rf2_t1 v07_rf2_t2 v07_rf2_t3 v08_rf2 v09_rf2 ///
-					v09_rf2_t1 v09_rf2_t2 v09_rf2_t3 v10_rf2 v11_rf2 ///
-					v11_rf2_t1 v11_rf2_t2 v11_rf2_t3 v12_rf2 v13_rf2 ///
-					v13_rf2_t1 v13_rf2_t2 v13_rf2_t3 v14_rf2 v14_rf2_t1 ///
-					v14_rf2_t2 v14_rf2_t3 v01_rf3 v01_rf3_t1 v02_rf3 v03_rf3 ///
-					v04_rf3 v05_rf3 v05_rf3_t1 v06_rf3 v07_rf3 v07_rf3_t1 ///
-					v07_rf3_t2 v07_rf3_t3 v08_rf3 v09_rf3 v09_rf3_t1 v09_rf3_t2 ///
-					v09_rf3_t3 v10_rf3 v11_rf3 v11_rf3_t1 v11_rf3_t2 v11_rf3_t3 ///
-					v12_rf3 v13_rf3 v13_rf3_t1 v13_rf3_t2 v13_rf3_t3 v14_rf3 ///
-					v14_rf3_t1 v14_rf3_t2 v14_rf3_t3 v01_rf4 v01_rf4_t1 v02_rf4 ///
-					v03_rf4 v04_rf4 v05_rf4 v05_rf4_t1 v06_rf4 v07_rf4 v07_rf4_t1 ///
-					v07_rf4_t2 v07_rf4_t3 v08_rf4 v09_rf4 v09_rf4_t1 v09_rf4_t2 ///
-					v09_rf4_t3 v10_rf4 v11_rf4 v11_rf4_t1 v11_rf4_t2 v11_rf4_t3 ///
-					v12_rf4 v13_rf4 v13_rf4_t1 v13_rf4_t2 v13_rf4_t3 v14_rf4 ///
-					v14_rf4_t1 v14_rf4_t2 v14_rf4_t3 maize_ea_p, ///
+					soil_fertility_index hh_size v01_chirp v01_chirp_t1 ///
+					v02_chirp v03_chirp v04_chirp v05_chirp v05_chirp_t1 ///
+					v06_chirp v07_chirp v07_chirp_t1 v07_chirp_t2 v07_chirp_t3 ///
+					v08_chirp v09_chirp v09_chirp_t1 v09_chirp_t2 v09_chirp_t3 ///
+					v10_chirp v11_chirp v11_chirp_t1 v11_chirp_t2 v11_chirp_t3 ///
+					v12_chirp v13_chirp v13_chirp_t1 v13_chirp_t2 v13_chirp_t3 ///
+					v14_chirp v14_chirp_t1 v14_chirp_t2 v14_chirp_t3 v01_cpcrf ///
+					v01_cpcrf_t1 v02_cpcrf v03_cpcrf v04_cpcrf v05_cpcrf ///
+					v05_cpcrf_t1 v06_cpcrf v07_cpcrf v07_cpcrf_t1 v07_cpcrf_t2 ///
+					v07_cpcrf_t3 v08_cpcrf v09_cpcrf v09_cpcrf_t1 v09_cpcrf_t2 ///
+					v09_cpcrf_t3 v10_cpcrf v11_cpcrf v11_cpcrf_t1 v11_cpcrf_t2 ///
+					v11_cpcrf_t3 v12_cpcrf v13_cpcrf v13_cpcrf_t1 v13_cpcrf_t2 ///
+					v13_cpcrf_t3 v14_cpcrf v14_cpcrf_t1 v14_cpcrf_t2 v14_cpcrf_t3 ///
+					v01_erarf v01_erarf_t1 v02_erarf v03_erarf v04_erarf v05_erarf ///
+					v05_erarf_t1 v06_erarf v07_erarf v07_erarf_t1 v07_erarf_t2 ///
+					v07_erarf_t3 v08_erarf v09_erarf v09_erarf_t1 v09_erarf_t2 ///
+					v09_erarf_t3 v10_erarf v11_erarf v11_erarf_t1 v11_erarf_t2 ///
+					v11_erarf_t3 v12_erarf v13_erarf v13_erarf_t1 v13_erarf_t2 ///
+					v13_erarf_t3 v14_erarf v14_erarf_t1 v14_erarf_t2 ///
+					v14_erarf_t3 maize_ea_p, ///
 			  by(year hh_id_obs wave country pw ea_id_merge ///
 					ea_id_obs strataid urban admin_1 admin_2 ///
 					hh_id_merge admin_3 dist_weekly)
