@@ -111,6 +111,7 @@
 ***********************************************************************
 **# 3 - end matter
 ***********************************************************************
+
 	bysort 			wave hh_id_obs ea_id_merge plot_id_obs crop_name: gen dup_check = _N
 	tab 			dup_check
 	list 			wave hh_id_obs ea_id_merge plot_id_obs crop_name if dup_check > 1

@@ -22,14 +22,14 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/lsms_risk_ag_data/refined_data/nigeria/wave_3"
+	global root 	"$data/lsms_risk_ag_data/refined_data/nigeria/wave_4"
 	global root2 	"$data/lsms_base/countries/nigeria"
-	global export 	"$data/lsms_risk_ag_data/merged_data/nigeria/wave_3"
+	global export 	"$data/lsms_risk_ag_data/merged_data/nigeria/wave_4"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/nigeria/logs"
 
 * open log 
 	cap log close 
-	log using "$logout/wave3_cleanrb", append
+	log using "$logout/wave4_cleanrb", append
 
 	
 * ***********************************************************************
@@ -41,20 +41,22 @@
 	
 	drop		_merge
 	
-	keep if wave == 3
+	keep if wave == 4
 	
 * merge in clean com sec
-	merge m:1  ea_id_merge hh_id_merge using "$root/wave3_rb_vars"
+	merge m:1  hh_id_merge using "$root/wave4_rb_vars"
 
 /*
+
     Result                      Number of obs
     -----------------------------------------
-    Not matched                           998
-        from master                       659  (_merge==1)
-        from using                        339  (_merge==2)
+    Not matched                           147
+        from master                       147  (_merge==1)
+        from using                          0  (_merge==2)
 
-    Matched                            13,133  (_merge==3)
+    Matched                            16,918  (_merge==3)
     -----------------------------------------
+
 */
 
 * keep only merged
@@ -62,10 +64,10 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 1,569 obs dropped
+	*** 1,659 obs dropped
 	
 	drop if			harv_missing == 1
-	*** 2,545 obs dropped
+	*** 577 obs dropped
 	
 ***********************************************************************
 **# 2 - impute value of harvest
@@ -74,13 +76,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 369, sd 1507, max 113,127
+	*** mean 1709, sd 180,893, max 2.14e+07
 	
 	sum				yield, detail
-	*** mean 2991, sd 22,173, max 901,617
+	*** mean 4385, sd 387,232, max 4.58e+07
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 511 changes made
+	* 700 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -95,16 +97,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 275, sd 485, max 8908
+	*** mean 140, sd 280, max 9648
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 968, sd 1392, max 8064
+	*** mean 518, sd 674, max 3695
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 543 changes
+	*** 1,371 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	
@@ -112,15 +114,16 @@
 ***********************************************************************
 **# 3 - end matter
 ***********************************************************************
+
 	bysort 			wave hh_id_obs ea_id_merge plot_id_obs crop_name: gen dup_check = _N
 	tab 			dup_check
 	list 			wave hh_id_obs ea_id_merge plot_id_obs crop_name if dup_check > 1
 	duplicates drop wave hh_id_obs ea_id_merge plot_id_obs crop_name, force
-	* 75 observations dropped
+	* 4 observation deleted
 	
-	isid		wave hh_id_obs ea_id_merge plot_id_merge crop_name
+	isid			wave hh_id_obs ea_id_merge plot_id_merge crop_name
 	
-	save 		"$export/wave3_cleanrb", replace
+	save 		"$export/wave4_cleanrb", replace
 	
 * close the log
 	log	close

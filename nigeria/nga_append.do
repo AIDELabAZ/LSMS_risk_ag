@@ -50,15 +50,15 @@
 	
 * check the number of observations again
 	count
-	*** 44,204 observations 
-	count if 		year == 2011
-	*** wave 1 has 10,167
+	*** 44,158 observations 
+	count if 		year == 2010
+	*** wave 1 has 10,148
 	count if 		year == 2012
-	*** wave 2 has 10,411
+	*** wave 2 has 10,399
 	count if 		year == 2015
-	*** wave 3 has 8,944
+	*** wave 3 has 8,933
 	count if 		year == 2018
-	*** wave 4 has 14,682
+	*** wave 4 has 14,678
 	
 	isid			wave hh_id_obs plot_id_obs crop_name
 	
@@ -72,14 +72,14 @@
 	replace			isp = 0 if isp == .
 			
 * collapse to household level
-	collapse (sum)	plot_area_GPS total_labor_days2 nitrogen_kg2 ///
-					isp harvest_value_USD seed_kg2 harvest_kg ///
+	collapse (sum)	plot_area_GPS total_labor_days fert_kg ///
+					isp harvest_value_USD seed_kg harvest_kg ///
 			 (max)	inorganic_fertilizer organic_fertilizer /// 
 					irrigated used_pesticides extension ///
 					crop_shock pests_shock rain_shock flood_shock livestock ///
 			 (mean) hh_asset_index hh_electricity_access /// 
-					dist_popcenter dist_road dist_market hh_shock totcons_USD2 /// 
-					soil_fertility_index hh_size, ///
+					dist_popcenter dist_road dist_market hh_shock totcons_USD /// 
+					soil_fertility_index hh_size maize_ea_p, ///
 			  by(year hh_id_obs wave country pw ea_id_merge ///
 					ea_id_obs strataid urban admin_1 admin_2 ///
 					hh_id_merge admin_3)

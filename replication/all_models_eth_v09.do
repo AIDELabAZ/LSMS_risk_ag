@@ -48,10 +48,14 @@
 **# Regressions using v09 only across rainfall metrics and weather sources
 ********************************************************************************
 
+* save results in temp file
+	tempname 	nga_results
+	postfile 	`nga_resultss' str3 country str3 sat str3 rain str3 shock model ///
+					beta_ap se_ap beta_ds se_ds adjustedr loglike dfr ///
+					using "$export/nga_results.dta", replace
+	
 	local 		rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
 	local 		lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
-
-	cap 		erase "$export/model_comparisons_eth_v09.txt"
 
 foreach v in `rain' {
     foreach t in `lag' {
@@ -130,11 +134,14 @@ foreach v in `rain' {
             constraint 8 		[mu1_s]tot_shockd3 = [mu1_f]tot_shockd3
 
             * Model 1
-            eststo clear
             bootstrap, reps(100) seed(2045): ///
-            reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
-            constraint(1 2) nolog
-            eststo model1
+				reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
+					constraint(1 2) nolog
+				post		`nga_results' ("nga") ("`substr("`v'", 5, 3)'") ///
+								("`substr("`v'", 1, 3)'") ("`substr("`s1'", 1, 3)'") ///
+								("mod1") (`=_b[mu2_s]') (`=_se[mu2_s]') ///
+								(`=_b[mu3_s]') (`=_se[mu3_s]')
+								(`=e(r2_a)') (`=e(ll)') (`=e(df_r)')
 
             * Model 2
             gen 		mod_mu2_s = `s1' * mu2_s
@@ -150,7 +157,11 @@ foreach v in `rain' {
             reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s) ///
                  (mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
             constraint(1 2 9 10 11) nolog
-            eststo model2
+				post		`nga_results' ("nga") ("`substr("`v'", 5, 3)'") ///
+								("`substr("`v'", 1, 3)'") ("`substr("`s1'", 1, 3)'") ///
+								("mod2") (`=_b[mu2_s]') (`=_se[mu2_s]') ///
+								(`=_b[mu3_s]') (`=_se[mu3_s]')
+								(`=e(r2_a)') (`=e(ll)') (`=e(df_r)')
 
             * Model 3
             bootstrap, reps(100) seed(2045): ///
@@ -159,12 +170,11 @@ foreach v in `rain' {
                  (mu1_f mu2_f mu3_f tot_shockd2 tot_shockd3 ///
                   shock1_mu2_f shock2_mu2_f shock1_mu3_f shock2_mu3_f), ///
                  constraint(1 2 3 4 5 6 7 8) nolog
-            eststo model3
-
-            esttab model1 model2 model3 using "$export/model_comparisons_eth_v09.txt", append ///
-                se star(* 0.1 ** 0.05 *** 0.01) ///
-                label compress nomtitle nogaps ///
-                title("Ethiopia | Rain: `v' | Lag: `t' | Shock: v09")
+				post		`nga_results' ("nga") ("`substr("`v'", 5, 3)'") ///
+								("`substr("`v'", 1, 3)'") ("`substr("`s1'", 1, 3)'") ///
+								("mod3") (`=_b[mu2_s]') (`=_se[mu2_s]') ///
+								(`=_b[mu3_s]') (`=_se[mu3_s]')
+								(`=e(r2_a)') (`=e(ll)') (`=e(df_r)')
 
             drop mod_mu* shock*_mu* tot_shockd* mu1_s mu1_f mu2_s mu2_f mu3_s mu3_f
         }
