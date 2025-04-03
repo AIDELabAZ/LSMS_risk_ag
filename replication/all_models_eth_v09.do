@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: 31 Mar 2025
 * Created by: reece
-* Edited on: 1 Apr 2025
-* Edited by: jdm
+* Edited on: 2 Apr 2025
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -28,7 +28,7 @@
 **# Variable creation
 ********************************************************************************
 
-	use 		"$root/eth_complete_p", clear
+	use 		"$root/eth_complete", clear
 	
 	xtset 		hh_id_obs
 	
@@ -39,7 +39,7 @@
 
 	gen 		std_y2 = std_y^2
 	gen 		std_y3 = std_y^3
-	egen 		std_f = std(nitrogen_kg2 / plot_area_GPS)
+	egen 		std_f = std(fert_kg / plot_area_GPS)
 	egen 		std_s = std(isp)
 	gen 		std_f2 = std_f^2
 	gen 		std_s2 = std_s^2
@@ -49,6 +49,105 @@
 ********************************************************************************
 **# Regressions using v09 only across rainfall metrics and weather sources
 ********************************************************************************
+* Rename chirp -> rf2
+	rename v01_chirp       v01_rf2
+	rename v01_chirp_t1    v01_rf2_t1
+	rename v02_chirp       v02_rf2	
+	rename v03_chirp       v03_rf2
+	rename v04_chirp       v04_rf2
+	rename v05_chirp       v05_rf2
+	rename v05_chirp_t1    v05_rf2_t1
+	rename v06_chirp       v06_rf2
+	rename v07_chirp       v07_rf2
+	rename v07_chirp_t1    v07_rf2_t1
+	rename v07_chirp_t2    v07_rf2_t2
+	rename v07_chirp_t3    v07_rf2_t3
+	rename v08_chirp       v08_rf2
+	rename v09_chirp       v09_rf2
+	rename v09_chirp_t1    v09_rf2_t1
+	rename v09_chirp_t2    v09_rf2_t2
+	rename v09_chirp_t3    v09_rf2_t3
+	rename v10_chirp       v10_rf2
+	rename v11_chirp       v11_rf2
+	rename v11_chirp_t1    v11_rf2_t1
+	rename v11_chirp_t2    v11_rf2_t2
+	rename v11_chirp_t3    v11_rf2_t3
+	rename v12_chirp       v12_rf2
+	rename v13_chirp       v13_rf2
+	rename v13_chirp_t1    v13_rf2_t1
+	rename v13_chirp_t2    v13_rf2_t2
+	rename v13_chirp_t3    v13_rf2_t3
+	rename v14_chirp       v14_rf2
+	rename v14_chirp_t1    v14_rf2_t1
+	rename v14_chirp_t2    v14_rf2_t2
+	rename v14_chirp_t3    v14_rf2_t3
+
+* Rename cpcrf -> rf3
+	rename v01_cpcrf       v01_rf3
+	rename v01_cpcrf_t1    v01_rf3_t1
+	rename v02_cpcrf       v02_rf3
+	rename v03_cpcrf       v03_rf3
+	rename v04_cpcrf       v04_rf3
+	rename v05_cpcrf       v05_rf3
+	rename v05_cpcrf_t1    v05_rf3_t1
+	rename v06_cpcrf       v06_rf3
+	rename v07_cpcrf       v07_rf3
+	rename v07_cpcrf_t1    v07_rf3_t1
+	rename v07_cpcrf_t2    v07_rf3_t2
+	rename v07_cpcrf_t3    v07_rf3_t3
+	rename v08_cpcrf       v08_rf3
+	rename v09_cpcrf       v09_rf3
+	rename v09_cpcrf_t1    v09_rf3_t1
+	rename v09_cpcrf_t2    v09_rf3_t2
+	rename v09_cpcrf_t3    v09_rf3_t3
+	rename v10_cpcrf       v10_rf3
+	rename v11_cpcrf       v11_rf3
+	rename v11_cpcrf_t1    v11_rf3_t1
+	rename v11_cpcrf_t2    v11_rf3_t2
+	rename v11_cpcrf_t3    v11_rf3_t3
+	rename v12_cpcrf       v12_rf3
+	rename v13_cpcrf       v13_rf3
+	rename v13_cpcrf_t1    v13_rf3_t1
+	rename v13_cpcrf_t2    v13_rf3_t2
+	rename v13_cpcrf_t3    v13_rf3_t3
+	rename v14_cpcrf       v14_rf3
+	rename v14_cpcrf_t1    v14_rf3_t1
+	rename v14_cpcrf_t2    v14_rf3_t2
+	rename v14_cpcrf_t3    v14_rf3_t3
+
+* Rename erarf -> rf4
+	rename v01_erarf       v01_rf4
+	rename v01_erarf_t1    v01_rf4_t1
+	rename v02_erarf       v02_rf4
+	rename v03_erarf       v03_rf4
+	rename v04_erarf       v04_rf4
+	rename v05_erarf       v05_rf4
+	rename v05_erarf_t1    v05_rf4_t1
+	rename v06_erarf       v06_rf4
+	rename v07_erarf       v07_rf4
+	rename v07_erarf_t1    v07_rf4_t1
+	rename v07_erarf_t2    v07_rf4_t2
+	rename v07_erarf_t3    v07_rf4_t3
+	rename v08_erarf       v08_rf4
+	rename v09_erarf       v09_rf4
+	rename v09_erarf_t1    v09_rf4_t1
+	rename v09_erarf_t2    v09_rf4_t2
+	rename v09_erarf_t3    v09_rf4_t3
+	rename v10_erarf       v10_rf4
+	rename v11_erarf       v11_rf4
+	rename v11_erarf_t1    v11_rf4_t1
+	rename v11_erarf_t2    v11_rf4_t2
+	rename v11_erarf_t3    v11_rf4_t3
+	rename v12_erarf       v12_rf4
+	rename v13_erarf       v13_rf4
+	rename v13_erarf_t1    v13_rf4_t1
+	rename v13_erarf_t2    v13_rf4_t2
+	rename v13_erarf_t3    v13_rf4_t3
+	rename v14_erarf       v14_rf4
+	rename v14_erarf_t1    v14_rf4_t1
+	rename v14_erarf_t2    v14_rf4_t2
+	rename v14_erarf_t3    v14_rf4_t3
+
 
 	local 		rain v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4
 	local 		lag  v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 v01_rf4_t1 v05_rf4_t1
