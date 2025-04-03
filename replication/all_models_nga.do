@@ -245,7 +245,7 @@
 
 * close the post file and open the data file
 	postclose	`nga_results' 
-/*	use 		 "$export/nga_results.dta", clear
+	use 		 "$export/nga_results.dta", clear
 	
 * create country type variable
 	drop		country
@@ -422,7 +422,7 @@ preserve
 	global			gheight	=	30
 
 
-	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(2)18) xsize(10) ysize(6) ///
+	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(8)84) xsize(10) ysize(6) ///
 						xtitle("Specification # - sorted by effect size") ///
 						ytitle("Arrow-Pratt (AP)", axis(2) yoffset(24)) ///
 						ylab(0(1)$gheight ) msize(small small small small) mcolor(gs10 gs10 gs10 gs10)	///
