@@ -1,12 +1,12 @@
 * Project: lsms risk ag
-* Created on: 1 Apr 2025
-* Created by: reece
-* Edited on: 2 Apr 2025
+* Created on: 3 Apr 2025
+* Created by: jdm
+* Edited on: 3 Apr 2025
 * Edited by: jdm
 * Stata v.18
 
 * does
-	* creates coef plots for all Nigeria results
+	* creates coef plots for all Malawi results
 		* models 1-3
 		* two rainfall variables in production
 		* three rainfall shock variables
@@ -15,26 +15,26 @@
 * assumes
 	* cleaned, merged (weather), and appended (waves) data
 
-	
+
 ********************************************************************************
 **# 0 - setup
 ********************************************************************************
 
-	global root   	"$data/lsms_risk_ag_data/regression_data/nigeria"
+	global root   	"$data/lsms_risk_ag_data/regression_data/malawi"
 	global export 	"$data/lsms_risk_ag_data/results"
 	global figures 	"$data/lsms_risk_ag_data/results/figures"
 	global tables 	"$data/lsms_risk_ag_data/results/tables"
 	global logout 	"$data/lsms_risk_ag_data/regression_data/logs"
 
 	cap 	log 	close
-	log 	using 	"$logout/model_comparisons_nga", replace
+	log 	using 	"$logout/model_comparisons_mwi", replace
 
 
 ********************************************************************************
 **# 1 - variable creation
 ********************************************************************************
 
-	use 		"$root/nga_complete", clear
+	use 		"$root/mwi_complete", clear
 	
 	xtset 		hh_id_obs
 	
@@ -73,12 +73,10 @@
 ********************************************************************************
 
 * save results in temp file
-	tempname 	nga_results
-	postfile 	`nga_results' str3 country str3 sat str3 rain str3 shock str4 model ///
+	tempname 	mwi_results
+	postfile 	`mwi_results' str3 country str3 sat str3 rain str3 shock str4 model ///
 					beta_ap se_ap beta_ds se_ds adjustedr loglike dfr ///
-					using "$export/nga_results.dta", replace
-
-	
+					using "$export/mwi_results.dta", replace
 
 * start rain loop
 	foreach v in `rain' {
@@ -94,7 +92,7 @@
 
             xtivreg std_y hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
 			
 			predict std_e1 if e(sample), e
@@ -115,7 +113,7 @@
 
             xtivreg std_e2 hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
 				
             matrix 		a2 = e(b)
@@ -129,7 +127,7 @@
 
             xtivreg std_e3 hh_size `v' i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
+                hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
 				
             matrix 		a3 = e(b)
@@ -159,7 +157,7 @@
             bootstrap, reps(10) seed(2045): ///
             reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
             constraint(1 2) nolog
-				post		`nga_results' ("nga") ("`sat'") ("`varn'") ("") ///
+				post		`mwi_results' ("mwi") ("`sat'") ("`varn'") ("") ///
 								("mod1") (`=[mu1_s]_b[mu2_s]') (`=[mu1_s]_se[mu2_s]') ///
 								(`=[mu1_s]_b[mu3_s]') (`=[mu1_s]_se[mu3_s]') ///
 								(`=e(r2_1)') (`=e(ll)') (`=e(dfk2_adj)')
@@ -188,7 +186,7 @@
 				reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s) ///
 					(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
 				constraint(1 2 3 4 5) nolog
-					post		`nga_results' ("nga") ("`sat'") ("`varn'") ("`shck'") ///
+					post		`mwi_results' ("mwi") ("`sat'") ("`varn'") ("`shck'") ///
 									("mod2") (`=[mu1_s]_b[mu2_s]') (`=[mu1_s]_se[mu2_s]') ///
 									(`=[mu1_s]_b[mu3_s]') (`=[mu1_s]_se[mu3_s]') ///
 									(`=e(r2_1)') (`=e(ll)') (`=e(dfk2_adj)')
@@ -226,7 +224,7 @@
 						(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f ///
 							`s2' mod_mu2_f2 mod_mu3_f2 `s3' mod_mu2_f3 mod_mu3_f3), ///
 						constraint(1 2 3 4 5 6 7 8 9 10 11) nolog
-						post		`nga_results' ("nga") ("`sat'") ("`varn'") ("`shck'") ///
+						post		`mwi_results' ("mwi") ("`sat'") ("`varn'") ("`shck'") ///
 										("mod3") (`=[mu1_s]_b[mu2_s]') (`=[mu1_s]_se[mu2_s]') ///
 										(`=[mu1_s]_b[mu3_s]') (`=[mu1_s]_se[mu3_s]') ///
 										(`=e(r2_1)') (`=e(ll)') (`=e(dfk2_adj)')
@@ -250,12 +248,12 @@
 ********************************************************************************
 
 * close the post file and open the data file
-	postclose	`nga_results' 
-	use 		 "$export/nga_results.dta", clear
+	postclose	`mwi_results' 
+	use 		 "$export/mwi_results.dta", clear
 	
 * create country type variable
 	drop		country
-	gen			country = 5
+	gen			country = 2
 	lab def		country 1 "Ethiopia" 2 "Malawi" 3 "Mali" ///
 					4 "Niger" 5 "Nigeria" 6 "Tanzania" ///
 					7 "Uganda"
@@ -457,8 +455,8 @@ preserve
 						legend(order(7 5 6) cols(3) size(small) rowgap(.5) pos(12) ring(1))
 	
 * graph save
-	graph export 	"$figures/nga_ap_coef.png", replace as(png)	
-	graph export 	"$figures/nga_ap_coef.eps", replace as(eps)		
+	graph export 	"$figures/mwi_ap_coef.png", replace as(png)	
+	graph export 	"$figures/mwi_ap_coef.eps", replace as(eps)		
 	
 restore	
 
@@ -526,8 +524,8 @@ preserve
 						legend(order(7 5 6) cols(3) size(small) rowgap(.5) pos(12) ring(1))
 	
 * grdsh save
-	graph export 	"$figures/nga_ds_coef.png", replace as(png)	
-	graph export 	"$figures/nga_ds_coef.eps", replace as(eps)		
+	graph export 	"$figures/mwi_ds_coef.png", replace as(png)	
+	graph export 	"$figures/mwi_ds_coef.eps", replace as(eps)		
 	
 restore		
 	

@@ -1,8 +1,8 @@
 * Project: lsms risk
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 1 Apr 2025
-* Edited by: reece
+* Edited on: 3 Apr 2025
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -108,6 +108,22 @@
 
 * generate improved seed share
 	replace			isp = isp/plot_area_GPS
+
+* merge in weather data
+	merge 1:1 		hh_id_obs wave using "$wth/weather"
+/* 
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       113,017
+        from master                         1  (_merge==1)
+        from using                    113,016  (_merge==2)
+
+    Matched                             8,077  (_merge==3)
+    -----------------------------------------
+
+*/ 
+	keep if 	_merge == 3
+	drop 		_merge
 
 * drop missing plot area and households that only appear once
 	drop if 	plot_area_GPS == 0
