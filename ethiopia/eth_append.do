@@ -85,23 +85,7 @@
 					crop_shock pests_shock rain_shock flood_shock livestock ///
 			 (mean) hh_asset_index hh_electricity_access /// 
 					dist_popcenter hh_shock totcons_USD /// 
-					soil_fertility_index hh_size v01_rf2 v01_rf2_t1 v02_rf2 /// 
-					v03_rf2 v04_rf2 v05_rf2 v05_rf2_t1 v06_rf2 v07_rf2 /// 
-					v07_rf2_t1 v07_rf2_t2 v07_rf2_t3 v08_rf2 v09_rf2 ///
-					v09_rf2_t1 v09_rf2_t2 v09_rf2_t3 v10_rf2 v11_rf2 ///
-					v11_rf2_t1 v11_rf2_t2 v11_rf2_t3 v12_rf2 v13_rf2 ///
-					v13_rf2_t1 v13_rf2_t2 v13_rf2_t3 v14_rf2 v14_rf2_t1 ///
-					v14_rf2_t2 v14_rf2_t3 v01_rf3 v01_rf3_t1 v02_rf3 v03_rf3 ///
-					v04_rf3 v05_rf3 v05_rf3_t1 v06_rf3 v07_rf3 v07_rf3_t1 ///
-					v07_rf3_t2 v07_rf3_t3 v08_rf3 v09_rf3 v09_rf3_t1 v09_rf3_t2 ///
-					v09_rf3_t3 v10_rf3 v11_rf3 v11_rf3_t1 v11_rf3_t2 v11_rf3_t3 ///
-					v12_rf3 v13_rf3 v13_rf3_t1 v13_rf3_t2 v13_rf3_t3 v14_rf3 ///
-					v14_rf3_t1 v14_rf3_t2 v14_rf3_t3 v01_rf4 v01_rf4_t1 v02_rf4 ///
-					v03_rf4 v04_rf4 v05_rf4 v05_rf4_t1 v06_rf4 v07_rf4 v07_rf4_t1 ///
-					v07_rf4_t2 v07_rf4_t3 v08_rf4 v09_rf4 v09_rf4_t1 v09_rf4_t2 ///
-					v09_rf4_t3 v10_rf4 v11_rf4 v11_rf4_t1 v11_rf4_t2 v11_rf4_t3 ///
-					v12_rf4 v13_rf4 v13_rf4_t1 v13_rf4_t2 v13_rf4_t3 v14_rf4 ///
-					v14_rf4_t1 v14_rf4_t2 v14_rf4_t3 maize_ea_p, ///
+					soil_fertility_index hh_size maize_ea_p, ///
 			  by(year hh_id_obs wave country pw ea_id_merge ///
 					ea_id_obs strataid urban admin_1 admin_2 ///
 					hh_id_merge admin_3 dist_weekly)
@@ -111,9 +95,26 @@
 * generate improved seed share
 	replace			isp = isp/plot_area_GPS
 
+* merge in weather data
+	merge 1:1 		hh_id_obs wave using "$wth/weather"
+/* 
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       110,239
+        from master                         6  (_merge==1)
+        from using                    110,233  (_merge==2)
+
+    Matched                            10,860  (_merge==3)
+    -----------------------------------------
+
+*/ 
+	keep if 	_merge == 3
+	drop 		_merge
+	
 * drop missing plot area and households that only appear once
 	drop if 	plot_area_GPS == 0
 	* 179 deleted
+	
 	duplicates 	tag hh_id_obs, generate(dup)
 	drop if		dup == 0
 	drop		dup
