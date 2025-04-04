@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: nov 8
 * Created by: reece
-* Edited on: nov 8 2024
-* Edited by: reece
+* Edited on: 4 Apr 2024
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -14,13 +14,14 @@
 	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
 
 * define paths
-	global root 	"$data/raw_lsms_data/malawi/wb_raw_data/data/ihs4cx/com"
+	global root 	"$data/raw_lsms_data/malawi/wb_raw_data/data/ihs4lpnl/com"
 	global export 	"$data/lsms_risk_ag_data/refined_data/malawi/wave_3"
 	global logout 	"$data/lsms_risk_ag_data/refined_data/malawi/logs"
 
@@ -49,8 +50,9 @@
 	
 	drop com_cd*
 	
+	
 * merge in extension
-	merge 1:1 ea_id using "$root/com_cf1"
+	merge m:m ea_id using "$root/com_cf1"
 	* all matched
 	
 * grab exension var
@@ -67,6 +69,8 @@
 
 	
 * prepare for export
+	drop if	ea_id == "30602235" & dist_daily == 0
+
 	isid			ea_id_merge
 	describe
 	summarize 

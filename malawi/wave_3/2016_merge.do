@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: January 2025
 * Created by: reece
-* Edited on: 29 Jan 2025
-* Edited by: reece
+* Edited on: 4 Apr 2025
+* Edited by: jdm
 * Stata v.18
 
 * does
@@ -14,7 +14,8 @@
 	* cleaned hh_seca.dta
 
 * TO DO:
-	* 
+	* done
+	
 * **********************************************************************
 **#0 - setup
 * **********************************************************************
@@ -45,15 +46,14 @@
 
 /* 
    Result                      Number of obs
+   Result                      Number of obs
     -----------------------------------------
-    Not matched                         8,404
-        from master                     7,650  (_merge==1)
-        from using                        754  (_merge==2)
+    Not matched                           391
+        from master                       391  (_merge==1)
+        from using                          0  (_merge==2)
 
-    Matched                               155  (_merge==3)
-    -----------------------------------------
-
-. 
+    Matched                             6,859  (_merge==3)
+    ----------------------------------------- 
 
 */
 	* keep only merged
@@ -61,10 +61,10 @@
 	drop			_merge
 	
 	drop if			crop_name == ""
-	*** 3 obs dropped
+	*** 0 obs dropped
 	
 	drop if			harv_missing == 1
-	*** 15 obs dropped
+	*** 775 obs dropped
 	
 	
 ***********************************************************************
@@ -74,13 +74,13 @@
 * replace outliers at top 5 percent
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum 			harvest_value_USD
-	*** mean 18, sd 32, max 229
+	*** mean 49, sd 63, max 300
 	
 	sum				yield, detail
-	*** mean 80, sd 143, max 972
+	*** mean 234, sd 484, max 15,962
 	
 	replace			harvest_value_USD = . if yield > `r(p95)' 
-	* 14 changes made
+	* 484 changes made
 	
 * impute 
 	mi set 			wide 	// declare the data to be wide.
@@ -95,16 +95,16 @@
 	
 * inspect imputation 
 	sum 			harvest_value_USD_1_
-	*** mean 15, sd 29, max 229
+	*** mean 46, sd 60, max 300
 	
 	drop			yield
 	gen				yield = harvest_value_USD/plot_area_GPS
 	sum				yield
-	*** mean 56, sd 85, max 378
+	*** mean 162, sd 188, max 830
 	
 * replace the imputated variable
 	replace 			harvest_value_USD = harvest_value_USD_1_
-	*** 6 changes
+	*** 298 changes
 	
 	drop 				mi_miss harvest_value_USD_1_ yield
 	

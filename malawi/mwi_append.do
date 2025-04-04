@@ -52,13 +52,13 @@
 	
 * check the number of observations again
 	count
-	*** 30,000 observations 
+	*** 35,947 observations 
 	count if 		wave == 1
 	*** wave 1 has 7,760
 	count if 		wave ==2
 	*** wave 2 has 11,716
 	count if 		wave ==3
-	*** wave 3 has 137
+	*** wave 3 has 6,084
 	count if 		wave ==4
 	*** wave 4 has 10,387
 	
@@ -83,23 +83,7 @@
 					crop_shock pests_shock rain_shock flood_shock livestock ///
 			 (mean) hh_asset_index hh_electricity_access /// 
 					dist_popcenter hh_shock totcons_USD /// 
-					soil_fertility_index hh_size v01_rf2 v01_rf2_t1 v02_rf2 /// 
-					v03_rf2 v04_rf2 v05_rf2 v05_rf2_t1 v06_rf2 v07_rf2 /// 
-					v07_rf2_t1 v07_rf2_t2 v07_rf2_t3 v08_rf2 v09_rf2 ///
-					v09_rf2_t1 v09_rf2_t2 v09_rf2_t3 v10_rf2 v11_rf2 ///
-					v11_rf2_t1 v11_rf2_t2 v11_rf2_t3 v12_rf2 v13_rf2 ///
-					v13_rf2_t1 v13_rf2_t2 v13_rf2_t3 v14_rf2 v14_rf2_t1 ///
-					v14_rf2_t2 v14_rf2_t3 v01_rf3 v01_rf3_t1 v02_rf3 v03_rf3 ///
-					v04_rf3 v05_rf3 v05_rf3_t1 v06_rf3 v07_rf3 v07_rf3_t1 ///
-					v07_rf3_t2 v07_rf3_t3 v08_rf3 v09_rf3 v09_rf3_t1 v09_rf3_t2 ///
-					v09_rf3_t3 v10_rf3 v11_rf3 v11_rf3_t1 v11_rf3_t2 v11_rf3_t3 ///
-					v12_rf3 v13_rf3 v13_rf3_t1 v13_rf3_t2 v13_rf3_t3 v14_rf3 ///
-					v14_rf3_t1 v14_rf3_t2 v14_rf3_t3 v01_rf4 v01_rf4_t1 v02_rf4 ///
-					v03_rf4 v04_rf4 v05_rf4 v05_rf4_t1 v06_rf4 v07_rf4 v07_rf4_t1 ///
-					v07_rf4_t2 v07_rf4_t3 v08_rf4 v09_rf4 v09_rf4_t1 v09_rf4_t2 ///
-					v09_rf4_t3 v10_rf4 v11_rf4 v11_rf4_t1 v11_rf4_t2 v11_rf4_t3 ///
-					v12_rf4 v13_rf4 v13_rf4_t1 v13_rf4_t2 v13_rf4_t3 v14_rf4 ///
-					v14_rf4_t1 v14_rf4_t2 v14_rf4_t3 maize_ea_p, ///
+					soil_fertility_index hh_size maize_ea_p, ///
 			  by(year hh_id_obs wave country pw ea_id_merge ///
 					ea_id_obs strataid urban admin_1 admin_2 ///
 					hh_id_merge admin_3 dist_weekly dist_daily out_supply)
@@ -113,12 +97,12 @@
 	merge 1:1 		hh_id_obs wave using "$wth/weather"
 /* 
     Result                      Number of obs
-    -----------------------------------------
-    Not matched                       113,017
-        from master                         1  (_merge==1)
-        from using                    113,016  (_merge==2)
+     -----------------------------------------
+    Not matched                       111,213
+        from master                         2  (_merge==1)
+        from using                    111,211  (_merge==2)
 
-    Matched                             8,077  (_merge==3)
+    Matched                             9,882  (_merge==3)
     -----------------------------------------
 
 */ 
@@ -127,11 +111,11 @@
 
 * drop missing plot area and households that only appear once
 	drop if 	plot_area_GPS == 0
-	* 75 obs deleted
+	* 84 obs deleted
 	duplicates 	tag hh_id_obs, generate(dup)
 	drop if		dup == 0
 	drop		dup
-	*** dropped 1,779 non-panel households
+	*** dropped 1,447 non-panel households
 	
 
 * **********************************************************************
