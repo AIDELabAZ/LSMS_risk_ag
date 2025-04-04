@@ -156,7 +156,7 @@
 
          * Model 1
             eststo clear
-            bootstrap, reps(10) seed(2045): ///
+            bootstrap, reps(1000) seed(2045): ///
             reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
             constraint(1 2) nolog
 				post		`nga_results' ("nga") ("`sat'") ("`varn'") ("") ///
@@ -184,7 +184,7 @@
 				constraint 4 		[mu1_s]mod_mu3_s = [mu1_f]mod_mu3_f
 				constraint 5 		[mu1_s]`s1' = [mu1_f]`s1'
 
-				bootstrap, reps(10) seed(2045): ///
+				bootstrap, reps(1000) seed(2045): ///
 				reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s) ///
 					(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
 				constraint(1 2 3 4 5) nolog
@@ -220,7 +220,7 @@
 					constraint 10 		[mu1_s]`s2' = [mu1_f]`s2'
 					constraint 11 		[mu1_s]`s3' = [mu1_f]`s3'
 			
-					bootstrap, reps(10) seed(2045): ///
+					bootstrap, reps(1000) seed(2045): ///
 					reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s ///
 							`s2' mod_mu2_s2 mod_mu3_s2 `s3' mod_mu2_s3 mod_mu3_s3) ///
 						(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f ///
