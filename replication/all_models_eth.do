@@ -34,7 +34,7 @@
 **# 1 - variable creation
 ********************************************************************************
 
-	use 		"$root/eth_complete_debug", clear
+	use 		"$root/eth_complete", clear
 	
 	xtset 		hh_id_obs
 	
@@ -43,28 +43,28 @@
 	drop 		std_y
 	egen 		std_y = std(harvest_value_USD / plot_area_GPS)
 
-	egen 		std_f = std(nitrogen_kg2 / plot_area_GPS)
+	egen 		std_f = std(fert_kg / plot_area_GPS)
 	egen 		std_s = std(isp)
 	gen 		std_f2 = std_f^2
 	gen 		std_s2 = std_s^2
 	gen 		std_fs = std_f * std_s
 
-	local rain 	v01_rf1 v05_rf1 v01_rf2 v05_rf2 v01_rf3 v05_rf3 v01_rf4 v05_rf4 ///
+	local rain 	v01_rf1 v05_rf1 v01_rf2 v05_rf2 v01_rf3 v05_rf3 ///
 					v01_rf5 v05_rf5 v01_rf6 v05_rf6
 
 	local lag  	v01_rf1_t1 v05_rf1_t1 v01_rf2_t1 v05_rf2_t1 v01_rf3_t1 v05_rf3_t1 ///
-					v01_rf4_t1 v05_rf4_t1 v01_rf5_t1 v05_rf5_t1 v01_rf6_t1 v05_rf6_t1
+					v01_rf5_t1 v05_rf5_t1 v01_rf6_t1 v05_rf6_t1
 
-	local shck1 v07_rf1_t1 v09_rf1_t1 v14_rf1_t1 v07_rf2_t1 v09_rf2_t1 v14_rf2_t1 ///
-					v07_rf3_t1 v09_rf3_t1 v14_rf3_t1 v07_rf4_t1 v09_rf4_t1 v14_rf4_t1 ///
+	local shck1 v07_rf1_t1 v09_rf1_t1 v07_rf2_t1 v09_rf2_t1 v14_rf2_t1 ///
+					v07_rf3_t1 v09_rf3_t1 v14_rf3_t1 ///
 					v07_rf5_t1 v09_rf5_t1 v14_rf5_t1 v07_rf6_t1 v09_rf6_t1 v14_rf6_t1 
 	
-	local shck2 v07_rf1_t2 v09_rf1_t2 v14_rf1_t2 v07_rf2_t2 v09_rf2_t2 v14_rf2_t2 ///
-					v07_rf3_t2 v09_rf3_t2 v14_rf3_t2 v07_rf4_t2 v09_rf4_t2 v14_rf4_t2 ///
+	local shck2 v07_rf1_t2 v09_rf1_t2 v07_rf2_t2 v09_rf2_t2 v14_rf2_t2 ///
+					v07_rf3_t2 v09_rf3_t2 v14_rf3_t2 ///
 					v07_rf5_t2 v09_rf5_t2 v14_rf5_t2 v07_rf6_t2 v09_rf6_t2 v14_rf6_t2 
 	
-	local shck3 v07_rf1_t3 v09_rf1_t3 v14_rf1_t3 v07_rf2_t3 v09_rf2_t3 v14_rf2_t3 ///
-					v07_rf3_t3 v09_rf3_t3 v14_rf3_t3 v07_rf4_t3 v09_rf4_t3 v14_rf4_t3 ///
+	local shck3 v07_rf1_t3 v09_rf1_t3 v07_rf2_t3 v09_rf2_t3 v14_rf2_t3 ///
+					v07_rf3_t3 v09_rf3_t3 v14_rf3_t3 ///
 					v07_rf5_t3 v09_rf5_t3 v14_rf5_t3 v07_rf6_t3 v09_rf6_t3 v14_rf6_t3 
 					
 					
@@ -156,7 +156,7 @@
 
          * Model 1
             eststo clear
-            bootstrap, reps(10) seed(2045): ///
+            bootstrap, reps(1000) seed(2045): ///
             reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
             constraint(1 2) nolog
 				post		`eth_results' ("eth") ("`sat'") ("`varn'") ("") ///
@@ -184,7 +184,7 @@
 				constraint 4 		[mu1_s]mod_mu3_s = [mu1_f]mod_mu3_f
 				constraint 5 		[mu1_s]`s1' = [mu1_f]`s1'
 
-				bootstrap, reps(10) seed(2045): ///
+				bootstrap, reps(1000) seed(2045): ///
 				reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s) ///
 					(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
 				constraint(1 2 3 4 5) nolog
@@ -220,7 +220,7 @@
 					constraint 10 		[mu1_s]`s2' = [mu1_f]`s2'
 					constraint 11 		[mu1_s]`s3' = [mu1_f]`s3'
 			
-					bootstrap, reps(10) seed(2045): ///
+					bootstrap, reps(1000) seed(2045): ///
 					reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s ///
 							`s2' mod_mu2_s2 mod_mu3_s2 `s3' mod_mu2_s3 mod_mu3_s3) ///
 						(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f ///
@@ -427,7 +427,7 @@ preserve
 	global			gheight	=	30
 
 
-	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(8)84) xsize(10) ysize(6) ///
+	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(8)66) xsize(10) ysize(6) ///
 						xtitle("Specification # - sorted by effect size") ///
 						ytitle("Arrow-Pratt (AP)", axis(2) yoffset(24)) ///
 						ylab(0(1)$gheight ) msize(small small small small) mcolor(gs10 gs10 gs10 gs10)	///
@@ -496,7 +496,7 @@ preserve
 	global			gheight	=	30
 
 
-	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(8)84) xsize(10) ysize(6) ///
+	twoway 			scatter k1 k2 k3 k4 obs, xlab(0(8)66) xsize(10) ysize(6) ///
 						xtitle("Specification # - sorted by effect size") ///
 						ytitle("Downside Risk (DS)", axis(2) yoffset(24)) ///
 						ylab(0(1)$gheight ) msize(small small small small) mcolor(gs10 gs10 gs10 gs10)	///

@@ -59,9 +59,9 @@
 **## 2.1 - production function
 ********************************************************************************
 
-            xtivreg std_y hh_size v05_rf2 i.year ///
+            xtivreg std_y hh_size v01_rf2 i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v05_rf2_t1), ///
+                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v01_rf2_t1), ///
                 fe vce(cluster hh_id_obs)
 			
 			predict std_e1 if e(sample), e
@@ -80,9 +80,9 @@
             gen 		mu1_s = b1_s + 2*b1_s2 * std_s + b1_fs * std_f
             gen 		mu1_f = b1_f + 2*b1_f2 * std_f + b1_fs * std_s
 
-            xtivreg std_e2 hh_size v05_rf2 i.year ///
+            xtivreg std_e2 hh_size v01_rf2 i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v05_rf2_t1), ///
+                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v01_rf2_t1), ///
                 fe vce(cluster hh_id_obs)
 				
             matrix 		a2 = e(b)
@@ -94,9 +94,9 @@
             gen 		mu2_s = b2_s + 2*b2_s2 * std_s + b2_fs * std_f
             gen 		mu2_f = b2_f + 2*b2_f2 * std_f + b2_fs * std_s
 
-            xtivreg std_e3 hh_size v05_rf2 i.year ///
+            xtivreg std_e3 hh_size v01_rf2 i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
-                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v05_rf2_t1), ///
+                hh_electricity_access dist_popcenter extension dist_weekly maize_ea_p v01_rf2_t1), ///
                 fe vce(cluster hh_id_obs)
 				
             matrix 		a3 = e(b)
