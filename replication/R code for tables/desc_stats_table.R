@@ -7,7 +7,7 @@ library(haven)
 library(xtable)
 
 # Step 1: Load the dataset
-data <- read_dta("C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture/lsms_risk_ag_data/regression_data/ethiopia/eth_complete_p.dta")
+data <- read_dta("C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture/lsms_risk_ag_data/regression_data/ethiopia/eth_complete_debug.dta")
 
 # Step 2: Check structure of data
 glimpse(data)
