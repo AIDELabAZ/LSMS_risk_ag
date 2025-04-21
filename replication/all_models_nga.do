@@ -1,8 +1,8 @@
 * Project: lsms risk ag
 * Created on: 1 Apr 2025
 * Created by: reece
-* Edited on: 2 Apr 2025
-* Edited by: jdm
+* Edited on: 21 Apr 2025
+* Edited by: reece
 * Stata v.18
 
 * does
@@ -67,6 +67,10 @@
 					v07_rf3_t3 v09_rf3_t3 v14_rf3_t3 v07_rf4_t3 v09_rf4_t3 v14_rf4_t3 ///
 					v07_rf5_t3 v09_rf5_t3 v14_rf5_t3 v07_rf6_t3 v09_rf6_t3 v14_rf6_t3 
 					
+		* create squared rainfall variables	
+	foreach v in `rain' {
+			gen `v'_sq = `v'^2
+	}					
 					
 ********************************************************************************
 **# 2 - regressions using v09 only across rainfall metrics and weather sources
@@ -92,7 +96,7 @@
 **## 2.1 - production function
 ********************************************************************************
 
-            xtivreg std_y hh_size `v' i.year ///
+            xtivreg std_y hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
@@ -113,7 +117,7 @@
             gen 		mu1_s = b1_s + 2*b1_s2 * std_s + b1_fs * std_f
             gen 		mu1_f = b1_f + 2*b1_f2 * std_f + b1_fs * std_s
 
-            xtivreg std_e2 hh_size `v' i.year ///
+            xtivreg std_e2 hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
@@ -127,7 +131,7 @@
             gen 		mu2_s = b2_s + 2*b2_s2 * std_s + b2_fs * std_f
             gen 		mu2_f = b2_f + 2*b2_f2 * std_f + b2_fs * std_s
 
-            xtivreg std_e3 hh_size `v' i.year ///
+            xtivreg std_e3 hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_road dist_market maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
@@ -156,7 +160,7 @@
 
          * Model 1
             eststo clear
-            bootstrap, reps(1000) seed(2045): ///
+            bootstrap, reps(10) seed(2045): ///
             reg3 (mu1_s mu2_s mu3_s) (mu1_f mu2_f mu3_f), ///
             constraint(1 2) nolog
 				post		`nga_results' ("nga") ("`sat'") ("`varn'") ("") ///
@@ -184,7 +188,7 @@
 				constraint 4 		[mu1_s]mod_mu3_s = [mu1_f]mod_mu3_f
 				constraint 5 		[mu1_s]`s1' = [mu1_f]`s1'
 
-				bootstrap, reps(1000) seed(2045): ///
+				bootstrap, reps(10) seed(2045): ///
 				reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s) ///
 					(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f), ///
 				constraint(1 2 3 4 5) nolog
@@ -220,7 +224,7 @@
 					constraint 10 		[mu1_s]`s2' = [mu1_f]`s2'
 					constraint 11 		[mu1_s]`s3' = [mu1_f]`s3'
 			
-					bootstrap, reps(1000) seed(2045): ///
+					bootstrap, reps(10) seed(2045): ///
 					reg3 (mu1_s mu2_s mu3_s `s1' mod_mu2_s mod_mu3_s ///
 							`s2' mod_mu2_s2 mod_mu3_s2 `s3' mod_mu2_s3 mod_mu3_s3) ///
 						(mu1_f mu2_f mu3_f `s1' mod_mu2_f mod_mu3_f ///

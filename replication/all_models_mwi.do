@@ -66,7 +66,12 @@
 	local shck3 v07_rf1_t3 v09_rf1_t3 v14_rf1_t3 v07_rf2_t3 v09_rf2_t3 v14_rf2_t3 ///
 					v07_rf3_t3 v09_rf3_t3 v14_rf3_t3 v07_rf4_t3 v09_rf4_t3 v14_rf4_t3 ///
 					v07_rf5_t3 v09_rf5_t3 v14_rf5_t3 v07_rf6_t3 v09_rf6_t3 v14_rf6_t3 
-					
+		
+	* create squared rainfall variables	
+	foreach v in `rain' {
+			gen `v'_sq = `v'^2
+	}
+
 					
 ********************************************************************************
 **# 2 - regressions using v09 only across rainfall metrics and weather sources
@@ -90,7 +95,7 @@
 **## 2.1 - production function
 ********************************************************************************
 
-            xtivreg std_y hh_size `v' i.year ///
+            xtivreg std_y hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
@@ -111,7 +116,7 @@
             gen 		mu1_s = b1_s + 2*b1_s2 * std_s + b1_fs * std_f
             gen 		mu1_f = b1_f + 2*b1_f2 * std_f + b1_fs * std_s
 
-            xtivreg std_e2 hh_size `v' i.year ///
+            xtivreg std_e2 hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
@@ -125,7 +130,7 @@
             gen 		mu2_s = b2_s + 2*b2_s2 * std_s + b2_fs * std_f
             gen 		mu2_f = b2_f + 2*b2_f2 * std_f + b2_fs * std_s
 
-            xtivreg std_e3 hh_size `v' i.year ///
+            xtivreg std_e3 hh_size `v' `v'_sq i.year ///
                 (std_f std_f2 std_s std_s2 std_fs = ///
                 hh_electricity_access extension dist_popcenter dist_weekly dist_daily out_supply maize_ea_p `t'), ///
                 fe vce(cluster hh_id_obs)
