@@ -34,7 +34,7 @@
 **# 1 - variable creation
 ********************************************************************************
 
-	use 		"$root/eth_complete", clear
+	use 		"$root/eth_complete_debug", clear
 	
 	xtset 		hh_id_obs
 	
@@ -43,7 +43,7 @@
 	drop 		std_y
 	egen 		std_y = std(harvest_value_USD / plot_area_GPS)
 
-	egen 		std_f = std(fert_kg / plot_area_GPS)
+	egen 		std_f = std(nitrogen_kg2 / plot_area_GPS)
 	egen 		std_s = std(isp)
 	gen 		std_f2 = std_f^2
 	gen 		std_s2 = std_s^2
