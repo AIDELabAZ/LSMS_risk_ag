@@ -7,8 +7,14 @@
 
 * does
     * creates output tables for Ethiopia results in .txt file
-    * adds Tier-1 IV relevance diagnostics (first moment only)
-    * fixes bootstrap reg3 failures by skipping reps where constraints become infeasible (r(412))
+
+ * assumes
+	* cleaned, merged (weather), and appended (waves) data
+
+* TO DO:
+	* add time
+	* deal with output 
+	
 
 ********************************************************************************
 **#0 - setup
