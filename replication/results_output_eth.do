@@ -12,7 +12,7 @@
 	* cleaned, merged (weather), and appended (waves) data
 
 * TO DO:
-	* add time
+	* add time: started run at 3.17
 	* deal with output 
 	
 
