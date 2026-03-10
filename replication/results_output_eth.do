@@ -11,10 +11,6 @@
 
 * assumes
     * cleaned, merged (weather), and appended (waves) data
-	
-* to do
-	* run time
-	* get table for appendix on ivs 
 
 ********************************************************************************
 **#0 - setup
