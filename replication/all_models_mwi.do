@@ -1,9 +1,9 @@
 * Project: lsms risk ag
 * Created on: 3 Apr 2025
 * Created by: jdm
-* Edited on: 3 Apr 2025
-* Edited by: jdm
-* Stata v.18
+* Edited on: 10 march 2026
+* Edited by: alj
+* Stata v.19
 
 * does
 	* creates coef plots for all Malawi results
@@ -14,6 +14,10 @@
 
 * assumes
 	* cleaned, merged (weather), and appended (waves) data
+	
+* to do
+	* include exclusion restriction tests 
+	* update with run time 
 
 
 ********************************************************************************
@@ -533,19 +537,5 @@ preserve
 	graph export 	"$figures/mwi_ds_coef.eps", replace as(eps)		
 	
 restore		
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 log close
